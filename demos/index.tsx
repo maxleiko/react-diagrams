@@ -29,78 +29,78 @@ storiesOf("Simple Usage", module)
 	.add(
 		"Simple example",
 		Helper.makeDemo(
-			require("./demo-simple/index").default(),
-			require("!!raw-loader!./demo-simple/index"),
+			require("./demo-simple").default(),
+			require("!!raw-loader!./demo-simple"),
 			require("./demo-simple/docs.md")
 		)
 	)
 	.add(
 		"Simple flow example",
-		Helper.makeDemo(require("./demo-simple-flow/index").default(), require("!!raw-loader!./demo-simple-flow/index"))
+		Helper.makeDemo(require("./demo-simple-flow").default(), require("!!raw-loader!./demo-simple-flow"))
 	)
 	.add(
 		"Performance demo",
-		Helper.makeDemo(require("./demo-performance/index").default(), require("!!raw-loader!./demo-performance/index"))
+		Helper.makeDemo(require("./demo-performance").default(), require("!!raw-loader!./demo-performance"))
 	)
 	.add(
 		"Locked widget",
-		Helper.makeDemo(require("./demo-locks/index").default(), require("!!raw-loader!./demo-locks/index"))
+		Helper.makeDemo(require("./demo-locks").default(), require("!!raw-loader!./demo-locks"))
 	)
 	.add(
 		"Canvas grid size",
-		Helper.makeDemo(require("./demo-grid/index").default(), require("!!raw-loader!./demo-grid/index"))
+		Helper.makeDemo(require("./demo-grid").default(), require("!!raw-loader!./demo-grid"))
 	)
 	.add(
 		"Limiting link points",
 		Helper.makeDemo(
-			require("./demo-limit-points/index").default(),
-			require("!!raw-loader!./demo-limit-points/index")
+			require("./demo-limit-points").default(),
+			require("!!raw-loader!./demo-limit-points")
 		)
 	)
 	.add(
 		"Events and listeners",
-		Helper.makeDemo(require("./demo-listeners/index").default(), require("!!raw-loader!./demo-listeners/index"))
+		Helper.makeDemo(require("./demo-listeners").default(), require("!!raw-loader!./demo-listeners"))
 	)
 	.add(
 		"Zoom to fit",
-		Helper.makeDemo(require("./demo-zoom-to-fit/index").default(), require("!!raw-loader!./demo-zoom-to-fit/index"))
+		Helper.makeDemo(require("./demo-zoom-to-fit").default(), require("!!raw-loader!./demo-zoom-to-fit"))
 	)
 	.add(
 		"Links with labels",
 		Helper.makeDemo(
-			require("./demo-labelled-links/index").default(),
-			require("!!raw-loader!./demo-labelled-links/index")
+			require("./demo-labelled-links").default(),
+			require("!!raw-loader!./demo-labelled-links")
 		)
 	);
 
 storiesOf("Advanced Techniques", module)
 	.add(
 		"Clone Selected",
-		Helper.makeDemo(require("./demo-cloning/index").default(), require("!!raw-loader!./demo-cloning/index"))
+		Helper.makeDemo(require("./demo-cloning").default(), require("!!raw-loader!./demo-cloning"))
 	)
 	.add(
 		"Serializing and de-serializing",
-		Helper.makeDemo(require("./demo-serializing/index").default(), require("!!raw-loader!./demo-serializing/index"))
+		Helper.makeDemo(require("./demo-serializing").default(), require("!!raw-loader!./demo-serializing"))
 	)
 	.add(
 		"Programatically modifying graph",
 		Helper.makeDemo(
-			require("./demo-mutate-graph/index").default(),
-			require("!!raw-loader!./demo-mutate-graph/index")
+			require("./demo-mutate-graph").default(),
+			require("!!raw-loader!./demo-mutate-graph")
 		)
 	)
 	.add(
 		"Large application",
 		Helper.makeDemo(
-			require("./demo-drag-and-drop/index").default(),
+			require("./demo-drag-and-drop").default(),
 			require("!!raw-loader!./demo-drag-and-drop/components/BodyWidget")
 		)
 	)
 	.add(
 		"Smart routing",
 		Helper.makeDemo(
-			require("./demo-smart-routing/index").default(),
-			require("!!raw-loader!./demo-smart-routing/index")
+			require("./demo-smart-routing").default(),
+			require("!!raw-loader!./demo-smart-routing")
 		)
 	);
 
@@ -108,21 +108,21 @@ storiesOf("Custom Models", module)
 	.add(
 		"Custom diamond node",
 		Helper.makeDemo(
-			require("./demo-custom-node1/index").default(),
-			require("!!raw-loader!./demo-custom-node1/index")
+			require("./demo-custom-node1").default(),
+			require("!!raw-loader!./demo-custom-node1")
 		)
 	)
 	.add(
 		"Custom animated links",
 		Helper.makeDemo(
-			require("./demo-custom-link1/index").default(),
-			require("!!raw-loader!./demo-custom-link1/index")
+			require("./demo-custom-link1").default(),
+			require("!!raw-loader!./demo-custom-link1")
 		)
 	);
 
 storiesOf("3rd party libraries", module).add(
 	"Auto Distribute (Dagre)",
-	Helper.makeDemo(require("./demo-dagre/index").default(), require("!!raw-loader!./demo-dagre/index"))
+	Helper.makeDemo(require("./demo-dagre").default(), require("!!raw-loader!./demo-dagre"))
 );
 
 // enable this to log mouse location when writing new puppeteer tests

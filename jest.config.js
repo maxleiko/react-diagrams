@@ -20,6 +20,6 @@ module.exports = {
 		__dirname+'/tests'
 	],
 	testMatch: [
-		"**/*\.test\.tsx"
+		"**/*\.test\.ts?(x)"
 	]
 };

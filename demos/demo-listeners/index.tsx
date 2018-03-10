@@ -15,29 +15,34 @@ export default () => {
 
 	// sample for link with simple line
 	var node1 = new DefaultNodeModel("Node 1", "rgb(255,99,66)");
-	var port1 = node1.addOutPort("Out");
+	var node1Out = node1.addOutPort("Out");
 	node1.setPosition(100, 100);
 
 	var node2 = new DefaultNodeModel("Node 2", "rgb(192,255,0)");
-	var port2 = node2.addInPort("In");
+	node2.addInPort("In");
 	node2.setPosition(400, 40);
 
 	var node3 = new DefaultNodeModel("Node 3", "rgb(128,99,255)");
-	var port3 = node3.addInPort("In");
+	var node3In = node3.addInPort("In");
 	node3.setPosition(300, 160);
 
-	//link the nodes
-	let link1 = port1.link(port2);
-	let link2 = port1.link(port3);
+	// link node1.out with node3.in
+	let link = node1Out.link(node3In);
 
 	// add all the models
-	let models = model.addAll(node1, node2, node3, link1, link2);
+	let models = model.addAll(node1, node2, node3, link);
 
 	// add a selection listener to each
 	models.forEach(item => {
 		item.addListener({
-			selectionChanged: action("selectionChanged")
+			selectionChanged: action("selectionChanged"),
+			entityRemoved: action("entityRemoved"),
+			lockChanged: action("lockChanged")
 		});
+	});
+
+	model.addListener({
+		linksUpdated: action("linksUpdated")
 	});
 
 	engine.setDiagramModel(model);
@@ -49,7 +54,15 @@ export default () => {
 
 	return (
 		<div>
-			<p>Click the diagram elements to inspect some of the possible events.</p>
+			<p>
+				To see the possible events you can:
+				<ul>
+					<li>select a node</li>
+					<li>move a node</li>
+					<li><code>Del</code> a selected node or link</li>
+					<li>create a link between ports</li>
+				</ul>
+			</p>
 			<DiagramWidget className="srd-demo-canvas" {...props} />
 		</div>
 	);

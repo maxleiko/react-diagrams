@@ -4,7 +4,7 @@ import { PointModel } from "../../models/PointModel";
 import { Toolkit } from "../../Toolkit";
 import { DefaultLinkFactory } from "../factories/DefaultLinkFactory";
 import { DefaultLinkModel } from "../models/DefaultLinkModel";
-import PathFinding from "../../routing/PathFinding";
+import { PathFinding } from "../../routing/PathFinding";
 import * as _ from "lodash";
 import { LabelModel } from "../../models/LabelModel";
 import { BaseWidget, BaseWidgetProps } from "../../widgets/BaseWidget";

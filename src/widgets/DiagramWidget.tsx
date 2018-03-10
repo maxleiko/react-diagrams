@@ -344,6 +344,7 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 						}
 					} else {
 						link.setTargetPort(element.model);
+						diagramEngine.getDiagramModel().connectLink(link);
 					}
 					delete this.props.diagramEngine.linksThatHaveInitiallyRendered[link.getID()];
 				}

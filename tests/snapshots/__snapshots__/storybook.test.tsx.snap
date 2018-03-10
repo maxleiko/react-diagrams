@@ -1933,7 +1933,24 @@ exports[`Storyshots Tests demos/demo-limit-points/index.tsx 1`] = `
 exports[`Storyshots Tests demos/demo-listeners/index.tsx 1`] = `
 <div>
   <p>
-    Click the diagram elements to inspect some of the possible events.
+    To see the possible events you can:
+    <ul>
+      <li>
+        select a node
+      </li>
+      <li>
+        move a node
+      </li>
+      <li>
+        <code>
+          Del
+        </code>
+         a selected node or link
+      </li>
+      <li>
+        create a link between ports
+      </li>
+    </ul>
   </p>
   <div
     className="srd-diagram srd-demo-canvas "
