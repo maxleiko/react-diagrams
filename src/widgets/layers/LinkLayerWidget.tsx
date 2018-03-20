@@ -47,7 +47,7 @@ export class LinkLayerWidget extends BaseWidget<LinkLayerProps, LinkLayerState> 
 							if (link.sourcePort !== null) {
 								try {
 									const portCenter = this.props.diagramEngine.getPortCenter(link.sourcePort);
-									link.points[0].updateLocation(portCenter);
+									link.points[0].setPosition(portCenter.x, portCenter.y);
 
 									const portCoords = this.props.diagramEngine.getPortCoords(link.sourcePort);
 									link.sourcePort.updateCoords(portCoords);
@@ -60,7 +60,7 @@ export class LinkLayerWidget extends BaseWidget<LinkLayerProps, LinkLayerState> 
 							if (link.targetPort !== null) {
 								try {
 									const portCenter = this.props.diagramEngine.getPortCenter(link.targetPort);
-									_.last(link.points).updateLocation(portCenter);
+									_.last(link.points).setPosition(portCenter.x, portCenter.y);
 
 									const portCoords = this.props.diagramEngine.getPortCoords(link.targetPort);
 									link.targetPort.updateCoords(portCoords);

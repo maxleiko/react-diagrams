@@ -252,16 +252,17 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 					model.model instanceof NodeModel ||
 					(model.model instanceof PointModel && !model.model.isConnectedToPort())
 				) {
-					model.model.x = diagramModel.getGridPosition(model.initialX + amountX / amountZoom);
-					model.model.y = diagramModel.getGridPosition(model.initialY + amountY / amountZoom);
+					const x = diagramModel.getGridPosition(model.initialX + amountX / amountZoom);
+					const y = diagramModel.getGridPosition(model.initialY + amountY / amountZoom);
+					model.model.setPosition(x, y);
 
 					// update port coordinates as well
-					if (model.model instanceof NodeModel) {
-						_.forEach(model.model.getPorts(), port => {
-							const portCoords = this.props.diagramEngine.getPortCoords(port);
-							port.updateCoords(portCoords);
-						});
-					}
+					// if (model.model instanceof NodeModel) {
+					// 	_.forEach(model.model.getPorts(), port => {
+					// 		const portCoords = this.props.diagramEngine.getPortCoords(port);
+					// 		port.updateCoords(portCoords);
+					// 	});
+					// }
 
 					if (diagramEngine.isSmartRoutingEnabled()) {
 						diagramEngine.calculateRoutingMatrix();
@@ -298,7 +299,7 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 	}
 
 	onKeyUp(event) {
-		//delete all selected
+		// delete all selected
 		if (this.props.deleteKeys.indexOf(event.keyCode) !== -1) {
 			_.forEach(this.props.diagramEngine.getDiagramModel().getSelectedItems(), element => {
 				//only delete items which are not locked
@@ -343,8 +344,13 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 							link.removePointsBefore(model.model);
 						}
 					} else {
-						link.setTargetPort(element.model);
-						diagramEngine.getDiagramModel().connectLink(link);
+						// if we are just clicking on a port, then remove the link
+						if (link.getSourcePort() === element.model) {
+							link.remove();
+						} else {
+							link.setTargetPort(element.model);
+							diagramEngine.getDiagramModel().connectLink(link);
+						}
 					}
 					delete this.props.diagramEngine.linksThatHaveInitiallyRendered[link.getID()];
 				}
@@ -489,8 +495,8 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 					if (model === null) {
 						//is it a multiple selection
 						if (event.shiftKey) {
-							var relative = diagramEngine.getRelativePoint(event.clientX, event.clientY);
-							this.startFiringAction(new SelectingAction(relative.x, relative.y));
+							var { x, y } = diagramEngine.getRelativePoint(event.clientX, event.clientY);
+							this.startFiringAction(new SelectingAction(x, y));
 						} else {
 							//its a drag the canvas event
 							diagramModel.clearSelection();
@@ -499,7 +505,7 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 					} else if (model.model instanceof PortModel) {
 						//its a port element, we want to drag a link
 						if (!this.props.diagramEngine.isModelLocked(model.model)) {
-							var relative = diagramEngine.getRelativeMousePoint(event);
+							var { x, y } = diagramEngine.getRelativeMousePoint(event);
 							var sourcePort = model.model;
 							var link = sourcePort.createLinkModel();
 							link.setSourcePort(sourcePort);
@@ -511,8 +517,8 @@ export class DiagramWidget extends BaseWidget<DiagramProps, DiagramState> {
 								}
 								link.setTargetPort(null);
 
-								link.getFirstPoint().updateLocation(relative);
-								link.getLastPoint().updateLocation(relative);
+								link.getFirstPoint().setPosition(x, y);
+								link.getLastPoint().setPosition(x, y);
 
 								diagramModel.clearSelection();
 								link.getLastPoint().setSelected(true);

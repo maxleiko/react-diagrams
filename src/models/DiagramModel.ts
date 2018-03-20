@@ -7,17 +7,14 @@ import { PortModel } from "./PortModel";
 import { BaseModel, BaseModelListener } from "./BaseModel";
 import { PointModel } from "./PointModel";
 
-export interface NodeEvent extends BaseEvent<DiagramModel> {
-	node: NodeModel;
+export interface NodeEvent<T extends NodeModel = NodeModel> extends BaseEvent<DiagramModel> {
+	node: T;
 	isCreated?: boolean;
-	isRemoved?: boolean;
 }
 
-export interface LinkEvent extends BaseEvent<DiagramModel> {
-	link: LinkModel;
+export interface LinkEvent<T extends LinkModel = LinkModel> extends BaseEvent<DiagramModel> {
+	link: T;
 	isCreated?: boolean;
-	isConnected?: boolean;
-	isRemoved?: boolean;
 }
 
 export interface OffsetEvent extends BaseEvent<DiagramModel> {
@@ -37,9 +34,9 @@ export interface GridEvent extends BaseEvent<DiagramModel> {
  * @author Dylan Vorster
  *
  */
-export interface DiagramListener extends BaseListener {
-	nodesUpdated?(event: NodeEvent): void;
-	linksUpdated?(event: LinkEvent): void;
+export interface DiagramListener<N extends NodeModel = NodeModel, L extends LinkModel = LinkModel> extends BaseListener {
+	nodesUpdated?(event: NodeEvent<N>): void;
+	linksUpdated?(event: LinkEvent<L>): void;
 	offsetUpdated?(event: OffsetEvent): void;
 	zoomUpdated?(event: ZoomEvent): void;
 	gridUpdated?(event: GridEvent): void;
@@ -280,8 +277,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
 		this.links[link.getID()] = link;
 		this.iterateListeners((listener, event) => {
 			if (listener.linksUpdated) {
-				const isConnected: boolean | undefined = link.getTargetPort() ? true : undefined;
-				listener.linksUpdated({ ...event, link: link, isCreated: true, isConnected });
+				listener.linksUpdated({ ...event, link: link, isCreated: true });
 			}
 		});
 		return link;
@@ -290,7 +286,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
 	connectLink(link: LinkModel): LinkModel {
 		this.iterateListeners((listener, event) => {
 			if (listener.linksUpdated) {
-				listener.linksUpdated({ ...event, link, isConnected: true });
+				listener.linksUpdated({ ...event, link });
 			}
 		});
 		return link;
@@ -316,7 +312,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
 		delete this.links[link.getID()];
 		this.iterateListeners((listener, event) => {
 			if (listener.linksUpdated) {
-				listener.linksUpdated({ ...event, link: link as LinkModel, isRemoved: true });
+				listener.linksUpdated({ ...event, link: link as LinkModel, isCreated: false });
 			}
 		});
 	}
@@ -326,7 +322,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
 		delete this.nodes[node.getID()];
 		this.iterateListeners((listener, event) => {
 			if (listener.nodesUpdated) {
-				listener.nodesUpdated({ ...event, node: node as NodeModel, isRemoved: true });
+				listener.nodesUpdated({ ...event, node: node as NodeModel, isCreated: false });
 			}
 		});
 	}

@@ -22,7 +22,7 @@ export class NodeModel extends BaseModel<DiagramModel, BaseModelListener> {
 		this.ports = {};
 	}
 
-	setPosition(x, y) {
+	setPosition(x: number, y: number) {
 		//store position
 		let oldX = this.x;
 		let oldY = this.y;

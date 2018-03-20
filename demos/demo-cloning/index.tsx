@@ -36,7 +36,7 @@ class CloneSelected extends React.Component<any, any> {
 			} else if (newItem instanceof LinkModel) {
 				// offset the link points
 				newItem.getPoints().forEach(p => {
-					p.updateLocation({ x: p.getX() + offset.x, y: p.getY() + offset.y });
+					p.setPosition(p.getX() + offset.x, p.getY() + offset.y);
 				});
 				model.addLink(newItem);
 			}

@@ -50,9 +50,9 @@ export class PointModel extends BaseModel<LinkModel, BaseModelListener> {
 		super.remove();
 	}
 
-	updateLocation(points: { x: number; y: number }) {
-		this.x = points.x;
-		this.y = points.y;
+	setPosition(x: number, y: number) {
+		this.x = x;
+		this.y = y;
 	}
 
 	getX(): number {
