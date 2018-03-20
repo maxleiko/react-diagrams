@@ -1,72 +1,80 @@
-var webpack = require("webpack");
+const webpack = require("webpack");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var path = require("path");
 var plugins = [];
+const production = process.env.NODE_ENV === 'production';
 
-// do we minify it all
-if(process.env.NODE_ENV === 'production') {
-	console.log('creating production build');
-	plugins.push(new webpack.optimize.UglifyJsPlugin({
-		mangle: {
-			keep_fnames: true
-		},
-		compress: {
-			keep_fnames: true,
-			warnings: false,
-		},
-		sourceMap: true,
-	}));
+//do we minify it all
+if (production) {
+	console.log("creating production build");
 	plugins.push(new webpack.DefinePlugin({
-		'process.env.NODE_ENV': 'production',
+		'process.env.NODE_ENV': '"production"',
 	}));
 }
 
 /**
  * @author Dylan Vorster
  */
-module.exports = {
-	entry: './src/main.ts',
-	output: {
-		filename: 'main.js',
-		path: __dirname + '/dist',
-		libraryTarget: 'umd',
-		library: 'storm-react-diagrams'
-	},
-	externals: {
-		react: {
-			root: 'React',
-			commonjs2: 'react',
-			commonjs: 'react',
-			amd: 'react'
+module.exports =
+	//for building the umd distribution
+	{
+		entry: './src/main.ts',
+		output: {
+			filename: 'main.js',
+			path: __dirname + '/dist',
+			libraryTarget: 'umd',
+			library: 'storm-react-diagrams'
 		},
-		'react-dom': {
-			root: 'ReactDOM',
-			commonjs2: 'react-dom',
-			commonjs: 'react-dom',
-			amd: 'react-dom'
-		},
-		"lodash": {
-			commonjs: 'lodash',
-			commonjs2: 'lodash',
-			amd: '_',
-			root: '_'
-		}
-	},
-	plugins:plugins,
-	module: {
-		rules: [
-			{
-				test: /\.tsx?$/,
-				loader: 'ts-loader'
+		externals: {
+			react: {
+				root: 'React',
+				commonjs2: 'react',
+				commonjs: 'react',
+				amd: 'react'
 			},
-			{
-				enforce: "pre",
-				test: /\.js$/,
-				loader: "source-map-loader"
+			'react-dom': {
+				root: 'ReactDOM',
+				commonjs2: 'react-dom',
+				commonjs: 'react-dom',
+				amd: 'react-dom'
+			},
+			"lodash": {
+				commonjs: 'lodash',
+				commonjs2: 'lodash',
+				amd: '_',
+				root: '_'
 			}
-		]
-	},
-	resolve: {
-		extensions: [".tsx", ".ts", ".js"]
-	},
-	// Enable sourcemaps for debugging webpack's output.
-	devtool: "source-map",
-};
+		},
+		plugins: plugins,
+		module: {
+			rules: [
+				{
+					enforce: 'pre',
+					test: /\.js$/,
+					loader: "source-map-loader"
+				},
+				{
+					test: /\.tsx?$/,
+					loader: 'awesome-typescript-loader'
+				}
+			]
+		},
+		resolve: {
+			extensions: [".tsx", ".ts", ".js"]
+		},
+		devtool: production ? 'source-map' : 'cheap-module-source-map',
+		mode: production ? 'production' : 'development',
+		optimization: {
+			minimizer: [
+				// we specify a custom UglifyJsPlugin here to get source maps in production
+				new UglifyJsPlugin({
+					uglifyOptions: {
+						compress: false,
+						ecma: 6,
+						mangle: false
+					},
+					sourceMap: true
+				})
+			]
+		},
+	};

@@ -22,7 +22,7 @@ module.exports = {
 			},
 			{
 				test: /\.tsx?$/,
-				loader: 'ts-loader',
+				loader: 'awesome-typescript-loader',
 			},
 			{
 				test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
@@ -31,6 +31,9 @@ module.exports = {
 		]
 	},
 	resolve: {
+		alias: {
+			'storm-react-diagrams': path.join(__dirname, "..", "src", "main")
+		},
 		extensions: [".tsx", ".ts", ".js"]
 	}
 };
