@@ -1,101 +1,107 @@
-import { BaseModel, BaseModelListener } from "./BaseModel";
-import { NodeModel } from "./NodeModel";
-import { LinkModel } from "./LinkModel";
-import * as _ from "lodash";
-import { DiagramEngine } from "../DiagramEngine";
+import { BaseModel, BaseModelListener } from './BaseModel';
+import { NodeModel } from './NodeModel';
+import { LinkModel } from './LinkModel';
+import * as _ from 'lodash';
+import { DiagramEngine } from '../DiagramEngine';
 
 export class PortModel extends BaseModel<NodeModel, BaseModelListener> {
-	name: string;
-	links: { [id: string]: LinkModel };
-	maximumLinks: number;
+  private _name: string;
+  private _maximumLinks: number;
+  private _links: Map<string, LinkModel> = new Map();
 
-	// calculated post rendering so routing can be done correctly
-	x: number;
-	y: number;
-	width: number;
-	height: number;
+  // calculated post rendering so routing can be done correctly
+  private _x: number = -1;
+  private _y: number = -1;
+  private _width: number = -1;
+  private _height: number = -1;
 
-	constructor(name: string, type?: string, id?: string, maximumLinks?: number) {
-		super(type, id);
-		this.name = name;
-		this.links = {};
-		this.maximumLinks = maximumLinks;
-	}
+  constructor(name: string, type: string, maximumLinks: number = -1, id?: string) {
+    super(type, id);
+    this._name = name;
+    this._maximumLinks = maximumLinks;
+  }
 
-	deSerialize(ob, engine: DiagramEngine) {
-		super.deSerialize(ob, engine);
-		this.name = ob.name;
-		this.maximumLinks = ob.maximumLinks;
-	}
+  getSelectedEntities(): Array<BaseModel<any, any>> {
+    if (this.selected) {
+      return ([this] as Array<BaseModel<any, any>>)
+        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities())));
+    }
+    return [];
+  }
 
-	serialize() {
-		return _.merge(super.serialize(), {
-			name: this.name,
-			parentNode: this.parent.id,
-			links: _.map(this.links, link => {
-				return link.id;
-			}),
-			maximumLinks: this.maximumLinks
-		});
-	}
+  deSerialize(ob: any, engine: DiagramEngine) {
+    super.deSerialize(ob, engine);
+    this._name = ob.name;
+    this._maximumLinks = ob.maximumLinks;
+  }
 
-	doClone(lookupTable = {}, clone) {
-		clone.links = {};
-		clone.parentNode = this.getParent().clone(lookupTable);
-	}
+  serialize() {
+    return _.merge(super.serialize(), {
+      name: this._name,
+      parentNode: this.parent ? this.parent.id : null,
+      links: this._links.keys(),
+      maximumLinks: this._maximumLinks
+    });
+  }
 
-	getNode(): NodeModel {
-		return this.getParent();
-	}
+  doClone(lookupTable: any = {}, clone: any) {
+    clone.links = {};
+    if (this.parent) {
+      clone.parentNode = this.parent.clone(lookupTable);
+    }
+  }
 
-	getName(): string {
-		return this.name;
-	}
+  get name(): string {
+    return this._name;
+  }
 
-	getMaximumLinks(): number {
-		return this.maximumLinks;
-	}
+  get maximumLinks(): number {
+    return this._maximumLinks;
+  }
 
-	setMaximumLinks(maximumLinks: number) {
-		this.maximumLinks = maximumLinks;
-	}
+  get links(): Map<string, LinkModel> {
+    return this._links;
+  }
 
-	removeLink(link: LinkModel) {
-		delete this.links[link.getID()];
-	}
+  get x(): number {
+    return this._x;
+  }
 
-	addLink(link: LinkModel) {
-		this.links[link.getID()] = link;
-	}
+  get y(): number {
+    return this._y;
+  }
 
-	getLinks(): { [id: string]: LinkModel } {
-		return this.links;
-	}
+  get width(): number {
+    return this._width;
+  }
 
-	public createLinkModel(): LinkModel | null {
-		if (_.isFinite(this.maximumLinks)) {
-			var numberOfLinks: number = _.size(this.links);
-			if (this.maximumLinks === 1 && numberOfLinks >= 1) {
-				return _.values(this.links)[0];
-			} else if (numberOfLinks >= this.maximumLinks) {
-				return null;
-			}
-		}
-		return null;
-	}
+  get height(): number {
+    return this._height;
+  }
 
-	updateCoords({ x, y, width, height }: { x: number; y: number; width: number; height: number }) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-	}
+  canCreateLink(): boolean {
+    if (this._maximumLinks === -1) {
+      return true;
+    }
+    return this._links.size < this._maximumLinks;
+  }
 
-	canLinkToPort(port: PortModel): boolean {
-		return true;
-	}
+  removeLink(link: LinkModel) {
+    return this._links.delete(link.id);
+  }
 
-	isLocked() {
-		return super.isLocked() || this.getParent().isLocked();
-	}
+  addLink(link: LinkModel) {
+    this._links.set(link.id, link);
+  }
+
+  updateCoords({ x, y, width, height }: { x: number; y: number; width: number; height: number }) {
+    this._x = x;
+    this._y = y;
+    this._width = width;
+    this._height = height;
+  }
+
+  canLinkToPort(_port: PortModel): boolean {
+    return true;
+  }
 }

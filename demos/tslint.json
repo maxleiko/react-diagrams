@@ -5,6 +5,8 @@
 	"rules": {
 		"no-console": false,
 		"max-classes-per-file": false,
-		"no-var-requires": false
+    "no-var-requires": false,
+    "comment-format": false,
+    "jsx-no-lambda": false
 	}
 }

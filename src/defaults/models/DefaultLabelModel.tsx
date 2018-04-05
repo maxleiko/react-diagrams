@@ -1,14 +1,18 @@
-import { LabelModel } from "../../models/LabelModel";
+import { LabelModel } from '../../models/LabelModel';
 
 export class DefaultLabelModel extends LabelModel {
-	label: string;
+  private _label: string | null = null;
 
-	constructor() {
-		super("default");
-		this.offsetY = -23;
-	}
+  constructor() {
+    super('default');
+    this.offsetY = -23;
+  }
 
-	setLabel(label: string) {
-		this.label = label;
-	}
+  get label(): string | null {
+    return this._label;
+  }
+
+  set label(label: string | null) {
+    this._label = label;
+  }
 }

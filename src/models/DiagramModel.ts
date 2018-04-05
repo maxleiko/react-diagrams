@@ -1,337 +1,417 @@
-import { BaseListener, BaseEntity, BaseEvent, BaseEntityType } from "../BaseEntity";
-import * as _ from "lodash";
-import { DiagramEngine } from "../DiagramEngine";
-import { LinkModel } from "./LinkModel";
-import { NodeModel } from "./NodeModel";
-import { PortModel } from "./PortModel";
-import { BaseModel, BaseModelListener } from "./BaseModel";
-import { PointModel } from "./PointModel";
+import { BaseListener, BaseEntity, BaseEvent, BaseEntityType } from '../BaseEntity';
+import * as _ from 'lodash';
+import { DiagramEngine } from '../DiagramEngine';
+import { LinkModel } from './LinkModel';
+import { NodeModel } from './NodeModel';
+import { PortModel } from './PortModel';
+import { BaseModel, BaseModelListener } from './BaseModel';
+import { PointModel } from './PointModel';
 
 export interface NodeEvent<T extends NodeModel = NodeModel> extends BaseEvent<DiagramModel> {
-	node: T;
-	isCreated?: boolean;
+  node: T;
+  isCreated?: boolean;
 }
 
 export interface LinkEvent<T extends LinkModel = LinkModel> extends BaseEvent<DiagramModel> {
-	link: T;
-	isCreated?: boolean;
+  link: T;
+  isCreated?: boolean;
 }
 
 export interface OffsetEvent extends BaseEvent<DiagramModel> {
-	offsetX: number;
-	offsetY: number;
+  offsetX: number;
+  offsetY: number;
 }
 
 export interface ZoomEvent extends BaseEvent<DiagramModel> {
-	zoom: number;
+  zoom: number;
 }
 
 export interface GridEvent extends BaseEvent<DiagramModel> {
-	size: number;
+  size: number;
 }
 
 /**
  * @author Dylan Vorster
  *
  */
-export interface DiagramListener<N extends NodeModel = NodeModel, L extends LinkModel = LinkModel> extends BaseListener {
-	nodesUpdated?(event: NodeEvent<N>): void;
-	linksUpdated?(event: LinkEvent<L>): void;
-	offsetUpdated?(event: OffsetEvent): void;
-	zoomUpdated?(event: ZoomEvent): void;
-	gridUpdated?(event: GridEvent): void;
+export interface DiagramListener<N extends NodeModel = NodeModel, L extends LinkModel = LinkModel>
+  extends BaseListener {
+  nodesUpdated?(event: NodeEvent<N>): void;
+  linksUpdated?(event: LinkEvent<L>): void;
+  offsetUpdated?(event: OffsetEvent): void;
+  zoomUpdated?(event: ZoomEvent): void;
+  gridUpdated?(event: GridEvent): void;
 }
 
 /**
  *
  */
 export class DiagramModel extends BaseEntity<DiagramListener> {
-	//models
-	links: { [s: string]: LinkModel };
-	nodes: { [s: string]: NodeModel };
+  // models
+  private _links: Map<string, LinkModel> = new Map();
+  private _nodes: Map<string, NodeModel> = new Map();
 
-	//control variables
-	offsetX: number;
-	offsetY: number;
-	zoom: number;
-	rendered: boolean;
-	gridSize: number;
+  // control variables
+  private _offsetX: number = 0;
+  private _offsetY: number = 0;
+  private _zoom: number = 100;
+  private _rendered: boolean = false;
+  private _gridSize: number = 0;
 
-	constructor() {
-		super();
+  /**
+   * Getter links
+   * @return {Map<string, LinkModel> }
+   */
+  get links(): Map<string, LinkModel> {
+    return this._links;
+  }
 
-		this.links = {};
-		this.nodes = {};
+  /**
+   * Setter links
+   * @param {Map<string, LinkModel> } value
+   */
+  set links(value: Map<string, LinkModel>) {
+    this._links = value;
+  }
 
-		this.offsetX = 0;
-		this.offsetY = 0;
-		this.zoom = 100;
-		this.rendered = false;
-		this.gridSize = 0;
-	}
+  /**
+   * Getter nodes
+   * @return {Map<string, NodeModel> }
+   */
+  get nodes(): Map<string, NodeModel> {
+    return this._nodes;
+  }
 
-	setGridSize(size: number = 0) {
-		this.gridSize = size;
-		this.iterateListeners((listener, event) => {
-			if (listener.gridUpdated) {
-				listener.gridUpdated({ ...event, size: size });
-			}
-		});
-	}
+  /**
+   * Setter nodes
+   * @param {Map<string, NodeModel> } value
+   */
+  set nodes(value: Map<string, NodeModel>) {
+    this._nodes = value;
+  }
 
-	getGridPosition(pos) {
-		if (this.gridSize === 0) {
-			return pos;
-		}
-		return this.gridSize * Math.floor((pos + this.gridSize / 2) / this.gridSize);
-	}
+  /**
+   * Getter offsetX
+   * @return {number }
+   */
+  get offsetX(): number {
+    return this._offsetX;
+  }
 
-	deSerializeDiagram(object: any, diagramEngine: DiagramEngine) {
-		this.deSerialize(object, diagramEngine);
+  /**
+   * Setter offsetX
+   * @param {number } value
+   */
+  set offsetX(value: number) {
+    this._offsetX = value;
+  }
 
-		this.offsetX = object.offsetX;
-		this.offsetY = object.offsetY;
-		this.zoom = object.zoom;
-		this.gridSize = object.gridSize;
+  /**
+   * Getter offsetY
+   * @return {number }
+   */
+  get offsetY(): number {
+    return this._offsetY;
+  }
 
-		// deserialize nodes
-		_.forEach(object.nodes, (node: any) => {
-			let nodeOb = diagramEngine.getNodeFactory(node.type).getNewInstance(node);
-			nodeOb.setParent(this);
-			nodeOb.deSerialize(node, diagramEngine);
-			this.addNode(nodeOb);
-		});
+  /**
+   * Setter offsetY
+   * @param {number } value
+   */
+  set offsetY(value: number) {
+    this._offsetY = value;
+  }
 
-		// deserialze links
-		_.forEach(object.links, (link: any) => {
-			let linkOb = diagramEngine.getLinkFactory(link.type).getNewInstance();
-			linkOb.setParent(this);
-			linkOb.deSerialize(link, diagramEngine);
-			this.addLink(linkOb);
-		});
-	}
+  /**
+   * Getter zoom
+   * @return {number }
+   */
+  get zoom(): number {
+    return this._zoom;
+  }
 
-	serializeDiagram() {
-		return _.merge(this.serialize(), {
-			offsetX: this.offsetX,
-			offsetY: this.offsetY,
-			zoom: this.zoom,
-			gridSize: this.gridSize,
-			links: _.map(this.links, link => {
-				return link.serialize();
-			}),
-			nodes: _.map(this.nodes, node => {
-				return node.serialize();
-			})
-		});
-	}
+  /**
+   * Setter zoom
+   * @param {number } value
+   */
+  set zoom(value: number) {
+    this._zoom = value;
+  }
 
-	clearSelection(ignore: BaseModel<BaseEntity, BaseModelListener> | null = null) {
-		_.forEach(this.getSelectedItems(), element => {
-			if (ignore && ignore.getID() === element.getID()) {
-				return;
-			}
-			element.setSelected(false); //TODO dont fire the listener
-		});
-	}
+  /**
+   * Getter rendered
+   * @return {boolean }
+   */
+  get rendered(): boolean {
+    return this._rendered;
+  }
 
-	getSelectedItems(...filters: BaseEntityType[]): BaseModel<BaseEntity, BaseModelListener>[] {
-		if (!Array.isArray(filters)) {
-			filters = [filters];
-		}
-		var items = [];
+  /**
+   * Setter rendered
+   * @param {boolean } value
+   */
+  set rendered(value: boolean) {
+    this._rendered = value;
+  }
 
-		// run through nodes
-		items = items.concat(
-			_.flatMap(this.nodes, node => {
-				return node.getSelectedEntities();
-			})
-		);
+  /**
+   * Getter gridSize
+   * @return {number }
+   */
+  get gridSize(): number {
+    return this._gridSize;
+  }
 
-		// find all the links
-		items = items.concat(
-			_.flatMap(this.links, link => {
-				return link.getSelectedEntities();
-			})
-		);
+  /**
+   * Setter gridSize
+   * @param {number } value
+   */
+  set gridSize(value: number) {
+    this._gridSize = value;
+  }
 
-		//find all points
-		items = items.concat(
-			_.flatMap(this.links, link => {
-				return _.flatMap(link.points, point => {
-					return point.getSelectedEntities();
-				});
-			})
-		);
+  setGridSize(size: number = 0) {
+    this.gridSize = size;
+    this.iterateListeners((listener, event) => {
+      if (listener.gridUpdated) {
+        listener.gridUpdated({ ...event, size });
+      }
+    });
+  }
 
-		items = _.uniq(items);
+  getGridPosition(pos: number) {
+    if (this.gridSize === 0) {
+      return pos;
+    }
+    return this.gridSize * Math.floor((pos + this.gridSize / 2) / this.gridSize);
+  }
 
-		if (filters.length > 0) {
-			items = _.filter(_.uniq(items), (item: BaseModel<any>) => {
-				if (_.includes(filters, "node") && item instanceof NodeModel) {
-					return true;
-				}
-				if (_.includes(filters, "link") && item instanceof LinkModel) {
-					return true;
-				}
-				if (_.includes(filters, "port") && item instanceof PortModel) {
-					return true;
-				}
-				if (_.includes(filters, "point") && item instanceof PointModel) {
-					return true;
-				}
-				return false;
-			});
-		}
+  deSerializeDiagram(object: any, diagramEngine: DiagramEngine) {
+    this.deSerialize(object, diagramEngine);
 
-		return items;
-	}
+    this.offsetX = object.offsetX;
+    this.offsetY = object.offsetY;
+    this.zoom = object.zoom;
+    this.gridSize = object.gridSize;
 
-	setZoomLevel(zoom: number) {
-		this.zoom = zoom;
+    // deserialize nodes
+    _.forEach(object.nodes, (node: any) => {
+      const nodeOb = diagramEngine.getNodeFactory(node.type).getNewInstance(node);
+      nodeOb.parent = this;
+      nodeOb.deSerialize(node, diagramEngine);
+      this.addNode(nodeOb);
+    });
 
-		this.iterateListeners((listener, event) => {
-			if (listener.zoomUpdated) {
-				listener.zoomUpdated({ ...event, zoom: zoom });
-			}
-		});
-	}
+    // deserialze links
+    _.forEach(object.links, (link: any) => {
+      const linkOb = diagramEngine.getLinkFactory(link.type).getNewInstance();
+      linkOb.parent = this;
+      linkOb.deSerialize(link, diagramEngine);
+      this.addLink(linkOb);
+    });
+  }
 
-	setOffset(offsetX: number, offsetY: number) {
-		this.offsetX = offsetX;
-		this.offsetY = offsetY;
-		this.iterateListeners((listener, event) => {
-			if (listener.offsetUpdated) {
-				listener.offsetUpdated({ ...event, offsetX: offsetX, offsetY: offsetY });
-			}
-		});
-	}
+  serializeDiagram() {
+    return _.merge(this.serialize(), {
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      zoom: this.zoom,
+      gridSize: this.gridSize,
+      links: Array.from(this._links.values()).map((link) => link.serialize()),
+      nodes: Array.from(this._nodes.values()).map((node) => node.serialize())
+    });
+  }
 
-	setOffsetX(offsetX: number) {
-		this.offsetX = offsetX;
-		this.iterateListeners((listener, event) => {
-			if (listener.offsetUpdated) {
-				listener.offsetUpdated({ ...event, offsetX: offsetX, offsetY: this.offsetY });
-			}
-		});
-	}
-	setOffsetY(offsetY: number) {
-		this.offsetY = offsetY;
+  clearSelection(ignore: BaseModel<BaseEntity, BaseModelListener> | null = null) {
+    _.forEach(this.getSelectedItems(), (element) => {
+      if (ignore && ignore.id === element.id) {
+        return;
+      }
+      element.selected = false; // TODO dont fire the listener
+    });
+  }
 
-		this.iterateListeners((listener, event) => {
-			if (listener.offsetUpdated) {
-				listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
-			}
-		});
-	}
+  getSelectedItems(...filters: BaseEntityType[]): Array<BaseModel<BaseEntity, BaseModelListener>> {
+    if (!Array.isArray(filters)) {
+      filters = [filters];
+    }
+    let items: BaseModel[] = [];
 
-	getOffsetY() {
-		return this.offsetY;
-	}
+    // run through nodes
+    items = items.concat(
+      _.flatMap(this.nodes, (node) => {
+        return node.getSelectedEntities();
+      })
+    );
 
-	getOffsetX() {
-		return this.offsetX;
-	}
+    // find all the links
+    items = items.concat(
+      _.flatMap(this.links, (link) => {
+        return link.getSelectedEntities();
+      })
+    );
 
-	getZoomLevel() {
-		return this.zoom;
-	}
+    // find all points
+    items = items.concat(
+      _.flatMap(this.links, (link) => {
+        return _.flatMap(link.points, (point) => {
+          return point.getSelectedEntities();
+        });
+      })
+    );
 
-	getNode(node: string | NodeModel): NodeModel | null {
-		if (node instanceof NodeModel) {
-			return node;
-		}
-		if (!this.nodes[node]) {
-			return null;
-		}
-		return this.nodes[node];
-	}
+    items = _.uniq(items);
 
-	getLink(link: string | LinkModel): LinkModel | null {
-		if (link instanceof LinkModel) {
-			return link;
-		}
-		if (!this.links[link]) {
-			return null;
-		}
-		return this.links[link];
-	}
+    if (filters.length > 0) {
+      items = _.filter(_.uniq(items), (item: BaseModel<any>) => {
+        if (_.includes(filters, 'node') && item instanceof NodeModel) {
+          return true;
+        }
+        if (_.includes(filters, 'link') && item instanceof LinkModel) {
+          return true;
+        }
+        if (_.includes(filters, 'port') && item instanceof PortModel) {
+          return true;
+        }
+        if (_.includes(filters, 'point') && item instanceof PointModel) {
+          return true;
+        }
+        return false;
+      });
+    }
 
-	addAll(...models: BaseModel[]): BaseModel[] {
-		_.forEach(models, model => {
-			if (model instanceof LinkModel) {
-				this.addLink(model);
-			} else if (model instanceof NodeModel) {
-				this.addNode(model);
-			}
-		});
-		return models;
-	}
+    return items;
+  }
 
-	addLink(link: LinkModel): LinkModel {
-		link.addListener({
-			entityRemoved: () => {
-				this.removeLink(link);
-			}
-		});
-		this.links[link.getID()] = link;
-		this.iterateListeners((listener, event) => {
-			if (listener.linksUpdated) {
-				listener.linksUpdated({ ...event, link: link, isCreated: true });
-			}
-		});
-		return link;
-	}
+  setZoomLevel(zoom: number) {
+    this.zoom = zoom;
 
-	connectLink(link: LinkModel): LinkModel {
-		this.iterateListeners((listener, event) => {
-			if (listener.linksUpdated) {
-				listener.linksUpdated({ ...event, link });
-			}
-		});
-		return link;
-	}
+    this.iterateListeners((listener, event) => {
+      if (listener.zoomUpdated) {
+        listener.zoomUpdated({ ...event, zoom });
+      }
+    });
+  }
 
-	addNode(node: NodeModel): NodeModel {
-		node.addListener({
-			entityRemoved: () => {
-				this.removeNode(node);
-			}
-		});
-		this.nodes[node.getID()] = node;
-		this.iterateListeners((listener, event) => {
-			if (listener.nodesUpdated) {
-				listener.nodesUpdated({ ...event, node: node, isCreated: true });
-			}
-		});
-		return node;
-	}
+  setOffset(offsetX: number, offsetY: number) {
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+    this.iterateListeners((listener, event) => {
+      if (listener.offsetUpdated) {
+        listener.offsetUpdated({ ...event, offsetX, offsetY });
+      }
+    });
+  }
 
-	removeLink(link: LinkModel | string) {
-		link = this.getLink(link);
-		delete this.links[link.getID()];
-		this.iterateListeners((listener, event) => {
-			if (listener.linksUpdated) {
-				listener.linksUpdated({ ...event, link: link as LinkModel, isCreated: false });
-			}
-		});
-	}
+  setOffsetX(offsetX: number) {
+    this.offsetX = offsetX;
+    this.iterateListeners((listener, event) => {
+      if (listener.offsetUpdated) {
+        listener.offsetUpdated({ ...event, offsetX, offsetY: this.offsetY });
+      }
+    });
+  }
+  setOffsetY(offsetY: number) {
+    this.offsetY = offsetY;
 
-	removeNode(node: NodeModel | string) {
-		node = this.getNode(node);
-		delete this.nodes[node.getID()];
-		this.iterateListeners((listener, event) => {
-			if (listener.nodesUpdated) {
-				listener.nodesUpdated({ ...event, node: node as NodeModel, isCreated: false });
-			}
-		});
-	}
+    this.iterateListeners((listener, event) => {
+      if (listener.offsetUpdated) {
+        listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
+      }
+    });
+  }
 
-	getLinks(): { [s: string]: LinkModel } {
-		return this.links;
-	}
+  getOffsetY() {
+    return this.offsetY;
+  }
 
-	getNodes(): { [s: string]: NodeModel } {
-		return this.nodes;
-	}
+  getOffsetX() {
+    return this.offsetX;
+  }
+
+  getZoomLevel() {
+    return this.zoom;
+  }
+
+  getNode(id: string): NodeModel | undefined {
+    return this._nodes.get(id);
+  }
+
+  getLink(id: string): LinkModel | undefined {
+    return this._links.get(id);
+  }
+
+  addAll(...models: BaseModel[]): BaseModel[] {
+    _.forEach(models, (model) => {
+      if (model instanceof LinkModel) {
+        this.addLink(model);
+      } else if (model instanceof NodeModel) {
+        this.addNode(model);
+      }
+    });
+    return models;
+  }
+
+  addLink(link: LinkModel): LinkModel {
+    link.addListener({
+      entityRemoved: () => {
+        this.removeLink(link);
+      }
+    });
+    this._links.set(link.id, link);
+    this.iterateListeners((listener, event) => {
+      if (listener.linksUpdated) {
+        listener.linksUpdated({ ...event, link, isCreated: true });
+      }
+    });
+    return link;
+  }
+
+  connectLink(link: LinkModel): LinkModel {
+    this.iterateListeners((listener, event) => {
+      if (listener.linksUpdated) {
+        listener.linksUpdated({ ...event, link });
+      }
+    });
+    return link;
+  }
+
+  addNode(node: NodeModel): NodeModel {
+    node.addListener({
+      entityRemoved: () => {
+        this.removeNode(node);
+      }
+    });
+    this._nodes.set(node.id, node);
+    this.iterateListeners((listener, event) => {
+      if (listener.nodesUpdated) {
+        listener.nodesUpdated({ ...event, node, isCreated: true });
+      }
+    });
+    return node;
+  }
+
+  removeLink(link: LinkModel | string) {
+    const l = this._links.get(link instanceof LinkModel ? link.id : link);
+    if (l) {
+      this._links.delete(l.id);
+      this.iterateListeners((listener, event) => {
+        if (listener.linksUpdated) {
+          listener.linksUpdated({ ...event, link: l, isCreated: false });
+        }
+      });
+    }
+  }
+
+  removeNode(node: NodeModel | string) {
+    const n = this._nodes.get(node instanceof NodeModel ? node.id : node);
+    if (n) {
+      this._nodes.delete(n.id);
+      this.iterateListeners((listener, event) => {
+        if (listener.nodesUpdated) {
+          listener.nodesUpdated({ ...event, node: n, isCreated: false });
+        }
+      });
+    }
+  }
 }

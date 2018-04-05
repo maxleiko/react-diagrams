@@ -32,18 +32,8 @@ afterAll(() => {
   browser.close();
 });
 
-describe('simple test', async () => {
-  itShould('demo-simple', 'should delete a link and create a new one', async (page, helper) => {
-    // get the existing link
-    const link = await helper.link('12');
-    await expect(await link.exists()).toBeTruthy();
-
-    // remove it
-    await link.select();
-    await page.keyboard.press('Del');
-
-    await expect(await link.exists()).toBeFalsy();
-
+describe('simple flow test', async () => {
+  itShould('demo-simple-flow', 'drag link to port adds a link', async (_page, helper) => {
     // create a new link
     const node1 = await helper.node('6');
     const node2 = await helper.node('9');
@@ -53,5 +43,18 @@ describe('simple test', async () => {
 
     const newlink = await port1.link(port2);
     await expect(await newlink.exists()).toBeTruthy();
+  });
+
+  itShould('demo-simple-flow', 'drag link to node does not add a link', async (_page, helper) => {
+    // create a new link
+    const node1 = await helper.node('6');
+    const node2 = await helper.node('9');
+
+    const port1 = await node1.port('7');
+
+    const node2Bounds = await node2.element.boundingBox();
+
+    const newlink = await port1.linkToPoint(node2Bounds.x, node2Bounds.y);
+    await expect(await newlink.exists()).toBeFalsy();
   });
 });

@@ -1,69 +1,73 @@
-import { BaseModel, BaseModelListener } from "./BaseModel";
-import { LinkModel } from "./LinkModel";
-import * as _ from "lodash";
-import { DiagramEngine } from "../DiagramEngine";
+import { BaseModel, BaseModelListener } from './BaseModel';
+import { LinkModel } from './LinkModel';
+import * as _ from 'lodash';
+import { DiagramEngine } from '../DiagramEngine';
 
 export class PointModel extends BaseModel<LinkModel, BaseModelListener> {
-	x: number;
-	y: number;
+  private _x: number;
+  private _y: number;
 
-	constructor(link: LinkModel, points: { x: number; y: number }) {
-		super();
-		this.x = points.x;
-		this.y = points.y;
-		this.parent = link;
-	}
+  constructor(link: LinkModel, point: { x: number; y: number }) {
+    super();
+    this.parent = link;
+    this._x = point.x;
+    this._y = point.y;
+  }
 
-	getSelectedEntities() {
-		if (super.isSelected() && !this.isConnectedToPort()) {
-			return [this];
-		}
-		return [];
-	}
+  getSelectedEntities() {
+    if (this.selected && !this.isConnectedToPort()) {
+      return [this];
+    }
+    return [];
+  }
 
-	isConnectedToPort(): boolean {
-		return this.parent.getPortForPoint(this) !== null;
-	}
+  isConnectedToPort(): boolean {
+    return this.parent!.getPortForPoint(this) !== null;
+  }
 
-	getLink(): LinkModel {
-		return this.getParent();
-	}
+  deSerialize(ob: any, engine: DiagramEngine) {
+    super.deSerialize(ob, engine);
+    this._x = ob.x;
+    this._y = ob.y;
+  }
 
-	deSerialize(ob, engine: DiagramEngine) {
-		super.deSerialize(ob, engine);
-		this.x = ob.x;
-		this.y = ob.y;
-	}
+  serialize() {
+    return _.merge(super.serialize(), {
+      x: this._x,
+      y: this._y
+    });
+  }
 
-	serialize() {
-		return _.merge(super.serialize(), {
-			x: this.x,
-			y: this.y
-		});
-	}
+  remove() {
+    // clear references
+    if (this.parent) {
+      this.parent.removePoint(this);
+    }
+    super.remove();
+  }
 
-	remove() {
-		//clear references
-		if (this.parent) {
-			this.parent.removePoint(this);
-		}
-		super.remove();
-	}
+  setPosition(x: number, y: number) {
+    this._x = x;
+    this._y = y;
+  }
 
-	setPosition(x: number, y: number) {
-		this.x = x;
-		this.y = y;
-	}
+  get x(): number {
+    return this._x;
+  }
 
-	getX(): number {
-		return this.x;
-	}
+  set x(x: number) {
+    this._x = x;
+  }
 
-	getY(): number {
-		return this.y;
-	}
+  get y(): number {
+    return this._y;
+  }
 
-	isLocked() {
-		return super.isLocked() || this.getParent().isLocked();
-	}
+  set y(y: number) {
+    this._y = y;
+  }
+
+  get locked(): boolean {
+    return this.locked || (this.parent ? this.parent.locked : false);
+  }
 }

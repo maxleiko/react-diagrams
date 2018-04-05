@@ -1,15 +1,15 @@
-import { BaseModel } from "../models/BaseModel";
+import { BaseModel } from '../models/BaseModel';
 
 export abstract class AbstractFactory<T extends BaseModel> {
-	type: string;
+  type: string;
 
-	constructor(name: string) {
-		this.type = name;
-	}
+  constructor(name: string) {
+    this.type = name;
+  }
 
-	getType(): string {
-		return this.type;
-	}
+  getType(): string {
+    return this.type;
+  }
 
-	abstract getNewInstance(initialConfig?: any): T;
+  abstract getNewInstance(initialConfig?: any): T;
 }

@@ -1,120 +1,121 @@
 import {
-	DiagramEngine,
-	DefaultNodeFactory,
-	DefaultLinkFactory,
-	DiagramModel,
-	DefaultNodeModel,
-	LinkModel,
-	DefaultPortModel,
-	DiagramWidget
-} from "storm-react-diagrams";
-import { distributeElements } from "./dagre-utils";
-import * as React from "react";
-import { DemoWorkspaceWidget } from "../.helpers/DemoWorkspaceWidget";
+  DiagramEngine,
+  DiagramModel,
+  DefaultNodeModel,
+  DefaultPortModel,
+  DiagramWidget
+} from 'storm-react-diagrams';
+import { distributeElements } from './dagre-utils';
+import * as React from 'react';
+import { DemoWorkspaceWidget } from '../.helpers/DemoWorkspaceWidget';
 
-function createNode(name) {
-	return new DefaultNodeModel(name, "rgb(0,192,255)");
+function createNode(name: any) {
+  return new DefaultNodeModel(name, 'rgb(0,192,255)');
 }
 
 let count = 0;
 
-function connectNodes(nodeFrom, nodeTo) {
-	//just to get id-like structure
-	count++;
-	const portOut = nodeFrom.addPort(new DefaultPortModel(true, `${nodeFrom.name}-out-${count}`, "Out"));
-	const portTo = nodeTo.addPort(new DefaultPortModel(false, `${nodeFrom.name}-to-${count}`, "IN"));
-	return portOut.link(portTo);
+function connectNodes(nodeFrom: any, nodeTo: any) {
+  //just to get id-like structure
+  count++;
+  const portOut = nodeFrom.addPort(new DefaultPortModel(true, `${nodeFrom.name}-out-${count}`, 'Out'));
+  const portTo = nodeTo.addPort(new DefaultPortModel(false, `${nodeFrom.name}-to-${count}`, 'IN'));
+  return portOut.link(portTo);
+}
+
+export interface Demo8WidgetProps {
+  engine: DiagramEngine;
 }
 
 /**
  * Tests auto distribution
  */
-class Demo8Widget extends React.Component<any, any> {
-	constructor(props) {
-		super(props);
-		this.state = {};
-		this.autoDistribute = this.autoDistribute.bind(this);
-	}
+class Demo8Widget extends React.Component<Demo8WidgetProps> {
+  constructor(props: Demo8WidgetProps) {
+    super(props);
+    this.state = {};
+    this.autoDistribute = this.autoDistribute.bind(this);
+  }
 
-	autoDistribute() {
-		const { engine } = this.props;
-		const model = engine.getDiagramModel();
-		let distributedModel = getDistributedModel(engine, model);
-		engine.setDiagramModel(distributedModel);
-		this.forceUpdate();
-	}
+  autoDistribute() {
+    const { engine } = this.props;
+    const model = engine.getDiagramModel();
+    const distributedModel = getDistributedModel(engine, model);
+    engine.setDiagramModel(distributedModel);
+    this.forceUpdate();
+  }
 
-	render() {
-		const { engine } = this.props;
+  render() {
+    const { engine } = this.props;
 
-		return (
-			<DemoWorkspaceWidget buttons={<button onClick={this.autoDistribute}>Re-distribute</button>}>
-				<DiagramWidget className="srd-demo-canvas" diagramEngine={engine} />
-			</DemoWorkspaceWidget>
-		);
-	}
+    return (
+      <DemoWorkspaceWidget buttons={<button onClick={this.autoDistribute}>Re-distribute</button>}>
+        <DiagramWidget className="srd-demo-canvas" diagramEngine={engine} />
+      </DemoWorkspaceWidget>
+    );
+  }
 }
 
-function getDistributedModel(engine, model) {
-	const serialized = model.serializeDiagram();
-	const distributedSerializedDiagram = distributeElements(serialized);
+function getDistributedModel(engine: any, model: any) {
+  const serialized = model.serializeDiagram();
+  const distributedSerializedDiagram = distributeElements(serialized);
 
-	//deserialize the model
-	let deSerializedModel = new DiagramModel();
-	deSerializedModel.deSerializeDiagram(distributedSerializedDiagram, engine);
-	return deSerializedModel;
+  //deserialize the model
+  const deSerializedModel = new DiagramModel();
+  deSerializedModel.deSerializeDiagram(distributedSerializedDiagram, engine);
+  return deSerializedModel;
 }
 
 export default () => {
-	//1) setup the diagram engine
-	let engine = new DiagramEngine();
-	engine.installDefaultFactories();
+  //1) setup the diagram engine
+  const engine = new DiagramEngine();
+  engine.installDefaultFactories();
 
-	//2) setup the diagram model
-	let model = new DiagramModel();
+  //2) setup the diagram model
+  const model = new DiagramModel();
 
-	//3) create a default nodes
-	let nodesFrom = [];
-	let nodesTo = [];
+  //3) create a default nodes
+  const nodesFrom: any[] = [];
+  const nodesTo: any[] = [];
 
-	nodesFrom.push(createNode("from-1"));
-	nodesFrom.push(createNode("from-2"));
-	nodesFrom.push(createNode("from-3"));
+  nodesFrom.push(createNode('from-1'));
+  nodesFrom.push(createNode('from-2'));
+  nodesFrom.push(createNode('from-3'));
 
-	nodesTo.push(createNode("to-1"));
-	nodesTo.push(createNode("to-2"));
-	nodesTo.push(createNode("to-3"));
+  nodesTo.push(createNode('to-1'));
+  nodesTo.push(createNode('to-2'));
+  nodesTo.push(createNode('to-3'));
 
-	//4) link nodes together
-	let links = nodesFrom.map((node, index) => {
-		return connectNodes(node, nodesTo[index]);
-	});
+  //4) link nodes together
+  const links = nodesFrom.map((node, index) => {
+    return connectNodes(node, nodesTo[index]);
+  });
 
-	// more links for more complicated diagram
-	links.push(connectNodes(nodesFrom[0], nodesTo[1]));
-	links.push(connectNodes(nodesTo[0], nodesFrom[1]));
-	links.push(connectNodes(nodesFrom[1], nodesTo[2]));
+  // more links for more complicated diagram
+  links.push(connectNodes(nodesFrom[0], nodesTo[1]));
+  links.push(connectNodes(nodesTo[0], nodesFrom[1]));
+  links.push(connectNodes(nodesFrom[1], nodesTo[2]));
 
-	// initial random position
-	nodesFrom.forEach((node, index) => {
-		node.x = index * 70;
-		model.addNode(node);
-	});
+  // initial random position
+  nodesFrom.forEach((node, index) => {
+    node.x = index * 70;
+    model.addNode(node);
+  });
 
-	nodesTo.forEach((node, index) => {
-		node.x = index * 70;
-		node.y = 100;
-		model.addNode(node);
-	});
+  nodesTo.forEach((node, index) => {
+    node.x = index * 70;
+    node.y = 100;
+    model.addNode(node);
+  });
 
-	links.forEach(link => {
-		model.addLink(link);
-	});
+  links.forEach((link) => {
+    model.addLink(link);
+  });
 
-	//5) load model into engine
-	let model2 = getDistributedModel(engine, model);
+  //5) load model into engine
+  const model2 = getDistributedModel(engine, model);
 
-	engine.setDiagramModel(model2);
+  engine.setDiagramModel(model2);
 
-	return <Demo8Widget engine={engine} />;
+  return <Demo8Widget engine={engine} />;
 };

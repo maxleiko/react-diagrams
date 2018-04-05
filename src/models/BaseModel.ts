@@ -1,82 +1,91 @@
-import { BaseEntity, BaseListener } from "../BaseEntity";
-import * as _ from "lodash";
-import { BaseEvent } from "../BaseEntity";
-import { DiagramEngine } from "../DiagramEngine";
+import { BaseEntity, BaseListener } from '../BaseEntity';
+import * as _ from 'lodash';
+import { BaseEvent } from '../BaseEntity';
+import { DiagramEngine } from '../DiagramEngine';
 
 export interface BaseModelListener extends BaseListener {
-	selectionChanged?(event: BaseEvent<BaseModel> & { isSelected: boolean }): void;
+  selectionChanged?(event: BaseEvent<BaseModel> & { isSelected: boolean }): void;
 
-	entityRemoved?(event: BaseEvent<BaseModel>): void;
+  entityRemoved?(event: BaseEvent<BaseModel>): void;
 }
 
 /**
  * @author Dylan Vorster
  */
-export class BaseModel<X extends BaseEntity = BaseEntity, T extends BaseModelListener = BaseModelListener> extends BaseEntity<T> {
-	type: string;
-	selected: boolean;
-	parent: X;
+export class BaseModel<
+  P extends BaseEntity = BaseEntity,
+  L extends BaseModelListener = BaseModelListener
+> extends BaseEntity<L> {
+  private _type: string;
+  private _selected: boolean = false;
+  private _parent: P | null = null;
 
-	constructor(type?: string, id?: string) {
-		super(id);
-		this.type = type;
-		this.selected = false;
-	}
+  constructor(type: string = 'srd-base', id?: string) {
+    super(id);
+    this._type = type;
+  }
 
-	public getParent(): X {
-		return this.parent;
-	}
+  get locked(): boolean {
+    if (this.locked) {
+      return true;
+    }
+    // if current element is not locked, check-out in parent
+    if (this._parent) {
+      return this._parent.locked;
+    }
+    return false;
+  }
 
-	public setParent(parent: X) {
-		this.parent = parent;
-	}
+  get parent(): P | null {
+    return this._parent;
+  }
 
-	public getSelectedEntities(): BaseModel<any, T>[] {
-		if (this.isSelected()) {
-			return [this];
-		}
-		return [];
-	}
+  set parent(p: P | null) {
+    this._parent = p;
+  }
 
-	public deSerialize(ob, engine: DiagramEngine) {
-		super.deSerialize(ob, engine);
-		this.type = ob.type;
-		this.selected = ob.selected;
-	}
+  getSelectedEntities(): Array<BaseModel<any, any>> {
+    if (this.selected) {
+      return [this];
+    }
+    return [];
+  }
 
-	public serialize() {
-		return _.merge(super.serialize(), {
-			type: this.type,
-			selected: this.selected
-		});
-	}
+  deSerialize(ob: any, engine: DiagramEngine) {
+    super.deSerialize(ob, engine);
+    this._type = ob.type;
+    this._selected = ob.selected;
+  }
 
-	public getType(): string {
-		return this.type;
-	}
+  serialize() {
+    return _.merge(super.serialize(), {
+      type: this._type,
+      selected: this._selected
+    });
+  }
 
-	public getID(): string {
-		return this.id;
-	}
+  get type(): string {
+    return this._type;
+  }
 
-	public isSelected(): boolean {
-		return this.selected;
-	}
+  get selected(): boolean {
+    return this._selected;
+  }
 
-	public setSelected(selected: boolean = true) {
-		this.selected = selected;
-		this.iterateListeners((listener, event) => {
-			if (listener.selectionChanged) {
-				listener.selectionChanged({ ...event, isSelected: selected });
-			}
-		});
-	}
+  set selected(selected: boolean) {
+    this._selected = selected;
+    this.iterateListeners((listener, event) => {
+      if (listener.selectionChanged) {
+        listener.selectionChanged({ ...event, isSelected: selected });
+      }
+    });
+  }
 
-	public remove() {
-		this.iterateListeners((listener, event) => {
-			if (listener.entityRemoved) {
-				listener.entityRemoved(event);
-			}
-		});
-	}
+  remove() {
+    this.iterateListeners((listener, event) => {
+      if (listener.entityRemoved) {
+        listener.entityRemoved(event);
+      }
+    });
+  }
 }

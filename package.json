@@ -1,6 +1,6 @@
 {
 	"name": "storm-react-diagrams",
-	"version": "5.1.0",
+	"version": "5.1.1",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/projectstorm/react-diagrams.git"
@@ -27,7 +27,7 @@
 		"storybook": "start-storybook -p 9001 -c .storybook",
 		"storybook:build": "build-storybook -c .storybook -o .out",
 		"storybook:github": "storybook-to-ghpages",
-		"pretty": "prettier --use-tabs --write \"{src,demos,tests}/**/*.{ts,tsx}\" --print-width 120",
+		"pretty": "prettier --write \"{src,demos,tests}/**/*.{ts,tsx}\"",
 		"lint": "tslint -p .",
 		"test:ci": "rm -rf ./dist && node ./tests/e2e/generate-e2e.js && jest --no-cache",
 		"test": "jest --no-cache",
@@ -78,8 +78,10 @@
 		"storybook-readme": "^3.2.1",
 		"style-loader": "^0.20.3",
 		"ts-jest": "^22.4.1",
+		"ts-loader": "^4.1.0",
 		"tslint": "^5.9.1",
-		"typescript": "^2.7.2",
+		"tslint-react": "^3.5.1",
+		"typescript": "^2.8.1",
 		"uglifyjs-webpack-plugin": "^1.2.3",
 		"val-loader": "^1.1.0",
 		"webpack": "^4.1.1",

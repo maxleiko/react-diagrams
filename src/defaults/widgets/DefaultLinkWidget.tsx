@@ -1,383 +1,384 @@
-import * as React from "react";
-import { DiagramEngine } from "../../DiagramEngine";
-import { PointModel } from "../../models/PointModel";
-import { Toolkit } from "../../Toolkit";
-import { DefaultLinkFactory } from "../factories/DefaultLinkFactory";
-import { DefaultLinkModel } from "../models/DefaultLinkModel";
-import { PathFinding } from "../../routing/PathFinding";
-import * as _ from "lodash";
-import { LabelModel } from "../../models/LabelModel";
-import { BaseWidget, BaseWidgetProps } from "../../widgets/BaseWidget";
+import * as React from 'react';
+import { DiagramEngine } from '../../DiagramEngine';
+import { PointModel } from '../../models/PointModel';
+import { Toolkit } from '../../Toolkit';
+import { DefaultLinkFactory } from '../factories/DefaultLinkFactory';
+import { DefaultLinkModel } from '../models/DefaultLinkModel';
+import { PathFinding } from '../../routing/PathFinding';
+import * as _ from 'lodash';
+import { LabelModel } from '../../models/LabelModel';
+import { BaseWidget, BaseWidgetProps } from '../../widgets/BaseWidget';
 
 export interface DefaultLinkProps extends BaseWidgetProps {
-	color?: string;
-	width?: number;
-	smooth?: boolean;
-	link: DefaultLinkModel;
-	diagramEngine: DiagramEngine;
-	pointAdded?: (point: PointModel, event: MouseEvent) => any;
+  color?: string;
+  width?: number;
+  smooth?: boolean;
+  link: DefaultLinkModel;
+  diagramEngine: DiagramEngine;
+  pointAdded?: (point: PointModel, event: React.MouseEvent<HTMLElement>) => any;
 }
 
 export interface DefaultLinkState {
-	selected: boolean;
+  selected: boolean;
 }
 
 export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkState> {
-	public static defaultProps: DefaultLinkProps = {
-		color: "black",
-		width: 3,
-		link: null,
-		engine: null,
-		smooth: false,
-		diagramEngine: null
-	};
+  static defaultProps: Partial<DefaultLinkProps> = {
+    color: 'black',
+    width: 3,
+    smooth: false
+  };
 
-	// DOM references to the label and paths (if label is given), used to calculate dynamic positioning
-	refLabels: { [id: string]: HTMLElement };
-	refPaths: SVGPathElement[];
+  // DOM references to the label and paths (if label is given), used to calculate dynamic positioning
+  refLabels: { [id: string]: HTMLElement | null };
+  refPaths: SVGPathElement[];
 
-	pathFinding: PathFinding; // only set when smart routing is active
+  pathFinding: PathFinding | null = null; // only set when smart routing is active
 
-	constructor(props: DefaultLinkProps) {
-		super("srd-default-link", props);
+  constructor(props: DefaultLinkProps) {
+    super('srd-default-link', props);
 
-		this.refLabels = {};
-		this.refPaths = [];
-		this.state = {
-			selected: false
-		};
+    this.refLabels = {};
+    this.refPaths = [];
+    this.state = {
+      selected: false
+    };
 
-		if (props.diagramEngine.isSmartRoutingEnabled()) {
-			this.pathFinding = new PathFinding(this.props.diagramEngine);
-		}
-	}
+    if (props.diagramEngine.isSmartRoutingEnabled()) {
+      this.pathFinding = new PathFinding(this.props.diagramEngine);
+    }
 
-	calculateAllLabelPosition() {
-		_.forEach(this.props.link.labels, (label, index) => {
-			this.calculateLabelPosition(label, index + 1);
-		});
-	}
+    this.select = this.select.bind(this);
+    this.unselect = this.unselect.bind(this);
+    this.addPointToLink = this.addPointToLink.bind(this);
+    this.calculateLabelPosition = this.calculateLabelPosition.bind(this);
+    this.findPathAndRelativePositionToRenderLabel = this.findPathAndRelativePositionToRenderLabel.bind(this);
+  }
 
-	componentDidUpdate() {
-		if (this.props.link.labels.length > 0) {
-			window.requestAnimationFrame(this.calculateAllLabelPosition.bind(this));
-		}
-	}
+  calculateAllLabelPosition() {
+    _.forEach(this.props.link.labels, (label, index) => {
+      this.calculateLabelPosition(label, index + 1);
+    });
+  }
 
-	componentDidMount() {
-		if (this.props.link.labels.length > 0) {
-			window.requestAnimationFrame(this.calculateAllLabelPosition.bind(this));
-		}
-	}
+  componentDidUpdate() {
+    if (this.props.link.labels.length > 0) {
+      window.requestAnimationFrame(this.calculateAllLabelPosition.bind(this));
+    }
+  }
 
-	addPointToLink = (event: MouseEvent, index: number): void => {
-		if (
-			!event.shiftKey &&
-			!this.props.diagramEngine.isModelLocked(this.props.link) &&
-			this.props.link.points.length - 1 <= this.props.diagramEngine.getMaxNumberPointsPerLink()
-		) {
-			const point = new PointModel(this.props.link, this.props.diagramEngine.getRelativeMousePoint(event));
-			point.setSelected(true);
-			this.forceUpdate();
-			this.props.link.addPoint(point, index);
-			this.props.pointAdded(point, event);
-		}
-	};
+  componentDidMount() {
+    if (this.props.link.labels.length > 0) {
+      window.requestAnimationFrame(this.calculateAllLabelPosition.bind(this));
+    }
+  }
 
-	generatePoint(pointIndex: number): JSX.Element {
-		let x = this.props.link.points[pointIndex].x;
-		let y = this.props.link.points[pointIndex].y;
+  addPointToLink(event: React.MouseEvent<HTMLElement>, index: number) {
+    if (
+      !event.shiftKey &&
+      !this.props.diagramEngine.isModelLocked(this.props.link) &&
+      this.props.link.points.length - 1 <= this.props.diagramEngine.getMaxNumberPointsPerLink()
+    ) {
+      const point = new PointModel(this.props.link, this.props.diagramEngine.getRelativeMousePoint(event));
+      point.setSelected(true);
+      this.forceUpdate();
+      this.props.link.addPoint(point, index);
+      if (this.props.pointAdded) {
+        this.props.pointAdded(point, event);
+      }
+    }
+  }
 
-		return (
-			<g key={"point-" + this.props.link.points[pointIndex].id}>
-				<circle
-					cx={x}
-					cy={y}
-					r={5}
-					className={
-						"point " +
-						this.bem("__point") +
-						(this.props.link.points[pointIndex].isSelected() ? this.bem("--point-selected") : "")
-					}
-				/>
-				<circle
-					onMouseLeave={() => {
-						this.setState({ selected: false });
-					}}
-					onMouseEnter={() => {
-						this.setState({ selected: true });
-					}}
-					data-id={this.props.link.points[pointIndex].id}
-					data-linkid={this.props.link.id}
-					cx={x}
-					cy={y}
-					r={15}
-					opacity={0}
-					className={"point " + this.bem("__point")}
-				/>
-			</g>
-		);
-	}
+  select() {
+    this.setState({ selected: true });
+  }
 
-	generateLabel(label: LabelModel) {
-		const canvas = this.props.diagramEngine.canvas as HTMLElement;
-		return (
-			<foreignObject
-				key={label.id}
-				className={this.bem("__label")}
-				width={canvas.offsetWidth}
-				height={canvas.offsetHeight}
-			>
-				<div ref={ref => (this.refLabels[label.id] = ref)}>
-					{this.props.diagramEngine
-						.getFactoryForLabel(label)
-						.generateReactWidget(this.props.diagramEngine, label)}
-				</div>
-			</foreignObject>
-		);
-	}
+  unselect() {
+    this.setState({ selected: false });
+  }
 
-	generateLink(path: string, extraProps: any, id: string | number): JSX.Element {
-		var props = this.props;
+  generatePoint(pointIndex: number): JSX.Element {
+    const x = this.props.link.points[pointIndex].x;
+    const y = this.props.link.points[pointIndex].y;
 
-		var Bottom = React.cloneElement(
-			(props.diagramEngine.getFactoryForLink(this.props.link) as DefaultLinkFactory).generateLinkSegment(
-				this.props.link,
-				this,
-				this.state.selected || this.props.link.isSelected(),
-				path
-			),
-			{
-				ref: ref => ref && this.refPaths.push(ref)
-			}
-		);
+    return (
+      <g key={'point-' + this.props.link.points[pointIndex].id}>
+        <circle
+          cx={x}
+          cy={y}
+          r={5}
+          className={
+            'point ' +
+            this.bem('__point') +
+            (this.props.link.points[pointIndex].isSelected() ? this.bem('--point-selected') : '')
+          }
+        />
+        <circle
+          onMouseEnter={this.select}
+          onMouseLeave={this.unselect}
+          data-id={this.props.link.points[pointIndex].id}
+          data-linkid={this.props.link.id}
+          cx={x}
+          cy={y}
+          r={15}
+          opacity={0}
+          className={'point ' + this.bem('__point')}
+        />
+      </g>
+    );
+  }
 
-		var Top = React.cloneElement(Bottom, {
-			...extraProps,
-			strokeLinecap: "round",
-			onMouseLeave: () => {
-				this.setState({ selected: false });
-			},
-			onMouseEnter: () => {
-				this.setState({ selected: true });
-			},
-			ref: null,
-			"data-linkid": this.props.link.getID(),
-			strokeOpacity: this.state.selected ? 0.1 : 0,
-			strokeWidth: 20,
-			onContextMenu: () => {
-				if (!this.props.diagramEngine.isModelLocked(this.props.link)) {
-					event.preventDefault();
-					this.props.link.remove();
-				}
-			}
-		});
+  generateLabel(label: LabelModel) {
+    const canvas = this.props.diagramEngine.canvas as HTMLElement;
+    const factory = this.props.diagramEngine.getFactoryForLabel(label);
+    if (factory) {
+      return (
+        <foreignObject
+          key={label.id}
+          className={this.bem('__label')}
+          width={canvas.offsetWidth}
+          height={canvas.offsetHeight}
+        >
+          <div ref={(ref) => (this.refLabels[label.id] = ref)}>
+            {factory.generateReactWidget(this.props.diagramEngine, label)}
+          </div>
+        </foreignObject>
+      );
+    }
+    throw new Error(`Unable to find a Label factory for "${label}"`);
+  }
 
-		return (
-			<g key={"link-" + id}>
-				{Bottom}
-				{Top}
-			</g>
-		);
-	}
+  generateLink(path: string, extraProps: any, id: string | number): JSX.Element {
+    const props = this.props;
 
-	findPathAndRelativePositionToRenderLabel = (index: number): { path: any; position: number } => {
-		// an array to hold all path lengths, making sure we hit the DOM only once to fetch this information
-		const lengths = this.refPaths.map(path => path.getTotalLength());
+    const Bottom = React.cloneElement(
+      (props.diagramEngine.getFactoryForLink(this.props.link) as DefaultLinkFactory).generateLinkSegment(
+        this.props.link,
+        this,
+        this.state.selected || this.props.link.isSelected(),
+        path
+      ),
+      {
+        ref: (ref: any) => ref && this.refPaths.push(ref)
+      }
+    );
 
-		// calculate the point where we want to display the label
-		let labelPosition =
-			lengths.reduce((previousValue, currentValue) => previousValue + currentValue, 0) *
-			(index / (this.props.link.labels.length + 1));
+    const Top = React.cloneElement(Bottom, {
+      ...extraProps,
+      strokeLinecap: 'round',
+      onMouseLeave: () => {
+        this.setState({ selected: false });
+      },
+      onMouseEnter: () => {
+        this.setState({ selected: true });
+      },
+      ref: null,
+      'data-linkid': this.props.link.getID(),
+      strokeOpacity: this.state.selected ? 0.1 : 0,
+      strokeWidth: 20,
+      onContextMenu: (event: React.MouseEvent<any>) => {
+        if (!this.props.diagramEngine.isModelLocked(this.props.link)) {
+          event.preventDefault();
+          this.props.link.remove();
+        }
+      }
+    });
 
-		// find the path where the label will be rendered and calculate the relative position
-		let pathIndex = 0;
-		while (pathIndex < this.refPaths.length) {
-			if (labelPosition - lengths[pathIndex] < 0) {
-				return {
-					path: this.refPaths[pathIndex],
-					position: labelPosition
-				};
-			}
+    return (
+      <g key={'link-' + id}>
+        {Bottom}
+        {Top}
+      </g>
+    );
+  }
 
-			// keep searching
-			labelPosition -= lengths[pathIndex];
-			pathIndex++;
-		}
-	};
+  findPathAndRelativePositionToRenderLabel(index: number) {
+    // an array to hold all path lengths, making sure we hit the DOM only once to fetch this information
+    const lengths = this.refPaths.map((path) => path.getTotalLength());
 
-	calculateLabelPosition = (label, index: number) => {
-		if (!this.refLabels[label.id]) {
-			// no label? nothing to do here
-			return;
-		}
+    // calculate the point where we want to display the label
+    let labelPosition =
+      lengths.reduce((previousValue, currentValue) => previousValue + currentValue, 0) *
+      (index / (this.props.link.labels.length + 1));
 
-		const { path, position } = this.findPathAndRelativePositionToRenderLabel(index);
+    // find the path where the label will be rendered and calculate the relative position
+    let pathIndex = 0;
+    while (pathIndex < this.refPaths.length) {
+      if (labelPosition - lengths[pathIndex] < 0) {
+        return {
+          path: this.refPaths[pathIndex],
+          position: labelPosition
+        };
+      }
 
-		const labelDimensions = {
-			width: this.refLabels[label.id].offsetWidth,
-			height: this.refLabels[label.id].offsetHeight
-		};
+      // keep searching
+      labelPosition -= lengths[pathIndex];
+      pathIndex++;
+    }
 
-		const pathCentre = path.getPointAtLength(position);
+    return null;
+  }
 
-		const labelCoordinates = {
-			x: pathCentre.x - labelDimensions.width / 2 + label.offsetX,
-			y: pathCentre.y - labelDimensions.height / 2 + label.offsetY
-		};
-		this.refLabels[label.id].setAttribute(
-			"style",
-			`transform: translate(${labelCoordinates.x}px, ${labelCoordinates.y}px);`
-		);
-	};
+  calculateLabelPosition(label: LabelModel, index: number) {
+    const labelRef = this.refLabels[label.id];
+    if (!labelRef) {
+      // no label? nothing to do here
+      return;
+    }
 
-	/**
-	 * Smart routing is only applicable when all conditions below are true:
-	 * - smart routing is set to true on the engine
-	 * - current link is between two nodes (not between a node and an empty point)
-	 * - no custom points exist along the line
-	 */
-	isSmartRoutingApplicable(): boolean {
-		const { diagramEngine, link } = this.props;
+    const labelData = this.findPathAndRelativePositionToRenderLabel(index);
+    if (labelData) {
+      const labelDimensions = {
+        width: labelRef.offsetWidth,
+        height: labelRef.offsetHeight
+      };
 
-		if (!diagramEngine.isSmartRoutingEnabled()) {
-			return false;
-		}
+      const pathCentre = labelData.path.getPointAtLength(labelData.position);
 
-		if (link.points.length !== 2) {
-			return false;
-		}
+      const labelCoordinates = {
+        x: pathCentre.x - labelDimensions.width / 2 + label.offsetX,
+        y: pathCentre.y - labelDimensions.height / 2 + label.offsetY
+      };
+      labelRef.setAttribute('style', `transform: translate(${labelCoordinates.x}px, ${labelCoordinates.y}px);`);
+    }
+  }
 
-		if (link.sourcePort === null || link.targetPort === null) {
-			return false;
-		}
+  /**
+   * Smart routing is only applicable when all conditions below are true:
+   * - smart routing is set to true on the engine
+   * - current link is between two nodes (not between a node and an empty point)
+   * - no custom points exist along the line
+   */
+  isSmartRoutingApplicable(): boolean {
+    const { diagramEngine, link } = this.props;
 
-		return true;
-	}
+    if (!diagramEngine.isSmartRoutingEnabled()) {
+      return false;
+    }
 
-	render() {
-		const { diagramEngine } = this.props;
-		if (!diagramEngine.nodesRendered) {
-			return null;
-		}
+    if (link.points.length !== 2) {
+      return false;
+    }
 
-		//ensure id is present for all points on the path
-		var points = this.props.link.points;
-		var paths = [];
+    if (link.sourcePort === null || link.targetPort === null) {
+      return false;
+    }
 
-		if (this.isSmartRoutingApplicable()) {
-			// first step: calculate a direct path between the points being linked
-			const directPathCoords = this.pathFinding.calculateDirectPath(_.first(points), _.last(points));
+    return true;
+  }
 
-			const routingMatrix = diagramEngine.getRoutingMatrix();
-			// now we need to extract, from the routing matrix, the very first walkable points
-			// so they can be used as origin and destination of the link to be created
-			const smartLink = this.pathFinding.calculateLinkStartEndCoords(routingMatrix, directPathCoords);
+  render() {
+    const { diagramEngine } = this.props;
+    if (!diagramEngine.nodesRendered) {
+      return null;
+    }
 
-			if (smartLink) {
-				const { start, end, pathToStart, pathToEnd } = smartLink;
+    // ensure id is present for all points on the path
+    const points = this.props.link.points;
+    const paths = [];
 
-				// second step: calculate a path avoiding hitting other elements
-				const simplifiedPath = this.pathFinding.calculateDynamicPath(
-					routingMatrix,
-					start,
-					end,
-					pathToStart,
-					pathToEnd
-				);
+    if (this.isSmartRoutingApplicable()) {
+      if (this.pathFinding) {
+        if (points.length > 1) {
+          // first step: calculate a direct path between the points being linked
+          const directPathCoords = this.pathFinding.calculateDirectPath(_.first(points)!, _.last(points)!);
 
-				paths.push(
-					//smooth: boolean, extraProps: any, id: string | number, firstPoint: PointModel, lastPoint: PointModel
-					this.generateLink(
-						Toolkit.generateDynamicPath(simplifiedPath),
-						{
-							onMouseDown: event => {
-								this.addPointToLink(event, 1);
-							}
-						},
-						"0"
-					)
-				);
-			}
-		}
+          const routingMatrix = diagramEngine.getRoutingMatrix();
+          // now we need to extract, from the routing matrix, the very first walkable points
+          // so they can be used as origin and destination of the link to be created
+          const smartLink = this.pathFinding.calculateLinkStartEndCoords(routingMatrix, directPathCoords);
 
-		// true when smart routing was skipped or not enabled.
-		// See @link{#isSmartRoutingApplicable()}.
-		if (paths.length === 0) {
-			if (points.length === 2) {
-				var isHorizontal = Math.abs(points[0].x - points[1].x) > Math.abs(points[0].y - points[1].y);
-				var xOrY = isHorizontal ? "x" : "y";
+          if (smartLink) {
+            const { start, end, pathToStart, pathToEnd } = smartLink;
 
-				//draw the smoothing
-				//if the points are too close, just draw a straight line
-				var margin = 50;
-				if (Math.abs(points[0][xOrY] - points[1][xOrY]) < 50) {
-					margin = 5;
-				}
+            // second step: calculate a path avoiding hitting other elements
+            const simplifiedPath = this.pathFinding.calculateDynamicPath(
+              routingMatrix,
+              start,
+              end,
+              pathToStart,
+              pathToEnd
+            );
 
-				var pointLeft = points[0];
-				var pointRight = points[1];
+            paths.push(
+              // smooth: boolean, extraProps: any, id: string | number, firstPoint: PointModel, lastPoint: PointModel
+              this.generateLink(
+                Toolkit.generateDynamicPath(simplifiedPath),
+                { onMouseDown: (event: React.MouseEvent<HTMLElement>) => this.addPointToLink(event, 1) },
+                '0'
+              )
+            );
+          }
+        }
+      }
+    }
 
-				//some defensive programming to make sure the smoothing is
-				//always in the right direction
-				if (pointLeft[xOrY] > pointRight[xOrY]) {
-					pointLeft = points[1];
-					pointRight = points[0];
-				}
+    // true when smart routing was skipped or not enabled.
+    // See @link{#isSmartRoutingApplicable()}.
+    if (paths.length === 0) {
+      if (points.length === 2) {
+        const isHorizontal = Math.abs(points[0].x - points[1].x) > Math.abs(points[0].y - points[1].y);
+        const xOrY = isHorizontal ? 'x' : 'y';
 
-				paths.push(
-					this.generateLink(
-						Toolkit.generateCurvePath(pointLeft, pointRight, this.props.link.curvyness),
-						{
-							onMouseDown: event => {
-								this.addPointToLink(event, 1);
-							}
-						},
-						"0"
-					)
-				);
+        let pointLeft = points[0];
+        let pointRight = points[1];
 
-				// draw the link as dangeling
-				if (this.props.link.targetPort === null) {
-					paths.push(this.generatePoint(1));
-				}
-			} else {
-				//draw the multiple anchors and complex line instead
-				for (let j = 0; j < points.length - 1; j++) {
-					paths.push(
-						this.generateLink(
-							Toolkit.generateLinePath(points[j], points[j + 1]),
-							{
-								"data-linkid": this.props.link.id,
-								"data-point": j,
-								onMouseDown: (event: MouseEvent) => {
-									this.addPointToLink(event, j + 1);
-								}
-							},
-							j
-						)
-					);
-				}
+        // some defensive programming to make sure the smoothing is
+        // always in the right direction
+        if (pointLeft[xOrY] > pointRight[xOrY]) {
+          pointLeft = points[1];
+          pointRight = points[0];
+        }
 
-				//render the circles
-				for (var i = 1; i < points.length - 1; i++) {
-					paths.push(this.generatePoint(i));
-				}
+        paths.push(
+          this.generateLink(
+            Toolkit.generateCurvePath(pointLeft, pointRight, this.props.link.curvyness),
+            { onMouseDown: (event: React.MouseEvent<any>) => this.addPointToLink(event, 1) },
+            '0'
+          )
+        );
 
-				if (this.props.link.targetPort === null) {
-					paths.push(this.generatePoint(points.length - 1));
-				}
-			}
-		}
+        // draw the link as dangeling
+        if (this.props.link.targetPort === null) {
+          paths.push(this.generatePoint(1));
+        }
+      } else {
+        // draw the multiple anchors and complex line instead
+        for (let j = 0; j < points.length - 1; j++) {
+          paths.push(
+            this.generateLink(
+              Toolkit.generateLinePath(points[j], points[j + 1]),
+              {
+                'data-linkid': this.props.link.id,
+                'data-point': j,
+                onMouseDown: (event: React.MouseEvent<any>) => {
+                  this.addPointToLink(event, j + 1);
+                }
+              },
+              j
+            )
+          );
+        }
 
-		this.refPaths = [];
-		return (
-			<g {...this.getProps()}>
-				{paths}
-				{_.map(this.props.link.labels, labelModel => {
-					return this.generateLabel(labelModel);
-				})}
-			</g>
-		);
-	}
+        // render the circles
+        for (let i = 1; i < points.length - 1; i++) {
+          paths.push(this.generatePoint(i));
+        }
+
+        if (this.props.link.targetPort === null) {
+          paths.push(this.generatePoint(points.length - 1));
+        }
+      }
+    }
+
+    this.refPaths = [];
+    return (
+      <g {...this.getProps()}>
+        {paths}
+        {_.map(this.props.link.labels, (labelModel) => {
+          return this.generateLabel(labelModel);
+        })}
+      </g>
+    );
+  }
 }

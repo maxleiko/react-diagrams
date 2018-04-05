@@ -1,4 +1,5 @@
-import initStoryshots from "@storybook/addon-storyshots";
-import "raf/polyfill";
+// @ts-ignore
+import initStoryshots from '@storybook/addon-storyshots';
+import 'raf/polyfill';
 
 initStoryshots({ configPath: __dirname });

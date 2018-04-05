@@ -1,35 +1,33 @@
-import * as React from "react";
-import { DefaultPortModel } from "../models/DefaultPortModel";
-import { PortWidget } from "../../widgets/PortWidget";
-import { BaseWidget, BaseWidgetProps } from "../../widgets/BaseWidget";
+import * as React from 'react';
+import { DefaultPortModel } from '../models/DefaultPortModel';
+import { PortWidget } from '../../widgets/PortWidget';
+import { BaseWidget, BaseWidgetProps } from '../../widgets/BaseWidget';
 
 export interface DefaultPortLabelProps extends BaseWidgetProps {
-	model: DefaultPortModel;
+  model: DefaultPortModel;
 }
-
-export interface DefaultPortLabelState {}
 
 /**
  * @author Dylan Vorster
  */
-export class DefaultPortLabel extends BaseWidget<DefaultPortLabelProps, DefaultPortLabelState> {
-	constructor(props) {
-		super("srd-default-port", props);
-	}
+export class DefaultPortLabel extends BaseWidget<DefaultPortLabelProps> {
+  constructor(props: DefaultPortLabelProps) {
+    super('srd-default-port', props);
+  }
 
-	getClassName() {
-		return super.getClassName() + (this.props.model.in ? this.bem("--in") : this.bem("--out"));
-	}
+  getClassName() {
+    return super.getClassName() + (this.props.model.in ? this.bem('--in') : this.bem('--out'));
+  }
 
-	render() {
-		var port = <PortWidget node={this.props.model.getParent()} name={this.props.model.name} />;
-		var label = <div className="name">{this.props.model.label}</div>;
+  render() {
+    const port = <PortWidget node={this.props.model.getParent()} name={this.props.model.name} />;
+    const label = <div className="name">{this.props.model.label}</div>;
 
-		return (
-			<div {...this.getProps()}>
-				{this.props.model.in ? port : label}
-				{this.props.model.in ? label : port}
-			</div>
-		);
-	}
+    return (
+      <div {...this.getProps()}>
+        {this.props.model.in ? port : label}
+        {this.props.model.in ? label : port}
+      </div>
+    );
+  }
 }

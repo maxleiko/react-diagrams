@@ -1,133 +1,117 @@
-import { BaseModel, BaseModelListener } from "./BaseModel";
-import { PortModel } from "./PortModel";
-import * as _ from "lodash";
-import { DiagramEngine } from "../DiagramEngine";
-import { DiagramModel } from "./DiagramModel";
+import { BaseModel, BaseModelListener } from './BaseModel';
+import { PortModel } from './PortModel';
+import * as _ from 'lodash';
+import { DiagramEngine } from '../DiagramEngine';
+import { DiagramModel } from './DiagramModel';
 
 export class NodeModel extends BaseModel<DiagramModel, BaseModelListener> {
-	x: number;
-	y: number;
-	extras: any;
-	ports: { [s: string]: PortModel };
+  private _x: number = 0;
+  private _y: number = 0;
+  private _extras: { [s: string]: any } = {};
+  private _ports: Map<string, PortModel> = new Map();
 
-	// calculated post rendering so routing can be done correctly
-	width: number;
-	height: number;
+  // calculated post rendering so routing can be done correctly
+  private _width: number = -1;
+  private _height: number = -1;
 
-	constructor(nodeType: string = "default", id?: string) {
-		super(nodeType, id);
-		this.x = 0;
-		this.y = 0;
-		this.extras = {};
-		this.ports = {};
-	}
+  constructor(nodeType: string = 'default', id?: string) {
+    super(nodeType, id);
+  }
 
-	setPosition(x: number, y: number) {
-		//store position
-		let oldX = this.x;
-		let oldY = this.y;
-		_.forEach(this.ports, port => {
-			_.forEach(port.getLinks(), link => {
-				let point = link.getPointForPort(port);
-				point.x = point.x + x - oldX;
-				point.y = point.y + y - oldY;
-			});
-		});
-		this.x = x;
-		this.y = y;
-	}
+  setPosition(x: number, y: number) {
+    // store position
+    const oldX = this._x;
+    const oldY = this._y;
+    this._ports.forEach((port) => {
+      port.links.forEach((link) => {
+        const point = link.getPointForPort(port);
+        if (point) {
+          point.x = point.x + x - oldX;
+          point.y = point.y + y - oldY;
+        }
+      });
+    });
+    this._x = x;
+    this._y = y;
+  }
 
-	getSelectedEntities() {
-		let entities = super.getSelectedEntities();
+  getSelectedEntities(): Array<BaseModel<any, any>> {
+    // add the points of each link that are selected here
+    return super.getSelectedEntities().concat(
+      _.flatten(Array.from(this._ports.values()).map((port) => port.getSelectedEntities()))
+    );
+  }
 
-		// add the points of each link that are selected here
-		if (this.isSelected()) {
-			_.forEach(this.ports, port => {
-				entities = entities.concat(
-					_.map(port.getLinks(), link => {
-						return link.getPointForPort(port);
-					})
-				);
-			});
-		}
-		return entities;
-	}
+  deSerialize(ob: any, engine: DiagramEngine) {
+    super.deSerialize(ob, engine);
+    this._x = ob.x;
+    this._y = ob.y;
+    this._extras = ob.extras;
 
-	deSerialize(ob, engine: DiagramEngine) {
-		super.deSerialize(ob, engine);
-		this.x = ob.x;
-		this.y = ob.y;
-		this.extras = ob.extras;
+    // deserialize ports
+    _.forEach(ob.ports, (port: any) => {
+      const portOb = engine.getPortFactory(port.type).getNewInstance();
+      portOb.deSerialize(port, engine);
+      this.addPort(portOb);
+    });
+  }
 
-		//deserialize ports
-		_.forEach(ob.ports, (port: any) => {
-			let portOb = engine.getPortFactory(port.type).getNewInstance();
-			portOb.deSerialize(port, engine);
-			this.addPort(portOb);
-		});
-	}
+  serialize() {
+    return _.merge(super.serialize(), {
+      x: this._x,
+      y: this._y,
+      extras: this._extras,
+      ports: Array.from(this._ports.values()).map((port) => port.serialize())
+    });
+  }
 
-	serialize() {
-		return _.merge(super.serialize(), {
-			x: this.x,
-			y: this.y,
-			extras: this.extras,
-			ports: _.map(this.ports, port => {
-				return port.serialize();
-			})
-		});
-	}
+  doClone(lookupTable: any = {}, clone: any) {
+    // also clone the ports
+    clone.ports = {};
+    Array.from(this._ports.values())
+      .forEach((port) => clone.addPort(port.clone(lookupTable)));
+  }
 
-	doClone(lookupTable = {}, clone) {
-		// also clone the ports
-		clone.ports = {};
-		_.forEach(this.ports, port => {
-			clone.addPort(port.clone(lookupTable));
-		});
-	}
+  remove() {
+    super.remove();
+    this._ports.forEach((port) => {
+      port.links.forEach((link) => link.remove());
+    });
+  }
 
-	remove() {
-		super.remove();
-		_.forEach(this.ports, port => {
-			_.forEach(port.getLinks(), link => {
-				link.remove();
-			});
-		});
-	}
+  getPortFromID(id: string): PortModel | undefined {
+    return this._ports.get(id);
+  }
 
-	getPortFromID(id): PortModel | null {
-		for (var i in this.ports) {
-			if (this.ports[i].id === id) {
-				return this.ports[i];
-			}
-		}
-		return null;
-	}
+  get ports(): Map<string, PortModel> {
+    return this._ports;
+  }
 
-	getPort(name: string): PortModel | null {
-		return this.ports[name];
-	}
+  get width(): number {
+    return this._width;
+  }
 
-	getPorts(): { [s: string]: PortModel } {
-		return this.ports;
-	}
+  get height(): number {
+    return this._height;
+  }
 
-	removePort(port: PortModel) {
-		//clear the parent node reference
-		if (this.ports[port.name]) {
-			this.ports[port.name].setParent(null);
-			delete this.ports[port.name];
-		}
-	}
+  removePort(port: PortModel) {
+    // clear the parent node reference
+    const p = this._ports.get(port.id);
+    if (p) {
+      p.parent = null;
+      this._ports.delete(p.id);
+    }
+  }
 
-	addPort<T extends PortModel>(port: T): T {
-		port.setParent(this);
-		this.ports[port.name] = port;
-		return port;
-	}
+  addPort<T extends PortModel>(port: T): T {
+    port.parent = this;
+    this._ports.set(port.id, port);
+    return port;
+  }
 
-	updateDimensions({ width, height }: { width: number; height: number }) {
-		this.width = width;
-		this.height = height;
-	}
+  updateDimensions({ width, height }: { width: number; height: number }) {
+    this._width = width;
+    this._height = height;
+  }
 }
