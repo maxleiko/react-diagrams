@@ -8,7 +8,7 @@ import { DiagramEngine } from '../../DiagramEngine';
 /**
  * @author Dylan Vorster
  */
-export class DefaultNodeModel extends NodeModel {
+export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
   private _name: string;
   private _color: string;
 
@@ -27,19 +27,19 @@ export class DefaultNodeModel extends NodeModel {
   }
 
   /**
-   * Getter color
-   * @return {string}
-   */
-  get color(): string {
-    return this._color;
-  }
-
-  /**
    * Setter name
    * @param {string} value
    */
   set name(value: string) {
     this._name = value;
+  }
+
+  /**
+   * Getter color
+   * @return {string}
+   */
+  get color(): string {
+    return this._color;
   }
 
   /**
@@ -72,14 +72,10 @@ export class DefaultNodeModel extends NodeModel {
   }
 
   getInPorts(): DefaultPortModel[] {
-    return _.filter(this.ports, (portModel) => {
-      return portModel.in;
-    });
+    return Array.from(this.ports.values()).filter((p) => p.in);
   }
 
   getOutPorts(): DefaultPortModel[] {
-    return _.filter(this.ports, (portModel) => {
-      return !portModel.in;
-    });
+    return Array.from(this.ports.values()).filter((p) => !p.in);
   }
 }

@@ -235,35 +235,22 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     if (!Array.isArray(filters)) {
       filters = [filters];
     }
-    let items: BaseModel[] = [];
+    let items: Array<BaseModel<any, any>> = [];
 
-    // run through nodes
+    // find all nodes
     items = items.concat(
-      _.flatMap(this.nodes, (node) => {
-        return node.getSelectedEntities();
-      })
+      _.flatten(Array.from(this._nodes.values()).map((node) => node.getSelectedEntities()))
     );
 
-    // find all the links
+    // find all links
     items = items.concat(
-      _.flatMap(this.links, (link) => {
-        return link.getSelectedEntities();
-      })
-    );
-
-    // find all points
-    items = items.concat(
-      _.flatMap(this.links, (link) => {
-        return _.flatMap(link.points, (point) => {
-          return point.getSelectedEntities();
-        });
-      })
+      _.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities()))
     );
 
     items = _.uniq(items);
 
     if (filters.length > 0) {
-      items = _.filter(_.uniq(items), (item: BaseModel<any>) => {
+      items = _.filter(items, (item: BaseModel<any>) => {
         if (_.includes(filters, 'node') && item instanceof NodeModel) {
           return true;
         }

@@ -1,30 +1,23 @@
 import * as React from 'react';
+import * as cx from 'classnames';
 import { DefaultPortModel } from '../models/DefaultPortModel';
 import { PortWidget } from '../../widgets/PortWidget';
-import { BaseWidget, BaseWidgetProps } from '../../widgets/BaseWidget';
 
-export interface DefaultPortLabelProps extends BaseWidgetProps {
+export interface DefaultPortLabelProps {
   model: DefaultPortModel;
 }
 
 /**
  * @author Dylan Vorster
  */
-export class DefaultPortLabel extends BaseWidget<DefaultPortLabelProps> {
-  constructor(props: DefaultPortLabelProps) {
-    super('srd-default-port', props);
-  }
-
-  getClassName() {
-    return super.getClassName() + (this.props.model.in ? this.bem('--in') : this.bem('--out'));
-  }
+export class DefaultPortLabel extends React.Component<DefaultPortLabelProps> {
 
   render() {
-    const port = <PortWidget node={this.props.model.getParent()} name={this.props.model.name} />;
+    const port = <PortWidget port={this.props.model} />;
     const label = <div className="name">{this.props.model.label}</div>;
 
     return (
-      <div {...this.getProps()}>
+      <div {...this.props} className={cx('srd-default-port', this.props.model.in ? 'in' : 'out')}>
         {this.props.model.in ? port : label}
         {this.props.model.in ? label : port}
       </div>

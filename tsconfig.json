@@ -17,7 +17,8 @@
     "jsx": "react",
     "baseUrl": ".",
     "paths": {
-      "storm-react-diagrams": ["src/main.ts"]
+      "storm-react-diagrams": ["src/main.ts"],
+      "pathfinding": ["src/routing/pathfinding.d.ts"]
     },
     "lib": ["dom", "es2015"]
   },

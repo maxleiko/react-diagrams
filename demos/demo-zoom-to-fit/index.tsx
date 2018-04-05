@@ -28,7 +28,7 @@ export default () => {
   }
 
   // 5) load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   // 6) render the diagram!
   return (

@@ -1,24 +1,16 @@
 import * as React from 'react';
 import { DiagramEngine } from '../../DiagramEngine';
-import * as _ from 'lodash';
 import { NodeWidget } from '../NodeWidget';
-import { NodeModel } from '../../models/NodeModel';
-import { BaseWidget, BaseWidgetProps } from '../BaseWidget';
 
-export interface NodeLayerProps extends BaseWidgetProps {
+export interface NodeLayerProps {
   diagramEngine: DiagramEngine;
 }
 
-export class NodeLayerWidget extends BaseWidget<NodeLayerProps> {
-  constructor(props: NodeLayerProps) {
-    super('srd-node-layer', props);
-    this.state = {};
-  }
+export class NodeLayerWidget extends React.Component<NodeLayerProps> {
 
   updateNodeDimensions = () => {
     if (!this.props.diagramEngine.nodesRendered) {
-      const diagramModel = this.props.diagramEngine.getDiagramModel();
-      _.map(diagramModel.getNodes(), (node) => {
+      Array.from(this.props.diagramEngine.model.nodes.values()).map((node) => {
         node.updateDimensions(this.props.diagramEngine.getNodeDimensions(node));
       });
     }
@@ -30,10 +22,10 @@ export class NodeLayerWidget extends BaseWidget<NodeLayerProps> {
   }
 
   render() {
-    const diagramModel = this.props.diagramEngine.getDiagramModel();
+    const diagramModel = this.props.diagramEngine.model;
     return (
       <div
-        {...this.getProps()}
+        className="srd-node-layer"
         style={{
           transform:
             'translate(' +
@@ -45,7 +37,7 @@ export class NodeLayerWidget extends BaseWidget<NodeLayerProps> {
             ')'
         }}
       >
-        {_.map(diagramModel.getNodes(), (node: NodeModel) => {
+        {Array.from(diagramModel.nodes.values()).map((node) => {
           return React.createElement(
             NodeWidget,
             {

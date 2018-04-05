@@ -23,10 +23,10 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
     return new DefaultLinkModel();
   }
 
-  generateLinkSegment(model: DefaultLinkModel, widget: DefaultLinkWidget, selected: boolean, path: string) {
+  generateLinkSegment(model: DefaultLinkModel, _widget: DefaultLinkWidget, selected: boolean, path: string) {
     return (
       <path
-        className={selected ? widget.bem('--path-selected') : ''}
+        className={selected ? '--path-selected' : ''}
         strokeWidth={model.width}
         stroke={model.color}
         d={path}

@@ -1,35 +1,26 @@
 import * as React from 'react';
+import * as cx from 'classnames';
 import { DiagramEngine } from '../DiagramEngine';
 import { NodeModel } from '../models/NodeModel';
-import { BaseWidget, BaseWidgetProps } from './BaseWidget';
 
-export interface NodeProps extends BaseWidgetProps {
+export interface NodeProps {
   node: NodeModel;
-  children?: any;
   diagramEngine: DiagramEngine;
 }
 
 /**
  * @author Dylan Vorster
  */
-export class NodeWidget extends BaseWidget<NodeProps> {
-  constructor(props: NodeProps) {
-    super('srd-node', props);
-    this.state = {};
-  }
+export class NodeWidget extends React.Component<NodeProps> {
 
   shouldComponentUpdate() {
     return this.props.diagramEngine.canEntityRepaint(this.props.node);
   }
 
-  getClassName() {
-    return 'node ' + super.getClassName() + (this.props.node.isSelected() ? this.bem('--selected') : '');
-  }
-
   render() {
     return (
       <div
-        {...this.getProps()}
+        className={cx('srd-node', { '--selected': this.props.node.selected })}
         data-nodeid={this.props.node.id}
         style={{
           top: this.props.node.y,

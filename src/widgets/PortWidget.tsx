@@ -1,50 +1,37 @@
 import * as React from 'react';
-import { NodeModel } from '../models/NodeModel';
-import { BaseWidget, BaseWidgetProps } from './BaseWidget';
+import * as cx from 'classnames';
+import { PortModel } from '../models/PortModel';
 
-export interface PortProps extends BaseWidgetProps {
-  name: string;
-  node: NodeModel;
-}
-
-export interface PortState {
-  selected: boolean;
+export interface PortProps {
+  port: PortModel;
 }
 
 /**
  * @author Dylan Vorster
  */
-export class PortWidget extends BaseWidget<PortProps, PortState> {
+export class PortWidget extends React.Component<PortProps> {
   constructor(props: PortProps) {
-    super('srd-port', props);
-    this.state = {
-      selected: false
-    };
-
+    super(props);
     this.select = this.select.bind(this);
     this.unselect = this.unselect.bind(this);
   }
 
   select() {
-    this.setState({ selected: true });
+    this.props.port.selected = true;
   }
 
   unselect() {
-    this.setState({ selected: false });
-  }
-
-  getClassName() {
-    return 'port ' + super.getClassName() + (this.state.selected ? this.bem('--selected') : '');
+    this.props.port.selected = false;
   }
 
   render() {
     return (
       <div
-        {...this.getProps()}
+        className={cx('srd-port', { '--selected': this.props.port.selected })}
         onMouseEnter={this.select}
         onMouseLeave={this.unselect}
-        data-name={this.props.name}
-        data-nodeid={this.props.node.getID()}
+        data-name={this.props.port.name}
+        data-nodeid={this.props.port.parent!.id}
       />
     );
   }

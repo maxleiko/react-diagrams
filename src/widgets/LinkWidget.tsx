@@ -1,8 +1,9 @@
+import * as React from 'react';
+import * as cx from 'classnames';
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from '../models/LinkModel';
-import { BaseWidget, BaseWidgetProps } from './BaseWidget';
 
-export interface LinkProps extends BaseWidgetProps {
+export interface LinkProps {
   link: LinkModel;
   diagramEngine: DiagramEngine;
   children?: any;
@@ -11,17 +12,18 @@ export interface LinkProps extends BaseWidgetProps {
 /**
  * @author Dylan Vorster
  */
-export class LinkWidget extends BaseWidget<LinkProps> {
-  constructor(props: LinkProps) {
-    super('srd-link', props);
-    this.state = {};
-  }
-
+export class LinkWidget extends React.Component<LinkProps> {
   shouldComponentUpdate() {
     return this.props.diagramEngine.canEntityRepaint(this.props.link);
   }
 
   render() {
-    return this.props.children;
+    return (
+      <div
+        className={cx('srd-link', { '--selected': this.props.link.selected })}
+      >
+        {this.props.children}
+      </div>
+    );
   }
 }

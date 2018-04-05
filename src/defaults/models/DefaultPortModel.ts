@@ -5,45 +5,57 @@ import { DefaultLinkModel } from './DefaultLinkModel';
 import { LinkModel } from '../../models/LinkModel';
 
 export class DefaultPortModel extends PortModel {
-  in: boolean;
-  label: string;
-  links: { [id: string]: DefaultLinkModel } = {};
+  private _in: boolean;
+  private _label: string;
 
   constructor(isInput: boolean, name: string, label: string | null = null, id?: string) {
-    super(name, 'default', id);
-    this.in = isInput;
-    this.label = label || name;
+    super(name, 'default', -1, id);
+    this._in = isInput;
+    this._label = label || name;
   }
 
   deSerialize(object: any, engine: DiagramEngine) {
     super.deSerialize(object, engine);
-    this.in = object.in;
-    this.label = object.label;
+    this._in = object.in;
+    this._label = object.label;
   }
 
   serialize() {
     return _.merge(super.serialize(), {
-      in: this.in,
-      label: this.label
+      in: this._in,
+      label: this._label
     });
   }
 
-  link(port: PortModel): LinkModel {
+  link(port: PortModel): LinkModel | null {
     const link = this.createLinkModel();
-    link.setSourcePort(this);
-    link.setTargetPort(port);
-    return link;
+    if (link) {
+      link.sourcePort = this;
+      link.targetPort = port;
+      return link;
+    }
+    return null;
   }
 
   canLinkToPort(port: PortModel): boolean {
     if (port instanceof DefaultPortModel) {
-      return this.in !== port.in;
+      return this._in !== port._in;
     }
     return true;
   }
 
-  createLinkModel(): LinkModel {
-    const link = super.createLinkModel();
-    return link || new DefaultLinkModel();
+  createLinkModel(): LinkModel | null {
+    if (this.canCreateLink()) {
+      return new DefaultLinkModel();
+    }
+    return null;
+  }
+
+  get in(): boolean {
+    return this._in;
+  }
+
+  get label(): string {
+    return this._label;
   }
 }

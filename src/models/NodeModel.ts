@@ -4,11 +4,11 @@ import * as _ from 'lodash';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
 
-export class NodeModel extends BaseModel<DiagramModel, BaseModelListener> {
+export class NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel, BaseModelListener> {
   private _x: number = 0;
   private _y: number = 0;
   private _extras: { [s: string]: any } = {};
-  private _ports: Map<string, PortModel> = new Map();
+  private _ports: Map<string, P> = new Map();
 
   // calculated post rendering so routing can be done correctly
   private _width: number = -1;
@@ -49,11 +49,13 @@ export class NodeModel extends BaseModel<DiagramModel, BaseModelListener> {
     this._extras = ob.extras;
 
     // deserialize ports
-    _.forEach(ob.ports, (port: any) => {
-      const portOb = engine.getPortFactory(port.type).getNewInstance();
-      portOb.deSerialize(port, engine);
-      this.addPort(portOb);
-    });
+    if (ob.ports) {
+      ob.ports.forEach((port: any) => {
+        const portOb = engine.getPortFactory(port.type).getNewInstance() as P;
+        portOb.deSerialize(port, engine);
+        this.addPort(portOb);
+      });
+    }
   }
 
   serialize() {
@@ -79,11 +81,11 @@ export class NodeModel extends BaseModel<DiagramModel, BaseModelListener> {
     });
   }
 
-  getPortFromID(id: string): PortModel | undefined {
+  getPortFromID(id: string): P | undefined {
     return this._ports.get(id);
   }
 
-  get ports(): Map<string, PortModel> {
+  get ports(): Map<string, P> {
     return this._ports;
   }
 
@@ -95,6 +97,22 @@ export class NodeModel extends BaseModel<DiagramModel, BaseModelListener> {
     return this._height;
   }
 
+  get x(): number {
+    return this._x;
+  }
+
+  set x(x: number) {
+    this._x = x;
+  }
+
+  get y(): number {
+    return this._y;
+  }
+
+  set y(y: number) {
+    this._y = y;
+  }
+
   removePort(port: PortModel) {
     // clear the parent node reference
     const p = this._ports.get(port.id);
@@ -104,7 +122,7 @@ export class NodeModel extends BaseModel<DiagramModel, BaseModelListener> {
     }
   }
 
-  addPort<T extends PortModel>(port: T): T {
+  addPort(port: P): P {
     port.parent = this;
     this._ports.set(port.id, port);
     return port;

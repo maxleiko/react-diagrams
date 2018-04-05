@@ -4,9 +4,8 @@ import { DefaultNodeModel } from '../models/DefaultNodeModel';
 import { DefaultPortModel } from '../models/DefaultPortModel';
 import { DefaultPortLabel } from './DefaultPortLabelWidget';
 import { DiagramEngine } from '../../DiagramEngine';
-import { BaseWidget, BaseWidgetProps } from '../../widgets/BaseWidget';
 
-export interface DefaultNodeProps extends BaseWidgetProps {
+export interface DefaultNodeProps {
   node: DefaultNodeModel;
   diagramEngine: DiagramEngine;
 }
@@ -14,11 +13,7 @@ export interface DefaultNodeProps extends BaseWidgetProps {
 /**
  * @author Dylan Vorster
  */
-export class DefaultNodeWidget extends BaseWidget<DefaultNodeProps> {
-  constructor(props: DefaultNodeProps) {
-    super('srd-default-node', props);
-    this.state = {};
-  }
+export class DefaultNodeWidget extends React.Component<DefaultNodeProps> {
 
   generatePort(port: DefaultPortModel) {
     return <DefaultPortLabel model={port} key={port.id} />;
@@ -26,13 +21,13 @@ export class DefaultNodeWidget extends BaseWidget<DefaultNodeProps> {
 
   render() {
     return (
-      <div {...this.getProps()} style={{ background: this.props.node.color }}>
-        <div className={this.bem('__title')}>
-          <div className={this.bem('__name')}>{this.props.node.name}</div>
+      <div {...this.props} className="srd-default-node" style={{ background: this.props.node.color }}>
+        <div className="title">
+          <div className="name">{this.props.node.name}</div>
         </div>
-        <div className={this.bem('__ports')}>
-          <div className={this.bem('__in')}>{_.map(this.props.node.getInPorts(), this.generatePort.bind(this))}</div>
-          <div className={this.bem('__out')}>{_.map(this.props.node.getOutPorts(), this.generatePort.bind(this))}</div>
+        <div className="ports">
+          <div className="in">{_.map(this.props.node.getInPorts(), this.generatePort.bind(this))}</div>
+          <div className="out">{_.map(this.props.node.getOutPorts(), this.generatePort.bind(this))}</div>
         </div>
       </div>
     );

@@ -10,20 +10,25 @@ import { LabelModel } from '../../models/LabelModel';
 
 export interface DefaultLinkModelListener extends LinkModelListener {
   colorChanged?(event: BaseEvent<DefaultLinkModel> & { color: null | string }): void;
-
   widthChanged?(event: BaseEvent<DefaultLinkModel> & { width: 0 | number }): void;
+  curvynessChanged?(event: BaseEvent<DefaultLinkModel> & { curvyness: 0 | number }): void;
 }
 
 export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener> {
-  width: number;
-  color: string;
-  curvyness: number;
+  private _color: string;
+  private _width: number = -1;
+  private _curvyness: number = -1;
 
-  constructor(type: string = 'default') {
+  constructor(
+    type: string = 'default',
+    color: string = 'rgba(255, 255, 255, 0.5)',
+    width: number = 3,
+    curvyness: number = 50
+  ) {
     super(type);
-    this.color = 'rgba(255,255,255,0.5)';
-    this.width = 3;
-    this.curvyness = 50;
+    this._color = color;
+    this._width = width;
+    this._curvyness = curvyness;
   }
 
   serialize() {
@@ -50,8 +55,12 @@ export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener> {
     return super.addLabel(labelOb);
   }
 
-  setWidth(width: number) {
-    this.width = width;
+  get width(): number {
+    return this._width;
+  }
+
+  set width(width: number) {
+    this._width = width;
     this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
       if (listener.widthChanged) {
         listener.widthChanged({ ...event, width });
@@ -59,11 +68,28 @@ export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener> {
     });
   }
 
-  setColor(color: string) {
-    this.color = color;
+  get color(): string {
+    return this._color;
+  }
+
+  set color(color: string) {
+    this._color = color;
     this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
       if (listener.colorChanged) {
         listener.colorChanged({ ...event, color });
+      }
+    });
+  }
+
+  get curvyness(): number {
+    return this._curvyness;
+  }
+
+  set curvyness(curvyness: number) {
+    this._curvyness = curvyness;
+    this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
+      if (listener.curvynessChanged) {
+        listener.curvynessChanged({ ...event, curvyness });
       }
     });
   }

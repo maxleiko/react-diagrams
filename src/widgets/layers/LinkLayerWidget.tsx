@@ -2,10 +2,9 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { DiagramEngine } from '../../DiagramEngine';
 import { PointModel } from '../../models/PointModel';
-import { BaseWidget, BaseWidgetProps } from '../BaseWidget';
 import { LinkWidget } from '../LinkWidget';
 
-export interface LinkLayerProps extends BaseWidgetProps {
+export interface LinkLayerProps {
   diagramEngine: DiagramEngine;
   pointAdded: (point: PointModel, event: MouseEvent) => any;
 }
@@ -13,17 +12,14 @@ export interface LinkLayerProps extends BaseWidgetProps {
 /**
  * @author Dylan Vorster
  */
-export class LinkLayerWidget extends BaseWidget<LinkLayerProps> {
-  constructor(props: LinkLayerProps) {
-    super('srd-link-layer', props);
-    this.state = {};
-  }
+export class LinkLayerWidget extends React.Component<LinkLayerProps> {
 
   render() {
-    const diagramModel = this.props.diagramEngine.getDiagramModel();
+    const diagramModel = this.props.diagramEngine.model;
     return (
       <svg
-        {...this.getProps()}
+        className="srd-link-layer"
+        {...this.props}
         style={{
           transform:
             'translate(' +
@@ -37,7 +33,7 @@ export class LinkLayerWidget extends BaseWidget<LinkLayerProps> {
       >
         {// only perform these actions when we have a diagram
         this.props.diagramEngine.canvas &&
-          _.map(diagramModel.getLinks(), (link) => {
+        Array.from(diagramModel.links.values()).map((link) => {
             if (
               this.props.diagramEngine.nodesRendered &&
               !this.props.diagramEngine.linksThatHaveInitiallyRendered[link.id]
@@ -45,10 +41,14 @@ export class LinkLayerWidget extends BaseWidget<LinkLayerProps> {
               if (link.sourcePort !== null) {
                 try {
                   const portCenter = this.props.diagramEngine.getPortCenter(link.sourcePort);
-                  link.points[0].setPosition(portCenter.x, portCenter.y);
+                  if (portCenter) {
+                    link.points[0].setPosition(portCenter.x, portCenter.y);
+                  }
 
                   const portCoords = this.props.diagramEngine.getPortCoords(link.sourcePort);
-                  link.sourcePort.updateCoords(portCoords);
+                  if (portCoords) {
+                    link.sourcePort.updateCoords(portCoords);
+                  }
 
                   this.props.diagramEngine.linksThatHaveInitiallyRendered[link.id] = true;
                 } catch (ignore) {
@@ -58,12 +58,19 @@ export class LinkLayerWidget extends BaseWidget<LinkLayerProps> {
               if (link.targetPort !== null) {
                 try {
                   const portCenter = this.props.diagramEngine.getPortCenter(link.targetPort);
-                  _.last(link.points).setPosition(portCenter.x, portCenter.y);
-
-                  const portCoords = this.props.diagramEngine.getPortCoords(link.targetPort);
-                  link.targetPort.updateCoords(portCoords);
-
-                  this.props.diagramEngine.linksThatHaveInitiallyRendered[link.id] = true;
+                  if (portCenter) {
+                    const lastPoint = _.last(link.points);
+                    if (lastPoint) {
+                      lastPoint.setPosition(portCenter.x, portCenter.y);
+                    }
+  
+                    const portCoords = this.props.diagramEngine.getPortCoords(link.targetPort);
+                    if (portCoords) {
+                      link.targetPort.updateCoords(portCoords);
+                    }
+  
+                    this.props.diagramEngine.linksThatHaveInitiallyRendered[link.id] = true;
+                  }
                 } catch (ignore) {
                   /*noop*/
                 }
@@ -73,11 +80,11 @@ export class LinkLayerWidget extends BaseWidget<LinkLayerProps> {
             // generate links
             const generatedLink = this.props.diagramEngine.generateWidgetForLink(link);
             if (!generatedLink) {
-              throw new Error(`no link generated for type: ${link.getType()}`);
+              throw new Error(`no link generated for type: ${link.type}`);
             }
 
             return (
-              <LinkWidget key={link.getID()} link={link} diagramEngine={this.props.diagramEngine}>
+              <LinkWidget key={link.id} link={link} diagramEngine={this.props.diagramEngine}>
                 {React.cloneElement(generatedLink, {
                   pointAdded: this.props.pointAdded
                 })}

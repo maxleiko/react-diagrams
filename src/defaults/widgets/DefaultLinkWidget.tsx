@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as cx from 'classnames';
 import { DiagramEngine } from '../../DiagramEngine';
 import { PointModel } from '../../models/PointModel';
 import { Toolkit } from '../../Toolkit';
@@ -7,9 +8,8 @@ import { DefaultLinkModel } from '../models/DefaultLinkModel';
 import { PathFinding } from '../../routing/PathFinding';
 import * as _ from 'lodash';
 import { LabelModel } from '../../models/LabelModel';
-import { BaseWidget, BaseWidgetProps } from '../../widgets/BaseWidget';
 
-export interface DefaultLinkProps extends BaseWidgetProps {
+export interface DefaultLinkProps {
   color?: string;
   width?: number;
   smooth?: boolean;
@@ -22,7 +22,7 @@ export interface DefaultLinkState {
   selected: boolean;
 }
 
-export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkState> {
+export class DefaultLinkWidget extends React.Component<DefaultLinkProps, DefaultLinkState> {
   static defaultProps: Partial<DefaultLinkProps> = {
     color: 'black',
     width: 3,
@@ -36,7 +36,7 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
   pathFinding: PathFinding | null = null; // only set when smart routing is active
 
   constructor(props: DefaultLinkProps) {
-    super('srd-default-link', props);
+    super(props);
 
     this.refLabels = {};
     this.refPaths = [];
@@ -80,7 +80,7 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
       this.props.link.points.length - 1 <= this.props.diagramEngine.getMaxNumberPointsPerLink()
     ) {
       const point = new PointModel(this.props.link, this.props.diagramEngine.getRelativeMousePoint(event));
-      point.setSelected(true);
+      point.selected = true;
       this.forceUpdate();
       this.props.link.addPoint(point, index);
       if (this.props.pointAdded) {
@@ -107,11 +107,11 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
           cx={x}
           cy={y}
           r={5}
-          className={
-            'point ' +
-            this.bem('__point') +
-            (this.props.link.points[pointIndex].isSelected() ? this.bem('--point-selected') : '')
-          }
+          className={cx(
+            'point',
+            '__point',
+            { '--point-selected': this.props.link.points[pointIndex].selected }
+          )}
         />
         <circle
           onMouseEnter={this.select}
@@ -122,7 +122,7 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
           cy={y}
           r={15}
           opacity={0}
-          className={'point ' + this.bem('__point')}
+          className="point __point"
         />
       </g>
     );
@@ -135,7 +135,7 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
       return (
         <foreignObject
           key={label.id}
-          className={this.bem('__label')}
+          className="__label"
           width={canvas.offsetWidth}
           height={canvas.offsetHeight}
         >
@@ -155,7 +155,7 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
       (props.diagramEngine.getFactoryForLink(this.props.link) as DefaultLinkFactory).generateLinkSegment(
         this.props.link,
         this,
-        this.state.selected || this.props.link.isSelected(),
+        this.state.selected || this.props.link.selected,
         path
       ),
       {
@@ -173,7 +173,7 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
         this.setState({ selected: true });
       },
       ref: null,
-      'data-linkid': this.props.link.getID(),
+      'data-linkid': this.props.link.id,
       strokeOpacity: this.state.selected ? 0.1 : 0,
       strokeWidth: 20,
       onContextMenu: (event: React.MouseEvent<any>) => {
@@ -373,7 +373,7 @@ export class DefaultLinkWidget extends BaseWidget<DefaultLinkProps, DefaultLinkS
 
     this.refPaths = [];
     return (
-      <g {...this.getProps()}>
+      <g {...this.props} className="srd-default-link">
         {paths}
         {_.map(this.props.link.labels, (labelModel) => {
           return this.generateLabel(labelModel);

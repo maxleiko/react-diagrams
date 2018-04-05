@@ -28,8 +28,8 @@ export class LinkModel<T extends LinkModelListener = LinkModelListener> extends 
 
   deSerialize(ob: any, engine: DiagramEngine) {
     super.deSerialize(ob, engine);
-    this.extras = ob.extras;
-    this.points = _.map(ob.points || [], (point: { x: number; y: number }) => {
+    this._extras = ob.extras;
+    this._points = _.map(ob.points || [], (point: { x: number; y: number }) => {
       const p = new PointModel(this, { x: point.x, y: point.y });
       p.deSerialize(point, engine);
       return p;
@@ -43,109 +43,121 @@ export class LinkModel<T extends LinkModelListener = LinkModelListener> extends 
     });
 
     if (ob.target) {
-      const node = this.getParent().getNode(ob.target);
-      if (node) {
-        this.setTargetPort(node.getPortFromID(ob.targetPort));
+      if (this.parent) {
+        const node = this.parent.getNode(ob.target);
+        if (node) {
+          const port = node.getPortFromID(ob.targetPort);
+          if (port) {
+            this._targetPort = port;
+          }
+        }
       }
     }
 
     if (ob.source) {
-      const node = this.getParent().getNode(ob.source);
-      if (node) {
-        this.setSourcePort(node.getPortFromID(ob.sourcePort));
+      if (this.parent) {
+        const node = this.parent.getNode(ob.source);
+        if (node) {
+          const port = node.getPortFromID(ob.sourcePort);
+          if (port) {
+            this._sourcePort = port;
+          }
+        }
       }
     }
   }
 
   serialize() {
     return _.merge(super.serialize(), {
-      source: this.sourcePort ? this.sourcePort.getParent().id : null,
-      sourcePort: this.sourcePort ? this.sourcePort.id : null,
-      target: this.targetPort ? this.targetPort.getParent().id : null,
-      targetPort: this.targetPort ? this.targetPort.id : null,
-      points: _.map(this.points, (point) => {
+      source: this._sourcePort ? (this._sourcePort.parent ? this._sourcePort.parent.id : null) : null,
+      sourcePort: this._sourcePort ? this._sourcePort.id : null,
+      target: this._targetPort ? (this._targetPort.parent ? this._targetPort.parent.id : null) : null,
+      targetPort: this._targetPort ? this._targetPort.id : null,
+      points: _.map(this._points, (point) => {
         return point.serialize();
       }),
-      extras: this.extras,
-      labels: _.map(this.labels, (label) => {
-        return label.serialize();
-      })
+      extras: this._extras,
+      labels: this._labels.map((label) => label.serialize())
     });
   }
 
   doClone(lookupTable: any = {}, clone: any) {
-    clone.setPoints(
-      _.map(this.getPoints(), (point: PointModel) => {
-        return point.clone(lookupTable);
-      })
-    );
-    if (this.sourcePort) {
-      clone.setSourcePort(this.sourcePort.clone(lookupTable));
+    clone.points = this._points.map((point) => point.clone(lookupTable));
+    if (this._sourcePort) {
+      clone.setSourcePort(this._sourcePort.clone(lookupTable));
     }
-    if (this.targetPort) {
-      clone.setTargetPort(this.targetPort.clone(lookupTable));
+    if (this._targetPort) {
+      clone.setTargetPort(this._targetPort.clone(lookupTable));
     }
   }
 
   remove() {
-    if (this.sourcePort) {
-      this.sourcePort.removeLink(this);
+    if (this._sourcePort) {
+      this._sourcePort.removeLink(this);
     }
-    if (this.targetPort) {
-      this.targetPort.removeLink(this);
+    if (this._targetPort) {
+      this._targetPort.removeLink(this);
     }
     super.remove();
   }
 
   isLastPoint(point: PointModel) {
     const index = this.getPointIndex(point);
-    return index === this.points.length - 1;
+    return index === this._points.length - 1;
   }
 
   getPointIndex(point: PointModel) {
-    return this.points.indexOf(point);
+    return this._points.indexOf(point);
   }
 
   getPointModel(id: string): PointModel | undefined {
-    return this.points.find((pt) => pt.id === id);
+    return this._points.find((pt) => pt.id === id);
   }
 
   getPortForPoint(point: PointModel): PortModel | null {
-    if (this.sourcePort !== null && this.getFirstPoint().getID() === point.getID()) {
-      return this.sourcePort;
+    if (this._sourcePort !== null && this.getFirstPoint().id === point.id) {
+      return this._sourcePort;
     }
-    if (this.targetPort !== null && this.getLastPoint().getID() === point.getID()) {
-      return this.targetPort;
+    if (this._targetPort !== null && this.getLastPoint().id === point.id) {
+      return this._targetPort;
     }
     return null;
   }
 
   getPointForPort(port: PortModel): PointModel | null {
-    if (this.sourcePort !== null && this.sourcePort.getID() === port.getID()) {
+    if (this._sourcePort !== null && this._sourcePort.id === port.id) {
       return this.getFirstPoint();
     }
-    if (this.targetPort !== null && this.targetPort.getID() === port.getID()) {
+    if (this._targetPort !== null && this._targetPort.id === port.id) {
       return this.getLastPoint();
     }
     return null;
   }
 
   getFirstPoint(): PointModel {
-    return this.points[0];
+    return this._points[0];
   }
 
   getLastPoint(): PointModel {
-    return this.points[this.points.length - 1];
+    return this._points[this._points.length - 1];
   }
 
-  setSourcePort(port: PortModel | null) {
+  get labels(): LabelModel[] {
+    return this._labels;
+  }
+
+  get sourcePort(): PortModel | null {
+    return this._sourcePort;
+  }
+
+  set sourcePort(port: PortModel | null) {
     if (port !== null) {
       port.addLink(this);
     }
-    if (this.sourcePort !== null) {
-      this.sourcePort.removeLink(this);
+    if (this._sourcePort !== null) {
+      this._sourcePort.removeLink(this);
     }
-    this.sourcePort = port;
+    this._sourcePort = port;
     this.iterateListeners((listener: LinkModelListener, event) => {
       if (listener.sourcePortChanged) {
         listener.sourcePortChanged({ ...event, port });
@@ -153,22 +165,18 @@ export class LinkModel<T extends LinkModelListener = LinkModelListener> extends 
     });
   }
 
-  getSourcePort(): PortModel | null {
-    return this.sourcePort;
+  get targetPort(): PortModel | null {
+    return this._targetPort;
   }
 
-  getTargetPort(): PortModel | null {
-    return this.targetPort;
-  }
-
-  setTargetPort(port: PortModel | null) {
+  set targetPort(port: PortModel | null) {
     if (port !== null) {
       port.addLink(this);
     }
     if (this.targetPort !== null) {
       this.targetPort.removeLink(this);
     }
-    this.targetPort = port;
+    this._targetPort = port;
     this.iterateListeners((listener: LinkModelListener, event) => {
       if (listener.targetPortChanged) {
         listener.targetPortChanged({ ...event, port });
@@ -181,42 +189,40 @@ export class LinkModel<T extends LinkModelListener = LinkModelListener> extends 
   }
 
   addLabel(label: LabelModel) {
-    label.setParent(this);
-    this.labels.push(label);
+    label.parent = this;
+    this._labels.push(label);
   }
 
-  getPoints(): PointModel[] {
-    return this.points;
+  get points(): PointModel[] {
+    return this._points;
   }
 
-  setPoints(points: PointModel[]) {
-    _.forEach(points, (point) => {
-      point.setParent(this);
-    });
-    this.points = points;
+  set points(points: PointModel[]) {
+    this._points = points;
+    this._points.forEach((point) => point.parent = this);
   }
 
   removePoint(pointModel: PointModel) {
-    this.points.splice(this.getPointIndex(pointModel), 1);
+    this._points.splice(this.getPointIndex(pointModel), 1);
   }
 
   removePointsBefore(pointModel: PointModel) {
-    this.points.splice(0, this.getPointIndex(pointModel));
+    this._points.splice(0, this.getPointIndex(pointModel));
   }
 
   removePointsAfter(pointModel: PointModel) {
-    this.points.splice(this.getPointIndex(pointModel) + 1);
+    this._points.splice(this.getPointIndex(pointModel) + 1);
   }
 
   removeMiddlePoints() {
-    if (this.points.length > 2) {
-      this.points.splice(0, this.points.length - 2);
+    if (this._points.length > 2) {
+      this._points.splice(0, this._points.length - 2);
     }
   }
 
   addPoint<P extends PointModel>(pointModel: P, index: number = 1): P {
-    pointModel.setParent(this);
-    this.points.splice(index, 0, pointModel);
+    pointModel.parent = this;
+    this._points.splice(index, 0, pointModel);
     return pointModel;
   }
 

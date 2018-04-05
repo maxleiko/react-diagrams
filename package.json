@@ -34,11 +34,13 @@
 		"prepublishOnly": "yarn run build"
 	},
 	"dependencies": {
+		"@types/classnames": "^2.2.3",
+		"classnames": "^2.2.5",
 		"closest": "^0.0.1",
 		"lodash": "^4.17.5",
 		"pathfinding": "^0.4.18",
 		"paths-js": "^0.4.7",
-		"react": "^16.2.0"
+		"react": "^16.3.1"
 	},
 	"devDependencies": {
 		"@storybook/addon-actions": "^3.3.15",
@@ -52,7 +54,7 @@
 		"@types/node": "^9.4.7",
 		"@types/promise": "^7.1.30",
 		"@types/puppeteer": "^1.1.0",
-		"@types/react": "^16.0.40",
+		"@types/react": "^16.3.5",
 		"awesome-typescript-loader": "^4.0.1",
 		"copy-webpack-plugin": "^4.5.1",
 		"cross-env": "^5.1.4",

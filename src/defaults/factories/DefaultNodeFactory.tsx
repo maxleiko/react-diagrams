@@ -1,5 +1,5 @@
-import { DefaultNodeModel } from '../models/DefaultNodeModel';
 import * as React from 'react';
+import { DefaultNodeModel } from '../models/DefaultNodeModel';
 import { DefaultNodeWidget } from '../widgets/DefaultNodeWidget';
 import { DiagramEngine } from '../../DiagramEngine';
 import { AbstractNodeFactory } from '../../factories/AbstractNodeFactory';
@@ -12,10 +12,7 @@ export class DefaultNodeFactory extends AbstractNodeFactory<DefaultNodeModel> {
   }
 
   generateReactWidget(diagramEngine: DiagramEngine, node: DefaultNodeModel): JSX.Element {
-    return React.createElement(DefaultNodeWidget, {
-      node,
-      diagramEngine
-    });
+    return <DefaultNodeWidget node={node} diagramEngine={diagramEngine} />;
   }
 
   getNewInstance(_initialConfig?: any): DefaultNodeModel {
