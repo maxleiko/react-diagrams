@@ -3,7 +3,6 @@ import * as cx from 'classnames';
 import { DiagramEngine } from '../../DiagramEngine';
 import { PointModel } from '../../models/PointModel';
 import { Toolkit } from '../../Toolkit';
-import { DefaultLinkFactory } from '../factories/DefaultLinkFactory';
 import { DefaultLinkModel } from '../models/DefaultLinkModel';
 import { PathFinding } from '../../routing/PathFinding';
 import * as _ from 'lodash';
@@ -108,21 +107,19 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps, Default
           cy={y}
           r={5}
           className={cx(
-            'point',
-            '__point',
-            { '--point-selected': this.props.link.points[pointIndex].selected }
+            'srd-point',
+            { selected: this.props.link.points[pointIndex].selected }
           )}
         />
         <circle
           onMouseEnter={this.select}
           onMouseLeave={this.unselect}
-          data-id={this.props.link.points[pointIndex].id}
-          data-linkid={this.props.link.id}
+          srd-id={this.props.link.points[pointIndex].id}
           cx={x}
           cy={y}
           r={15}
           opacity={0}
-          className="point __point"
+          className="srd-point"
         />
       </g>
     );
@@ -135,7 +132,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps, Default
       return (
         <foreignObject
           key={label.id}
-          className="__label"
+          className="label"
           width={canvas.offsetWidth}
           height={canvas.offsetHeight}
         >
@@ -150,19 +147,9 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps, Default
 
   generateLink(path: string, extraProps: any, id: string | number): JSX.Element {
     const props = this.props;
-
-    const Bottom = React.cloneElement(
-      (props.diagramEngine.getFactoryForLink(this.props.link) as DefaultLinkFactory).generateLinkSegment(
-        this.props.link,
-        this,
-        this.state.selected || this.props.link.selected,
-        path
-      ),
-      {
-        ref: (ref: any) => ref && this.refPaths.push(ref)
-      }
-    );
-
+    const factory = props.diagramEngine.getFactoryForLink(this.props.link);
+    const linkEl = factory.generateLinkSegment(this.props.link, this.state.selected || this.props.link.selected, path);
+    const Bottom = React.cloneElement(linkEl, { ref: (ref: any) => ref && this.refPaths.push(ref) });
     const Top = React.cloneElement(Bottom, {
       ...extraProps,
       strokeLinecap: 'round',
@@ -173,7 +160,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps, Default
         this.setState({ selected: true });
       },
       ref: null,
-      'data-linkid': this.props.link.id,
+      'srd-id': this.props.link.id,
       strokeOpacity: this.state.selected ? 0.1 : 0,
       strokeWidth: 20,
       onContextMenu: (event: React.MouseEvent<any>) => {
@@ -317,22 +304,9 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps, Default
     // See @link{#isSmartRoutingApplicable()}.
     if (paths.length === 0) {
       if (points.length === 2) {
-        const isHorizontal = Math.abs(points[0].x - points[1].x) > Math.abs(points[0].y - points[1].y);
-        const xOrY = isHorizontal ? 'x' : 'y';
-
-        let pointLeft = points[0];
-        let pointRight = points[1];
-
-        // some defensive programming to make sure the smoothing is
-        // always in the right direction
-        if (pointLeft[xOrY] > pointRight[xOrY]) {
-          pointLeft = points[1];
-          pointRight = points[0];
-        }
-
         paths.push(
           this.generateLink(
-            Toolkit.generateCurvePath(pointLeft, pointRight, this.props.link.curvyness),
+            Toolkit.generateCurvePath(points[0], points[1], this.props.link.curvyness),
             { onMouseDown: (event: React.MouseEvent<any>) => this.addPointToLink(event, 1) },
             '0'
           )
@@ -349,7 +323,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps, Default
             this.generateLink(
               Toolkit.generateLinePath(points[j], points[j + 1]),
               {
-                'data-linkid': this.props.link.id,
+                'srd-id': this.props.link.id,
                 'data-point': j,
                 onMouseDown: (event: React.MouseEvent<any>) => {
                   this.addPointToLink(event, j + 1);
@@ -373,11 +347,9 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps, Default
 
     this.refPaths = [];
     return (
-      <g {...this.props} className="srd-default-link">
+      <g className="srd-default-link">
         {paths}
-        {_.map(this.props.link.labels, (labelModel) => {
-          return this.generateLabel(labelModel);
-        })}
+        {this.props.link.labels.map((labelModel) => this.generateLabel(labelModel))}
       </g>
     );
   }

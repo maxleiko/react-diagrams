@@ -20,7 +20,7 @@ glob.glob(__dirname + "/../../demos/demo-*/index.tsx", {}, (err, files) => {
 			new CopyWebpackPlugin(copy)
 		],
 		output: {
-			filename: '[name]/main.js',
+			filename: '[name]/index.js',
 			path: __dirname + '/../../dist/e2e',
 		},
 		module: {
@@ -32,7 +32,7 @@ glob.glob(__dirname + "/../../demos/demo-*/index.tsx", {}, (err, files) => {
 		resolve: {
 			...config.resolve,
 			alias: {
-				'storm-react-diagrams': path.join(__dirname, "..", "..", "src", "main")
+				'storm-react-diagrams': path.join(__dirname, "..", "..", "src", "index")
 			}
 		},
 	};

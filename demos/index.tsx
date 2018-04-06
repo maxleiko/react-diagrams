@@ -100,4 +100,3 @@ storiesOf('3rd party libraries', module).add(
 );
 
 // enable this to log mouse location when writing new puppeteer tests
-//Helper.logMousePosition()

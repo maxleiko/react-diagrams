@@ -1,13 +1,7 @@
 import * as React from 'react';
 // @ts-ignore
 import { action } from '@storybook/addon-actions';
-import {
-  DiagramEngine,
-  DiagramModel,
-  DiagramProps,
-  DefaultNodeModel,
-  DiagramWidget
-} from 'storm-react-diagrams';
+import { DiagramEngine, DiagramModel, DiagramProps, DefaultNodeModel, DiagramWidget } from 'storm-react-diagrams';
 
 /**
  * Shows some of the events triggered when elements are selected
@@ -60,17 +54,15 @@ export default () => {
 
   return (
     <div>
-      <p>
-        To see the possible events you can:
-        <ul>
-          <li>select a node</li>
-          <li>move a node</li>
-          <li>
-            <code>Del</code> a selected node or link
-          </li>
-          <li>create a link between ports</li>
-        </ul>
-      </p>
+      <p>To see the possible events you can:</p>
+      <ul>
+        <li>select a node</li>
+        <li>move a node</li>
+        <li>
+          <code>Del</code> a selected node or link
+        </li>
+        <li>create a link between ports</li>
+      </ul>
       <DiagramWidget className="srd-demo-canvas" {...props} />
     </div>
   );

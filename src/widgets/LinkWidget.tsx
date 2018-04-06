@@ -6,7 +6,6 @@ import { LinkModel } from '../models/LinkModel';
 export interface LinkProps {
   link: LinkModel;
   diagramEngine: DiagramEngine;
-  children?: any;
 }
 
 /**
@@ -19,11 +18,12 @@ export class LinkWidget extends React.Component<LinkProps> {
 
   render() {
     return (
-      <div
-        className={cx('srd-link', { '--selected': this.props.link.selected })}
+      <g
+        srd-id={this.props.link.id}
+        className={cx('srd-link', { 'selected': this.props.link.selected })}
       >
         {this.props.children}
-      </div>
+      </g>
     );
   }
 }

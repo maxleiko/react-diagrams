@@ -26,14 +26,13 @@ export class BaseModel<
   }
 
   get locked(): boolean {
-    if (this.locked) {
-      return true;
-    }
-    // if current element is not locked, check-out in parent
     if (this._parent) {
-      return this._parent.locked;
+      if (this._parent.locked) {
+        // check if parent is locked first
+        return true;
+      }
     }
-    return false;
+    return this._locked;
   }
 
   get parent(): P | null {

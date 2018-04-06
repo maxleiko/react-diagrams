@@ -19,7 +19,7 @@ export * from './defaults/factories/DefaultLabelFactory';
 export * from './defaults/widgets/DefaultLinkWidget';
 export * from './defaults/widgets/DefaultLabelWidget';
 export * from './defaults/widgets/DefaultNodeWidget';
-export * from './defaults/widgets/DefaultPortLabelWidget';
+export * from './defaults/widgets/DefaultPortWidget';
 
 export * from './factories/AbstractFactory';
 export * from './factories/AbstractLabelFactory';

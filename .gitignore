@@ -1,9 +1,9 @@
-dist/
-dist/main.js
-dist/main.js.map
+dist
+dist
 /package
 *.tgz
 build/
+@types
 
 .out
 

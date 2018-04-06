@@ -89,13 +89,13 @@ export class E2ELink extends E2EElement {
 
   async exists(): Promise<boolean> {
     return await this.page.evaluate((id) => {
-      return !!document.querySelector(`path[data-linkid="${id}"]`);
+      return !!document.querySelector(`path[srd-id="${id}"]`);
     }, this.id);
   }
 
   async select(): Promise<any> {
     const point = await this.page.evaluate((id) => {
-      const path = document.querySelector(`path[data-linkid="${id}"]`) as SVGPathElement;
+      const path = document.querySelector(`path[srd-id="${id}"]`) as SVGPathElement;
       return path.getPointAtLength(path.getTotalLength() / 2);
     }, this.id);
     await this.page.keyboard.down('Shift');
@@ -113,12 +113,12 @@ export class E2EHelper {
   }
 
   async link(id: any): Promise<E2ELink> {
-    const selector = await this.page.waitForSelector(`path[data-linkid="${id}"]`);
+    const selector = await this.page.waitForSelector(`.srd-link[srd-id="${id}"]`);
     return new E2ELink(this, this.page, selector, id);
   }
 
   async node(id: any): Promise<E2ENode> {
-    const selector = await this.page.waitForSelector(`div[data-nodeid="${id}"]`);
+    const selector = await this.page.waitForSelector(`.srd-node[srd-id="${id}"]`);
     return new E2ENode(this, this.page, selector, id);
   }
 }

@@ -22,32 +22,17 @@ export class NodeLayerWidget extends React.Component<NodeLayerProps> {
   }
 
   render() {
-    const diagramModel = this.props.diagramEngine.model;
+    const { nodes, offsetX, offsetY, zoom } = this.props.diagramEngine.model;
     return (
       <div
         className="srd-node-layer"
-        style={{
-          transform:
-            'translate(' +
-            diagramModel.getOffsetX() +
-            'px,' +
-            diagramModel.getOffsetY() +
-            'px) scale(' +
-            diagramModel.getZoomLevel() / 100.0 +
-            ')'
-        }}
+        style={{ transform: `translate(${offsetX}px, ${offsetY}px) scale(${zoom / 100.0})` }}
       >
-        {Array.from(diagramModel.nodes.values()).map((node) => {
-          return React.createElement(
-            NodeWidget,
-            {
-              diagramEngine: this.props.diagramEngine,
-              key: node.id,
-              node
-            },
-            this.props.diagramEngine.generateWidgetForNode(node)
-          );
-        })}
+        {Array.from(nodes.values()).map((node) => (
+          <NodeWidget key={node.id} node={node}>
+            {this.props.diagramEngine.generateWidgetForNode(node)}
+          </NodeWidget>
+        ))}
       </div>
     );
   }

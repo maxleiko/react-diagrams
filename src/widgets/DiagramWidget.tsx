@@ -58,8 +58,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
 
   constructor(props: DiagramProps) {
     super(props);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
     this.state = {
       action: null,
       wasMoved: false,
@@ -68,16 +66,21 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       diagramEngineListener: null,
       document: null
     };
-  }
 
-  onKeyUpPointer: (this: Window, ev: KeyboardEvent) => void = () => null;
+    this.onWheel = this.onWheel.bind(this);
+    this.onKeyUp = this.onKeyUp.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
+    this.pointAdded = this.pointAdded.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+  }
 
   componentWillUnmount() {
     this.props.diagramEngine.removeListener(this.state.diagramEngineListener);
     this.props.diagramEngine.canvas = null;
-    window.removeEventListener('keyup', this.onKeyUpPointer);
     window.removeEventListener('mouseup', this.onMouseUp);
     window.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('keyup', this.onKeyUp);
   }
 
   componentWillReceiveProps(nextProps: DiagramProps) {
@@ -110,9 +113,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   }
 
   componentDidMount() {
-    this.onKeyUpPointer = this.onKeyUp.bind(this);
-
     // add a keyboard listener
+    window.addEventListener('keyup', this.onKeyUp);
+
     this.setState({
       document,
       renderedNodes: true,
@@ -123,8 +126,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       })
     });
 
-    window.addEventListener('keyup', this.onKeyUpPointer, false);
-
     // dont focus the window when in test mode - jsdom fails
     if (process.env.NODE_ENV !== 'test') {
       window.focus();
@@ -134,68 +135,68 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   /**
    * Gets a model and element under the mouse cursor
    */
-  getMouseEvent(event: MouseEvent): { model: BaseModel<BaseEntity, BaseModelListener>; element: Element } | null {
+  getModelAtPosition(event: MouseEvent): BaseModel<BaseEntity, BaseModelListener> | undefined {
     const target = event.target as Element;
     const model = this.props.diagramEngine.model;
 
-    // is it a port
-    let element = Toolkit.closest(target, '.port[data-name]');
+    // look for a port
+    let element = Toolkit.closest(target, '.srd-port[srd-id]');
     if (element) {
-      const nodeElement = Toolkit.closest(target, '.node[data-nodeid]') as HTMLElement;
-      const nodeElId = nodeElement.getAttribute('data-nodeid');
-      const portElName = nodeElement.getAttribute('data-name');
-      if (nodeElId && portElName) {
-        const node = model.getNode(nodeElId);
+      const nodeElement = Toolkit.closest(target, '.srd-node[srd-id]');
+      const nodeId = nodeElement.getAttribute('srd-id');
+      const portId = element.getAttribute('srd-id');
+      if (nodeId && portId) {
+        const node = model.getNode(nodeId);
         if (node) {
-          const port = node.ports.get(portElName);
+          const port = node.getPortFromID(portId);
           if (port) {
-            return { element, model: port };
+            return port;
           }
         }
       }
     }
 
     // look for a point
-    element = Toolkit.closest(target, '.point[data-id]');
+    element = Toolkit.closest(target, '.srd-point[srd-id]');
     if (element) {
-      const linkId = element.getAttribute('data-linkid');
-      const pointId = element.getAttribute('data-id');
+      const linkId = element.getAttribute('srd-id');
+      const pointId = element.getAttribute('srd-id');
       if (linkId && pointId) {
         const link = model.getLink(linkId);
         if (link) {
           const point = link.getPointModel(pointId);
           if (point) {
-            return { element, model: point };
+            return point;
           }
         }
       }
     }
 
     // look for a link
-    element = Toolkit.closest(target, '[data-linkid]');
+    element = Toolkit.closest(target, '.srd-link[srd-id]');
     if (element) {
-      const linkId = element.getAttribute('data-linkid');
+      const linkId = element.getAttribute('srd-id');
       if (linkId) {
         const link = model.getLink(linkId);
         if (link) {
-          return { element, model: link };
+          return link;
         }
       }
     }
 
     // look for a node
-    element = Toolkit.closest(target, '.node[data-nodeid]');
+    element = Toolkit.closest(target, '.srd-node[srd-id]');
     if (element) {
-      const nodeId = element.getAttribute('data-nodeid');
+      const nodeId = element.getAttribute('srd-id');
       if (nodeId) {
         const node = model.getNode(nodeId);
         if (node) {
-          return { element, model: node };
+          return node;
         }
       }
     }
 
-    return null;
+    return;
   }
 
   fireAction() {
@@ -226,10 +227,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   onMouseMove(event: MouseEvent) {
     const engine = this.props.diagramEngine;
     const model = engine.model;
-    // select items so draw a bounding box
     if (this.state.action instanceof SelectingAction) {
-      const relative = engine.getRelativePoint(event.clientX, event.clientY);
-
       model.nodes.forEach((node) => {
         if ((this.state.action as SelectingAction).containsElement(node.x, node.y, model)) {
           node.selected = true;
@@ -251,18 +249,17 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         }
       });
 
+      const relative = engine.getRelativePoint(event.clientX, event.clientY);
       this.state.action.mouseX2 = relative.x;
       this.state.action.mouseY2 = relative.y;
 
       this.fireAction();
       this.setState({ action: this.state.action });
-      return;
     } else if (this.state.action instanceof MoveItemsAction) {
       const amountX = event.clientX - this.state.action.mouseX;
       const amountY = event.clientY - this.state.action.mouseY;
-      const amountZoom = model.getZoomLevel() / 100;
-
-      _.forEach(this.state.action.selectionModels, (selModel) => {
+      const amountZoom = model.zoom / 100;
+      this.state.action.selectionModels.forEach((selModel) => {
         // in this case we need to also work out the relative grid position
         if (
           selModel.model instanceof NodeModel ||
@@ -271,14 +268,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           const x = model.getGridPosition(selModel.initialX + amountX / amountZoom);
           const y = model.getGridPosition(selModel.initialY + amountY / amountZoom);
           selModel.model.setPosition(x, y);
-
-          // update port coordinates as well
-          // if (model.model instanceof NodeModel) {
-          // 	_.forEach(model.model.getPorts(), port => {
-          // 		const portCoords = this.props.diagramEngine.getPortCoords(port);
-          // 		port.updateCoords(portCoords);
-          // 	});
-          // }
 
           if (engine.isSmartRoutingEnabled()) {
             engine.calculateRoutingMatrix();
@@ -314,10 +303,10 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     }
   }
 
-  onKeyUp(event: React.KeyboardEvent<HTMLDivElement>) {
+  onKeyUp(event: KeyboardEvent) {
     // delete all selected
     if (this.props.deleteKeys!.indexOf(event.keyCode) !== -1) {
-      _.forEach(this.props.diagramEngine.model.getSelectedItems(), (element) => {
+      this.props.diagramEngine.model.getSelectedItems().forEach((element) => {
         // only delete items which are not locked
         if (!this.props.diagramEngine.isModelLocked(element)) {
           element.remove();
@@ -331,23 +320,23 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     const diagramEngine = this.props.diagramEngine;
     // are we going to connect a link to something?
     if (this.state.action instanceof MoveItemsAction) {
-      const element = this.getMouseEvent(event);
+      const elModel = this.getModelAtPosition(event);
       _.forEach(this.state.action.selectionModels, (model) => {
         // only care about points connecting to things
         if (!(model.model instanceof PointModel)) {
           return;
         }
-        if (element && element.model instanceof PortModel && !diagramEngine.isModelLocked(element.model)) {
+        if (elModel && elModel instanceof PortModel && !diagramEngine.isModelLocked(elModel)) {
           const link = model.model.parent!;
           if (link.targetPort !== null) {
             // if this was a valid link already and we are adding a node in the middle, create 2 links from the original
-            if (link.targetPort !== element.model && link.sourcePort !== element.model) {
+            if (link.targetPort !== elModel && link.sourcePort !== elModel) {
               const targetPort = link.targetPort;
               if (targetPort) {
                 const newLink = link.clone({});
-                newLink.setSourcePort(element.model);
+                newLink.setSourcePort(elModel);
                 newLink.setTargetPort(targetPort);
-                link.targetPort = element.model;
+                link.targetPort = elModel;
                 targetPort.removeLink(link);
                 newLink.removePointsBefore(newLink.getPoints()[link.getPointIndex(model.model)]);
                 link.removePointsAfter(model.model);
@@ -356,17 +345,17 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
                 // TODO ?? what do we do if targetPort is null
               }
               // if we are connecting to the same target or source, remove tweener points
-            } else if (link.targetPort === element.model) {
+            } else if (link.targetPort === elModel) {
               link.removePointsAfter(model.model);
-            } else if (link.sourcePort === element.model) {
+            } else if (link.sourcePort === elModel) {
               link.removePointsBefore(model.model);
             }
           } else {
             // if we are just clicking on a port, then remove the link
-            if (link.sourcePort === element.model) {
+            if (link.sourcePort === elModel) {
               link.remove();
             } else {
-              link.targetPort = element.model;
+              link.targetPort = elModel;
               diagramEngine.model.connectLink(link);
             }
           }
@@ -430,7 +419,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     const dimensions = (this.state.action as SelectingAction).getBoxDimensions();
     return (
       <div
-        className={cx('srd-diagram', '__selector')}
+        className="selection-box"
         style={{
           top: dimensions.top,
           left: dimensions.left,
@@ -447,8 +436,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     if (this.props.allowCanvasZoom) {
       event.preventDefault();
       event.stopPropagation();
-      const oldZoomFactor = model.getZoomLevel() / 100;
-      let scrollDelta = this.props.inverseZoom ? -event.deltaY : event.deltaY;
+      const oldZoomFactor = model.zoom / 100;
+      let scrollDelta = this.props.inverseZoom ? event.deltaY : -event.deltaY;
       // check if it is pinch gesture
       if (event.ctrlKey && scrollDelta % 1 !== 0) {
         /*Chrome and Firefox sends wheel event with deltaY that
@@ -459,11 +448,11 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       } else {
         scrollDelta /= 60;
       }
-      if (model.getZoomLevel() + scrollDelta > 10) {
-        model.setZoomLevel(model.getZoomLevel() + scrollDelta);
+      if (model.zoom + scrollDelta > 10) {
+        model.zoom = model.zoom + scrollDelta;
       }
 
-      const zoomFactor = model.getZoomLevel() / 100;
+      const zoomFactor = model.zoom / 100;
 
       const boundingRect = event.currentTarget.getBoundingClientRect();
       const clientWidth = boundingRect.width;
@@ -476,10 +465,10 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       const clientY = event.clientY - boundingRect.top;
 
       // compute width and height increment factor
-      const xFactor = (clientX - model.getOffsetX()) / oldZoomFactor / clientWidth;
-      const yFactor = (clientY - model.getOffsetY()) / oldZoomFactor / clientHeight;
+      const xFactor = (clientX - model.offsetX) / oldZoomFactor / clientWidth;
+      const yFactor = (clientY - model.offsetY) / oldZoomFactor / clientHeight;
 
-      model.setOffset(model.getOffsetX() - widthDiff * xFactor, model.getOffsetY() - heightDiff * yFactor);
+      model.setOffset(model.offsetX - widthDiff * xFactor, model.offsetY - heightDiff * yFactor);
 
       this.props.diagramEngine.enableRepaintEntities([]);
       this.forceUpdate();
@@ -491,39 +480,36 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     const model = this.props.diagramEngine.model;
 
     this.props.diagramEngine.clearRepaintEntities();
-    const mouseEvent = this.getMouseEvent(event.nativeEvent);
+    const elModel = this.getModelAtPosition(event.nativeEvent);
+    // tslint:disable-next-line
+    console.log('[mousedown] selected model', elModel);
     // the canvas was selected
-    if (mouseEvent === null) {
-      // is it a multiple selection
+    if (!elModel) {
       if (event.shiftKey) {
+        // it is a "multiple selection" action
         const { x, y } = this.props.diagramEngine.getRelativePoint(event.clientX, event.clientY);
         this.startFiringAction(new SelectingAction(x, y));
       } else {
-        // its a drag the canvas event
+        // it is a "move the canvas" action
         model.clearSelection();
         this.startFiringAction(new MoveCanvasAction(event.clientX, event.clientY, model));
       }
-    } else if (mouseEvent.model instanceof PortModel) {
+    } else if (elModel instanceof PortModel) {
       // its a port element, we want to drag a link
-      if (!this.props.diagramEngine.isModelLocked(mouseEvent.model)) {
+      if (!this.props.diagramEngine.isModelLocked(elModel)) {
         const { x, y } = this.props.diagramEngine.getRelativeMousePoint(event);
-        const sourcePort = mouseEvent.model;
-        const link = sourcePort.createLinkModel();
+        const link = elModel.createLinkModel();
         if (link) {
-          link.sourcePort = sourcePort;
+          // tslint:disable-next-line
+          console.log('[mousedown] onMouseDown.link create', link);
+          link.sourcePort = elModel;
           link.removeMiddlePoints();
-          if (link.sourcePort !== sourcePort) {
-            link.sourcePort = sourcePort;
-          }
-          link.targetPort = null;
-
           link.getFirstPoint().setPosition(x, y);
-          link.getLastPoint().setPosition(x, y);
-
+          const lastPoint = link.getLastPoint();
+          lastPoint.setPosition(x, y);
+          lastPoint.selected = true;
           model.clearSelection();
-          link.getLastPoint().selected = true;
           model.addLink(link);
-
           this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.diagramEngine));
         }
       } else {
@@ -531,11 +517,12 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       }
     } else {
       // its some or other element, probably want to move it
-      if (!event.shiftKey && !mouseEvent.model.selected) {
+      if (!event.shiftKey && !elModel.selected) {
         model.clearSelection();
       }
-      mouseEvent.model.selected = true;
-
+      elModel.selected = true;
+      // tslint:disable-next-line
+      console.log('[mousedown] selected model fire action MOVE', { x: event.clientX, y: event.clientY });
       this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.diagramEngine));
     }
     this.state.document.addEventListener('mousemove', this.onMouseMove);
@@ -559,9 +546,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
 
     return (
       <div
-        {...this.props as any}
         className={cx('srd-diagram', this.props.className)}
-        ref={(ref) => this.props.diagramEngine.canvas = ref}
+        ref={(ref) => (this.props.diagramEngine.canvas = ref)}
         onWheel={this.onWheel}
         onMouseDown={this.onMouseDown}
       >

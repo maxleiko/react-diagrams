@@ -1,5 +1,4 @@
-.srd-default-link{
-
+.srd-default-link {
   @keyframes dash {
     from {
       stroke-dashoffset: 24;
@@ -9,31 +8,35 @@
     }
   }
 
-  path{
-    fill:none;
-    pointer-events:all;
+  path {
+    fill: none;
+    pointer-events: all;
+
+    &.selected {
+      stroke: rgb(0, 192, 255) !important;
+      stroke-dasharray: 10, 2;
+      animation: dash 1s linear infinite;
+    }
+
+    &.reverse {
+      animation-direction: reverse;
+    }
   }
 
-  &--path-selected{
-    stroke: rgb(0,192,255) !important;
-    stroke-dasharray: 10,2;
-    animation: dash 1s linear infinite;
-  }
-
-  &__label {
+  &.label {
     pointer-events: none;
 
-    > div{
+    > div {
       display: inline-block;
       position: absolute;
     }
   }
 
-  &__point{
-    fill: rgba(white,0.5);
-  }
+  &.point {
+    fill: rgba(white, 0.5);
 
-  &--point-selected{
-    fill: rgb(0,192,255);
+    &.selected {
+      fill: rgb(0, 192, 255);
+    }
   }
 }

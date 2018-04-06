@@ -12,7 +12,7 @@ export interface LinkModelListener extends BaseModelListener {
   targetPortChanged?(event: BaseEvent<LinkModel> & { port: null | PortModel }): void;
 }
 
-export class LinkModel<T extends LinkModelListener = LinkModelListener> extends BaseModel<DiagramModel, T> {
+export class LinkModel<L extends LinkModelListener = LinkModelListener> extends BaseModel<DiagramModel, L> {
   private _sourcePort: PortModel | null = null;
   private _targetPort: PortModel | null = null;
   private _labels: LabelModel[] = [];
@@ -151,10 +151,10 @@ export class LinkModel<T extends LinkModelListener = LinkModelListener> extends 
   }
 
   set sourcePort(port: PortModel | null) {
-    if (port !== null) {
+    if (port) {
       port.addLink(this);
     }
-    if (this._sourcePort !== null) {
+    if (this._sourcePort) {
       this._sourcePort.removeLink(this);
     }
     this._sourcePort = port;
@@ -170,10 +170,10 @@ export class LinkModel<T extends LinkModelListener = LinkModelListener> extends 
   }
 
   set targetPort(port: PortModel | null) {
-    if (port !== null) {
+    if (port) {
       port.addLink(this);
     }
-    if (this.targetPort !== null) {
+    if (this.targetPort) {
       this.targetPort.removeLink(this);
     }
     this._targetPort = port;

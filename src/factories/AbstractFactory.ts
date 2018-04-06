@@ -1,15 +1,17 @@
 import { BaseModel } from '../models/BaseModel';
+import { DiagramEngine } from '../DiagramEngine';
 
 export abstract class AbstractFactory<T extends BaseModel> {
-  type: string;
+  private _type: string;
 
-  constructor(name: string) {
-    this.type = name;
+  constructor(type: string) {
+    this._type = type;
   }
 
-  getType(): string {
-    return this.type;
+  get type(): string {
+    return this._type;
   }
 
   abstract getNewInstance(initialConfig?: any): T;
+  abstract generateReactWidget(diagramEngine: DiagramEngine, model: T): JSX.Element;
 }

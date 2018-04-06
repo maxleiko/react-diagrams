@@ -104,6 +104,11 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    */
   set offsetX(value: number) {
     this._offsetX = value;
+    this.iterateListeners((listener, event) => {
+      if (listener.offsetUpdated) {
+        listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
+      }
+    });
   }
 
   /**
@@ -120,6 +125,11 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    */
   set offsetY(value: number) {
     this._offsetY = value;
+    this.iterateListeners((listener, event) => {
+      if (listener.offsetUpdated) {
+        listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
+      }
+    });
   }
 
   /**
@@ -132,10 +142,15 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
 
   /**
    * Setter zoom
-   * @param {number } value
+   * @param {number } zoom
    */
-  set zoom(value: number) {
-    this._zoom = value;
+  set zoom(zoom: number) {
+    this._zoom = zoom;
+    this.iterateListeners((listener, event) => {
+      if (listener.zoomUpdated) {
+        listener.zoomUpdated({ ...event, zoom });
+      }
+    });
   }
 
   /**
@@ -270,54 +285,14 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     return items;
   }
 
-  setZoomLevel(zoom: number) {
-    this.zoom = zoom;
-
-    this.iterateListeners((listener, event) => {
-      if (listener.zoomUpdated) {
-        listener.zoomUpdated({ ...event, zoom });
-      }
-    });
-  }
-
   setOffset(offsetX: number, offsetY: number) {
-    this.offsetX = offsetX;
-    this.offsetY = offsetY;
+    this._offsetX = offsetX;
+    this._offsetY = offsetY;
     this.iterateListeners((listener, event) => {
       if (listener.offsetUpdated) {
         listener.offsetUpdated({ ...event, offsetX, offsetY });
       }
     });
-  }
-
-  setOffsetX(offsetX: number) {
-    this.offsetX = offsetX;
-    this.iterateListeners((listener, event) => {
-      if (listener.offsetUpdated) {
-        listener.offsetUpdated({ ...event, offsetX, offsetY: this.offsetY });
-      }
-    });
-  }
-  setOffsetY(offsetY: number) {
-    this.offsetY = offsetY;
-
-    this.iterateListeners((listener, event) => {
-      if (listener.offsetUpdated) {
-        listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
-      }
-    });
-  }
-
-  getOffsetY() {
-    return this.offsetY;
-  }
-
-  getOffsetX() {
-    return this.offsetX;
-  }
-
-  getZoomLevel() {
-    return this.zoom;
   }
 
   getNode(id: string): NodeModel | undefined {

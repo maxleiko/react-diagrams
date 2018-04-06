@@ -1,9 +1,16 @@
+import * as React from 'react';
 import { DefaultPortModel } from '../models/DefaultPortModel';
 import { AbstractPortFactory } from '../../factories/AbstractPortFactory';
+import { DiagramEngine } from '../../DiagramEngine';
+import { DefaultPortWidget } from '../../defaults/widgets/DefaultPortWidget';
 
 export class DefaultPortFactory extends AbstractPortFactory<DefaultPortModel> {
   constructor() {
     super('default');
+  }
+
+  generateReactWidget(_engine: DiagramEngine, model: DefaultPortModel) {
+    return <DefaultPortWidget port={model} />;
   }
 
   getNewInstance(_initialConfig?: any): DefaultPortModel {

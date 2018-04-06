@@ -1,11 +1,11 @@
 {
-  "name": "storm-react-diagrams",
+  "name": "srd-demos",
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "@types",
+    "outDir": "../build/demos",
     "target": "es5",
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
     "skipLibCheck": true,
     "noImplicitAny": true,
@@ -17,13 +17,7 @@
     "jsx": "react",
     "lib": ["dom", "es2015"],
     "paths": {
-      "storm-react-diagrams": ["src/index"]
+      "storm-react-diagrams": ["../src/index"]
     }
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules", "@types"
-  ]
+  }
 }

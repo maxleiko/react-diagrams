@@ -20,8 +20,8 @@ export type BaseEntityType = 'node' | 'link' | 'port' | 'point';
 
 export class BaseEntity<L extends BaseListener = BaseListener> {
   private _id: string;
-  private _locked: boolean = false;
   private _listeners: Map<string, L> = new Map();
+  protected _locked: boolean = false;
 
   constructor(id: string = Toolkit.UID()) {
     this._id = id;

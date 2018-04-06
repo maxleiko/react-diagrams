@@ -129,6 +129,10 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     return this._paintableWidgets[baseModel.id] !== undefined;
   }
 
+  get canvas(): HTMLDivElement | null {
+    return this._canvas;
+  }
+
   set canvas(canvas: HTMLDivElement | null) {
     this._canvas = canvas;
   }
@@ -207,63 +211,63 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     if (this._portFactories[type]) {
       return this._portFactories[type];
     }
-    throw new Error(`cannot find factory for port of type: [${type}]`);
+    throw new Error(`Cannot find factory for port of type: [${type}]`);
   }
 
   getNodeFactory(type: string): AbstractNodeFactory {
     if (this._nodeFactories[type]) {
       return this._nodeFactories[type];
     }
-    throw new Error(`cannot find factory for node of type: [${type}]`);
+    throw new Error(`Cannot find factory for node of type: [${type}]`);
   }
 
   getLinkFactory(type: string): AbstractLinkFactory {
     if (this._linkFactories[type]) {
       return this._linkFactories[type];
     }
-    throw new Error(`cannot find factory for link of type: [${type}]`);
+    throw new Error(`Cannot find factory for link of type: [${type}]`);
   }
 
   getLabelFactory(type: string): AbstractLabelFactory {
     if (this._labelFactories[type]) {
       return this._labelFactories[type];
     }
-    throw new Error(`cannot find factory for label of type: [${type}]`);
+    throw new Error(`Cannot find factory for label of type: [${type}]`);
   }
 
-  getFactoryForNode(node: NodeModel): AbstractNodeFactory | null {
+  getFactoryForPort(node: PortModel): AbstractPortFactory {
+    return this.getPortFactory(node.type);
+  }
+
+  getFactoryForNode(node: NodeModel): AbstractNodeFactory {
     return this.getNodeFactory(node.type);
   }
 
-  getFactoryForLink(link: LinkModel): AbstractLinkFactory | null {
+  getFactoryForLink(link: LinkModel): AbstractLinkFactory {
     return this.getLinkFactory(link.type);
   }
 
-  getFactoryForLabel(label: LabelModel): AbstractLabelFactory | null {
+  getFactoryForLabel(label: LabelModel): AbstractLabelFactory {
     return this.getLabelFactory(label.type);
   }
 
-  generateWidgetForLink(link: LinkModel): JSX.Element | null {
-    const linkFactory = this.getFactoryForLink(link);
-    if (!linkFactory) {
-      throw new Error('Cannot find link factory for link: ' + link.type);
-    }
-    return linkFactory.generateReactWidget(this, link);
+  generateWidgetForLink(link: LinkModel): JSX.Element {
+    return this.getFactoryForLink(link).generateReactWidget(this, link);
   }
 
-  generateWidgetForNode(node: NodeModel): JSX.Element | null {
-    const nodeFactory = this.getFactoryForNode(node);
-    if (!nodeFactory) {
-      throw new Error('Cannot find widget factory for node: ' + node.type);
-    }
-    return nodeFactory.generateReactWidget(this, node);
+  generateWidgetForNode(node: NodeModel): JSX.Element {
+    return this.getFactoryForNode(node).generateReactWidget(this, node);
+  }
+
+  generateWidgetForPort(port: PortModel): JSX.Element {
+    return this.getFactoryForPort(port).generateReactWidget(this, port);
   }
 
   getRelativeMousePoint(event: React.MouseEvent<HTMLElement>): { x: number; y: number } {
     const point = this.getRelativePoint(event.clientX, event.clientY);
     return {
-      x: (point.x - this._model.getOffsetX()) / (this._model.getZoomLevel() / 100.0),
-      y: (point.y - this._model.getOffsetY()) / (this._model.getZoomLevel() / 100.0)
+      x: (point.x - this._model.offsetX) / (this._model.zoom / 100.0),
+      y: (point.y - this._model.offsetY) / (this._model.zoom / 100.0)
     };
   }
 
@@ -273,7 +277,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
   }
 
   getNodeElement(node: NodeModel): Element {
-    const selector = this._canvas!.querySelector(`.node[data-nodeid="${node.id}"]`);
+    const selector = this._canvas!.querySelector(`.srd-node[srd-id="${node.id}"]`);
     if (selector === null) {
       throw new Error('Cannot find Node element with nodeID: [' + node.id + ']');
     }
@@ -283,14 +287,14 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
   getNodePortElement(port: PortModel): HTMLElement | null {
     if (port.parent) {
       const selector = this._canvas!.querySelector<HTMLElement>(
-        `.port[data-name="${port.name}"][data-nodeid="${port.parent.id}"]`
+        `.srd-node[srd-id="${port.parent.id}"] .srd-port[srd-id="${port.id}"]`
       );
       if (selector === null) {
         throw new Error(
           'Cannot find Node Port element with nodeID: [' +
             port.parent.id +
             '] and name: [' +
-            port.name +
+            port.id +
             ']'
         );
       }
@@ -305,14 +309,14 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
       const sourceRect = sourceElement.getBoundingClientRect();
 
       const rel = this.getRelativePoint(sourceRect.left, sourceRect.top);
-  
+
       return {
         x:
           sourceElement.offsetWidth / 2 +
-          (rel.x - this._model.getOffsetX()) / (this._model.getZoomLevel() / 100.0),
+          (rel.x - this._model.offsetX) / (this._model.zoom / 100.0),
         y:
           sourceElement.offsetHeight / 2 +
-          (rel.y - this._model.getOffsetY()) / (this._model.getZoomLevel() / 100.0)
+          (rel.y - this._model.offsetY) / (this._model.zoom / 100.0)
       };
     }
     return null;
@@ -333,7 +337,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     if (sourceElement) {
       const sourceRect = sourceElement.getBoundingClientRect() as DOMRect;
       const canvasRect = this._canvas!.getBoundingClientRect() as ClientRect;
-  
+
       return {
         x: (sourceRect.x - this._model.offsetX) / (this._model.zoom / 100.0) - canvasRect.left,
         y: (sourceRect.y - this._model.offsetY) / (this._model.zoom / 100.0) - canvasRect.top,
@@ -585,7 +589,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     const yFactor = this._canvas!.clientHeight / this._canvas!.scrollHeight;
     const zoomFactor = xFactor < yFactor ? xFactor : yFactor;
 
-    this._model.setZoomLevel(this._model.getZoomLevel() * zoomFactor);
+    this._model.zoom = this._model.zoom * zoomFactor;
     this._model.setOffset(0, 0);
     this.repaintCanvas();
   }

@@ -4,7 +4,6 @@ import {
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget,
-  DefaultLinkWidget,
   DefaultLinkModel,
   DefaultLinkFactory
 } from 'storm-react-diagrams';
@@ -89,15 +88,14 @@ export class AdvancedLinkSegment extends React.Component<AdvancedLinkSegmentProp
 
 export class AdvancedLinkFactory extends DefaultLinkFactory {
   constructor() {
-    super();
-    this.type = 'advanced';
+    super('advanced');
   }
 
   getNewInstance(_initialConfig?: any): AdvancedLinkModel {
     return new AdvancedLinkModel();
   }
 
-  generateLinkSegment(model: AdvancedLinkModel, _widget: DefaultLinkWidget, _selected: boolean, path: string) {
+  generateLinkSegment(model: AdvancedLinkModel, _selected: boolean, path: string) {
     return (
       <g>
         <AdvancedLinkSegment model={model} path={path} />
@@ -112,7 +110,7 @@ export class AdvancedLinkFactory extends DefaultLinkFactory {
  * @Author kfrajtak
  */
 export default () => {
-  //1) setup the diagram engine
+  // 1) setup the diagram engine
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
   engine.registerLinkFactory(new AdvancedLinkFactory());

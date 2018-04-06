@@ -6,11 +6,11 @@ export interface DefaultLabelWidgetProps {
 }
 
 export class DefaultLabelWidget extends React.Component<DefaultLabelWidgetProps> {
-  constructor(props: DefaultLabelWidgetProps) {
-    super(props);
-  }
-
   render() {
-    return <div className="srd-default-label">{this.props.model.label}</div>;
+    return (
+      <div className="srd-default-label">
+        {this.props.model.label}
+      </div>
+    );
   }
 }

@@ -7,7 +7,7 @@ export class MoveCanvasAction extends BaseAction {
 
   constructor(mouseX: number, mouseY: number, diagramModel: DiagramModel) {
     super(mouseX, mouseY);
-    this.initialOffsetX = diagramModel.getOffsetX();
-    this.initialOffsetY = diagramModel.getOffsetY();
+    this.initialOffsetX = diagramModel.offsetX;
+    this.initialOffsetY = diagramModel.offsetY;
   }
 }

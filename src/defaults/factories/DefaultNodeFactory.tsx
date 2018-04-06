@@ -11,8 +11,8 @@ export class DefaultNodeFactory extends AbstractNodeFactory<DefaultNodeModel> {
     super('default');
   }
 
-  generateReactWidget(diagramEngine: DiagramEngine, node: DefaultNodeModel): JSX.Element {
-    return <DefaultNodeWidget node={node} diagramEngine={diagramEngine} />;
+  generateReactWidget(engine: DiagramEngine, node: DefaultNodeModel): JSX.Element {
+    return <DefaultNodeWidget node={node} engine={engine} />;
   }
 
   getNewInstance(_initialConfig?: any): DefaultNodeModel {

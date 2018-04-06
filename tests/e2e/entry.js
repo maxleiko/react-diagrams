@@ -3,7 +3,7 @@ function answer(options, a, b) {
 		code: `
 			var demo = require("` + options.entry + `");
 			var ReactDOM = require("react-dom");
-			var srd = require("../../src/main.ts");
+			var srd = require("../../src/index.ts");
 			srd.Toolkit.TESTING = true;
 			var styles = require("` + (__dirname + "/../../demos/.helpers/demo.scss") + `");
 			window.onload = function(){

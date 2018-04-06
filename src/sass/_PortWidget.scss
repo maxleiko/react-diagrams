@@ -1,9 +1,13 @@
-.srd-port{
+.srd-port {
   width: 15px;
   height: 15px;
   background: rgba(white,0.1);
-  
-  &:hover,&.selected{
+
+  &:hover {
+    background: rgb(192,0,162);
+  }
+
+  .selected {
     background: rgb(192,255,0);
   }
 }

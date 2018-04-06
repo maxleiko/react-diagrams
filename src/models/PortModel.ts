@@ -5,7 +5,6 @@ import * as _ from 'lodash';
 import { DiagramEngine } from '../DiagramEngine';
 
 export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> {
-  private _name: string;
   private _maximumLinks: number;
   private _links: Map<string, LinkModel> = new Map();
 
@@ -15,9 +14,8 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   private _width: number = -1;
   private _height: number = -1;
 
-  constructor(name: string, type: string, maximumLinks: number = -1, id?: string) {
-    super(type, id);
-    this._name = name;
+  constructor(name: string, type: string, maximumLinks: number = -1) {
+    super(type, name);
     this._maximumLinks = maximumLinks;
   }
 
@@ -31,13 +29,11 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
 
   deSerialize(ob: any, engine: DiagramEngine) {
     super.deSerialize(ob, engine);
-    this._name = ob.name;
     this._maximumLinks = ob.maximumLinks;
   }
 
   serialize() {
     return _.merge(super.serialize(), {
-      name: this._name,
       parentNode: this.parent ? this.parent.id : null,
       links: this._links.keys(),
       maximumLinks: this._maximumLinks
@@ -78,10 +74,6 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   }
 
   abstract createLinkModel(): LinkModel | null;
-
-  get name(): string {
-    return this._name;
-  }
 
   get maximumLinks(): number {
     return this._maximumLinks;

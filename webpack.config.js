@@ -22,8 +22,8 @@ module.exports =
 	{
 		entry: "./src/index.ts",
 		output: {
-			filename: "index.js",
-			path: __dirname,
+			filename: 'index.js',
+			path: path.join(__dirname, 'dist'),
 			libraryTarget: "umd",
 			library: "storm-react-diagrams"
 		},

@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { DiamondNodeModel } from './DiamondNodeModel';
-import { PortWidget } from 'storm-react-diagrams';
+import { DiagramEngine } from 'storm-react-diagrams';
 
 export interface DiamonNodeWidgetProps {
   node: DiamondNodeModel;
+  engine: DiagramEngine;
   size?: number;
 }
 
@@ -12,52 +13,27 @@ export interface DiamonNodeWidgetProps {
  */
 export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
   static defaultProps: Partial<DiamonNodeWidgetProps> = {
-    size: 150,
+    size: 150
   };
-
-  constructor(props: DiamonNodeWidgetProps) {
-    super(props);
-    this.state = {};
-  }
 
   render() {
     const size = this.props.size!;
+    const engine = this.props.engine;
 
     return (
-      <div
-        className={'diamond-node'}
-        style={{
-          position: 'relative',
-          width: size,
-          height: size
-        }}
-      >
-        <svg
-          width={size}
-          height={size}
-          dangerouslySetInnerHTML={{
-            __html:
-              `
-          <g id="Layer_1">
+      <div className="diamond-node" style={{ width: size, height: size }}>
+        <svg width={size} height={size}>
+          <g>
+            <polygon
+              className="polygon"
+              fill="purple"
+              stroke="#000000"
+              stroke-width="3"
+              stroke-miterlimit="10"
+              points={`10,${size / 2} ${size / 2},10 ${size - 10},${size / 2} ${size / 2},${size - 10}`}
+            />
           </g>
-          <g id="Layer_2">
-            <polygon fill="purple" stroke="#000000" stroke-width="3" stroke-miterlimit="10" points="10,` +
-              size / 2 +
-              ` ` +
-              size / 2 +
-              `,10 ` +
-              (size - 10) +
-              `,` +
-              size / 2 +
-              ` ` +
-              size / 2 +
-              `,` +
-              (size - 10) +
-              ` "/>
-          </g>
-        `
-          }}
-        />
+        </svg>
         <div
           style={{
             position: 'absolute',
@@ -66,7 +42,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             left: -8
           }}
         >
-          <PortWidget port={this.props.node.getPortFromID('left')!} />
+          {engine.generateWidgetForPort(this.props.node.getPortFromID('left')!)}
         </div>
         <div
           style={{
@@ -76,7 +52,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             top: -8
           }}
         >
-          <PortWidget port={this.props.node.getPortFromID('top')!} />
+          {engine.generateWidgetForPort(this.props.node.getPortFromID('top')!)}
         </div>
         <div
           style={{
@@ -86,7 +62,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             top: size / 2 - 8
           }}
         >
-          <PortWidget port={this.props.node.getPortFromID('right')!} />
+          {engine.generateWidgetForPort(this.props.node.getPortFromID('right')!)}
         </div>
         <div
           style={{
@@ -96,7 +72,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             top: size - 8
           }}
         >
-          <PortWidget port={this.props.node.getPortFromID('bottom')!} />
+          {engine.generateWidgetForPort(this.props.node.getPortFromID('bottom')!)}
         </div>
       </div>
     );

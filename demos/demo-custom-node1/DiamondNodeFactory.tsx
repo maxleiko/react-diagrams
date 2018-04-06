@@ -1,15 +1,15 @@
-import * as SRD from 'storm-react-diagrams';
+import { DiagramEngine, AbstractNodeFactory } from 'storm-react-diagrams';
 import { DiamonNodeWidget } from './DiamondNodeWidget';
 import { DiamondNodeModel } from './DiamondNodeModel';
 import * as React from 'react';
 
-export class DiamondNodeFactory extends SRD.AbstractNodeFactory {
+export class DiamondNodeFactory extends AbstractNodeFactory<DiamondNodeModel> {
   constructor() {
     super('diamond');
   }
 
-  generateReactWidget(_diagramEngine: SRD.DiagramEngine, node: SRD.NodeModel): JSX.Element {
-    return <DiamonNodeWidget node={node} />;
+  generateReactWidget(engine: DiagramEngine, node: DiamondNodeModel): JSX.Element {
+    return <DiamonNodeWidget node={node} engine={engine} />;
   }
 
   getNewInstance() {

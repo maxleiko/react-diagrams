@@ -1,4 +1,4 @@
-.srd-default-port{
+.srd-default-port {
   $p: &;
 
   display: flex;
@@ -8,12 +8,11 @@
     align-self: center;
   }
 
-  &__name {
+  &.name {
     padding: 0 5px;
   }
 
-
-  &--out{
+  &.out {
     justify-content: flex-end;
 
     #{$p}__name {

@@ -20,11 +20,11 @@
 	"typings": "./dist/@types/src/index",
 	"author": "dylanvorster",
 	"scripts": {
-    "clean": "rm -rf build",
+    "clean": "rm -rf dist build",
 		"build": "yarn run build:ts:prod && yarn run build:sass:prod",
 		"build:ts": "webpack",
 		"build:ts:prod": "webpack -p",
-		"build:sass:prod": "node-sass --output-style compressed ./src/sass/main.scss > ./build/style.min.css",
+		"build:sass:prod": "node-sass --output-style compressed ./src/sass/main.scss > ./dist/style.min.css",
 		"storybook": "start-storybook -p 9001 -c .storybook",
 		"storybook:build": "build-storybook -c .storybook -o .out",
 		"storybook:github": "storybook-to-ghpages",
