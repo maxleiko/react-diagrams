@@ -20,7 +20,7 @@ export default () => {
   node2.setPosition(400, 100);
 
   //3-C) link the 2 nodes together
-  const link1 = port1.link(port2);
+  const link1 = port1.link(port2)!;
 
   //3-D) create an orphaned node
   const node3 = new DefaultNodeModel('Node 3', 'rgb(0,192,255)');
@@ -31,7 +31,7 @@ export default () => {
   model.addAll(node1, node2, node3, link1);
 
   //5) load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   //6) render the diagram!
   return <DiagramWidget className="srd-demo-canvas" diagramEngine={engine} allowLooseLinks={false} />;

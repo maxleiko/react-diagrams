@@ -5,7 +5,9 @@ describe('calculating start and end points', () => {
   let pathFinding: PathFinding;
 
   beforeEach(() => {
-    pathFinding = new PathFinding(null);
+    // trick the compiler with "null!" because we won't use methods that need an engine
+    // TODO: this trick shows that there is a conception problem with PathFinding => decoupling needed
+    pathFinding = new PathFinding(null!);
   });
 
   test('return correct object for valid walkable input', () => {
@@ -19,7 +21,7 @@ describe('calculating start and end points', () => {
     ];
     const path = [[0, 5], [1, 4], [2, 3], [3, 2], [4, 1], [5, 0]];
 
-    const result = pathFinding.calculateLinkStartEndCoords(matrix, path);
+    const result = pathFinding.calculateLinkStartEndCoords(matrix, path)!;
 
     expect(result.start).toEqual({
       x: 2,

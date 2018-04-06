@@ -29,17 +29,12 @@ export interface AdvancedLinkSegmentProps {
 }
 
 export class AdvancedLinkSegment extends React.Component<AdvancedLinkSegmentProps> {
-  path: SVGPathElement;
-  circle: SVGCircleElement;
-  callback: () => any;
-  percent: number;
-  handle: any;
-  mounted: boolean;
-
-  constructor(props: AdvancedLinkSegmentProps) {
-    super(props);
-    this.percent = 0;
-  }
+  percent: number = 0;
+  path: SVGPathElement | null = null;
+  handle: any = null;
+  circle: SVGCircleElement | null = null;
+  mounted: boolean = false;
+  callback: () => any = () => null;
 
   componentDidMount() {
     this.mounted = true;
@@ -145,13 +140,13 @@ export default () => {
 
   const model = new DiagramModel();
 
-  model.addAll(port1.link(port3), port2.link(port4));
+  model.addAll(port1.link(port3)!, port2.link(port4)!);
 
   // add everything else
   model.addAll(node1, node2, node3, node4);
 
   // load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   // render the diagram!
   return <DiagramWidget className="srd-demo-canvas" diagramEngine={engine} />;

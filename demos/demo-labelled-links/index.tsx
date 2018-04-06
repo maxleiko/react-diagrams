@@ -36,23 +36,23 @@ export default () => {
   node4.setPosition(300, 250);
 
   // link node A and B together and give it a label
-  const link1 = port1.link(port2);
-  (link1 as DefaultLinkModel).addLabel('Custom label 1');
-  (link1 as DefaultLinkModel).addLabel('Custom label 2');
+  const link1 = port1.link(port2)! as DefaultLinkModel;
+  link1.addLabel('Custom label 1');
+  link1.addLabel('Custom label 2');
 
   // no label for A and C, just a link
-  const link2 = port1.link(port3);
+  const link2 = port1.link(port3)!;
 
   // also a label for A and D
-  const link3 = port1.link(port4);
-  link3.setTargetPort(port4);
+  const link3 = port1.link(port4)!;
+  link3.targetPort = port4;
   (link3 as DefaultLinkModel).addLabel('Emoji label: 🎉');
 
   // add all to the main model
   model.addAll(node1, node2, node3, node4, link1, link2, link3);
 
   // load model into engine and render
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   return (
     <DemoWorkspaceWidget

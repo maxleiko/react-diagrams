@@ -20,10 +20,10 @@ if (production) {
 module.exports =
 	//for building the umd distribution
 	{
-		entry: "./src/main.ts",
+		entry: "./src/index.ts",
 		output: {
-			filename: "main.js",
-			path: __dirname + "/dist",
+			filename: "index.js",
+			path: __dirname,
 			libraryTarget: "umd",
 			library: "storm-react-diagrams"
 		},

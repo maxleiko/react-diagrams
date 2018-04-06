@@ -52,7 +52,7 @@ describe('simple flow test', async () => {
 
     const port1 = await node1.port('7');
 
-    const node2Bounds = await node2.element.boundingBox();
+    const node2Bounds = (await node2.element.boundingBox())!;
 
     const newlink = await port1.linkToPoint(node2Bounds.x, node2Bounds.y);
     await expect(await newlink.exists()).toBeFalsy();

@@ -33,7 +33,7 @@ export default () => {
   node3.setPosition(300, 160);
 
   // link node1.out with node3.in
-  const link = node1Out.link(node3In);
+  const link = node1Out.link(node3In)!;
 
   // add all the models
   const models = model.addAll(node1, node2, node3, link);
@@ -51,7 +51,7 @@ export default () => {
     linksUpdated: action('linksUpdated')
   });
 
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   const props = {
     diagramEngine: engine,

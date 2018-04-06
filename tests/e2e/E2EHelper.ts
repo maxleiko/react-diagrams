@@ -17,7 +17,7 @@ export class E2EElement {
 
 export class E2ENode extends E2EElement {
   async port(id: string): Promise<E2EPort> {
-    return new E2EPort(this.helper, this.page, await this.element.$(`div[data-name="${id}"]`), id, this);
+    return new E2EPort(this.helper, this.page, (await this.element.$(`div[data-name="${id}"]`))!, id, this);
   }
 
   async model(): Promise<any> {
@@ -42,13 +42,13 @@ export class E2EPort extends E2EElement {
   async link(port: E2EPort): Promise<E2ELink> {
     const currentLinks = _.flatMap((await this.parent.model()).ports, 'links');
 
-    const bounds = await this.element.boundingBox();
+    const bounds = (await this.element.boundingBox())!;
 
     // click on this port
     this.page.mouse.move(bounds.x, bounds.y);
     this.page.mouse.down();
 
-    const bounds2 = await port.element.boundingBox();
+    const bounds2 = (await port.element.boundingBox())!;
 
     // drag to other port
     this.page.mouse.move(bounds2.x, bounds2.y);
@@ -61,7 +61,7 @@ export class E2EPort extends E2EElement {
   async linkToPoint(x: number, y: number): Promise<E2ELink> {
     const currentLinks = _.flatMap((await this.parent.model()).ports, 'links');
 
-    const bounds = await this.element.boundingBox();
+    const bounds = (await this.element.boundingBox())!;
 
     // click on this port
     this.page.mouse.move(bounds.x, bounds.y);

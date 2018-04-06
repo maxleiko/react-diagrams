@@ -1,5 +1,5 @@
 import * as PF from 'pathfinding';
-import { DiagramEngine } from '../main';
+import { DiagramEngine } from '../DiagramEngine';
 
 /*
 it can be very expensive to calculate routes when every single pixel on the canvas
@@ -67,7 +67,7 @@ export class PathFinding {
     };
     pathToStart: number[][];
     pathToEnd: number[][];
-  } | null {
+  } | undefined {
     const startIndex = path.findIndex((point) => matrix[point[1]][point[0]] === 0);
     const endIndex =
       path.length -
@@ -80,7 +80,7 @@ export class PathFinding {
     // are we trying to create a path exclusively through blocked areas?
     // if so, let's fallback to the linear routing
     if (startIndex === -1 || endIndex === -1) {
-      return null;
+      return;
     }
 
     const pathToStart = path.slice(0, startIndex);

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as _ from 'lodash';
 import { TrayWidget } from './TrayWidget';
 import { Application } from '../Application';
 import { TrayItemWidget } from './TrayItemWidget';
@@ -13,11 +12,6 @@ export interface BodyWidgetProps {
  * @author Dylan Vorster
  */
 export class BodyWidget extends React.Component<BodyWidgetProps> {
-  constructor(props: BodyWidgetProps) {
-    super(props);
-    this.state = {};
-  }
-
   render() {
     return (
       <div className="body">
@@ -33,12 +27,7 @@ export class BodyWidget extends React.Component<BodyWidgetProps> {
             className="diagram-layer"
             onDrop={(event) => {
               const data = JSON.parse(event.dataTransfer.getData('storm-diagram-node'));
-              const nodesCount = _.keys(
-                this.props.app
-                  .getDiagramEngine()
-                  .getDiagramModel()
-                  .getNodes()
-              ).length;
+              const nodesCount = this.props.app.getDiagramEngine().model.nodes.size;
 
               let node = null;
               if (data.type === 'in') {
@@ -51,10 +40,7 @@ export class BodyWidget extends React.Component<BodyWidgetProps> {
               const points = this.props.app.getDiagramEngine().getRelativeMousePoint(event);
               node.x = points.x;
               node.y = points.y;
-              this.props.app
-                .getDiagramEngine()
-                .getDiagramModel()
-                .addNode(node);
+              this.props.app.getDiagramEngine().model.addNode(node);
               this.forceUpdate();
             }}
             onDragOver={(event) => {

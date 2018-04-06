@@ -35,8 +35,8 @@ class CloneSelected extends React.Component<any, any> {
         model.addNode(newItem);
       } else if (newItem instanceof LinkModel) {
         // offset the link points
-        newItem.getPoints().forEach((p) => {
-          p.setPosition(p.getX() + offset.x, p.getY() + offset.y);
+        newItem.points.forEach((p) => {
+          p.setPosition(p.x + offset.x, p.y + offset.y);
         });
         model.addLink(newItem);
       }
@@ -76,12 +76,13 @@ export default () => {
 
   // link the ports
   const link1 = port.link(port2);
-
-  //4) add the models to the root graph
-  model.addAll(node1, node2, link1);
+  if (link1) {
+    //4) add the models to the root graph
+    model.addAll(node1, node2, link1);
+  }
 
   //5) load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   //6) render the diagram!
   return <CloneSelected engine={engine} model={model} />;

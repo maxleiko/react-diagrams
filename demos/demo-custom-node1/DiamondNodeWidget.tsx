@@ -11,9 +11,8 @@ export interface DiamonNodeWidgetProps {
  * @author Dylan Vorster
  */
 export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
-  static defaultProps: DiamonNodeWidgetProps = {
+  static defaultProps: Partial<DiamonNodeWidgetProps> = {
     size: 150,
-    node: null
   };
 
   constructor(props: DiamonNodeWidgetProps) {
@@ -22,18 +21,20 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
   }
 
   render() {
+    const size = this.props.size!;
+
     return (
       <div
         className={'diamond-node'}
         style={{
           position: 'relative',
-          width: this.props.size,
-          height: this.props.size
+          width: size,
+          height: size
         }}
       >
         <svg
-          width={this.props.size}
-          height={this.props.size}
+          width={size}
+          height={size}
           dangerouslySetInnerHTML={{
             __html:
               `
@@ -41,17 +42,17 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
           </g>
           <g id="Layer_2">
             <polygon fill="purple" stroke="#000000" stroke-width="3" stroke-miterlimit="10" points="10,` +
-              this.props.size / 2 +
+              size / 2 +
               ` ` +
-              this.props.size / 2 +
+              size / 2 +
               `,10 ` +
-              (this.props.size - 10) +
+              (size - 10) +
               `,` +
-              this.props.size / 2 +
+              size / 2 +
               ` ` +
-              this.props.size / 2 +
+              size / 2 +
               `,` +
-              (this.props.size - 10) +
+              (size - 10) +
               ` "/>
           </g>
         `
@@ -61,41 +62,41 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
           style={{
             position: 'absolute',
             zIndex: 10,
-            top: this.props.size / 2 - 8,
+            top: size / 2 - 8,
             left: -8
           }}
         >
-          <PortWidget name="left" node={this.props.node} />
+          <PortWidget port={this.props.node.getPortFromID('left')!} />
         </div>
         <div
           style={{
             position: 'absolute',
             zIndex: 10,
-            left: this.props.size / 2 - 8,
+            left: size / 2 - 8,
             top: -8
           }}
         >
-          <PortWidget name="top" node={this.props.node} />
+          <PortWidget port={this.props.node.getPortFromID('top')!} />
         </div>
         <div
           style={{
             position: 'absolute',
             zIndex: 10,
-            left: this.props.size - 8,
-            top: this.props.size / 2 - 8
+            left: size - 8,
+            top: size / 2 - 8
           }}
         >
-          <PortWidget name="right" node={this.props.node} />
+          <PortWidget port={this.props.node.getPortFromID('right')!} />
         </div>
         <div
           style={{
             position: 'absolute',
             zIndex: 10,
-            left: this.props.size / 2 - 8,
-            top: this.props.size - 8
+            left: size / 2 - 8,
+            top: size - 8
           }}
         >
-          <PortWidget name="bottom" node={this.props.node} />
+          <PortWidget port={this.props.node.getPortFromID('bottom')!} />
         </div>
       </div>
     );

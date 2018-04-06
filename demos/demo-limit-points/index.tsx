@@ -28,11 +28,11 @@ export default () => {
   node2.setPosition(400, 100);
 
   // link the ports
-  const link1 = port.link(port2);
+  const link1 = port.link(port2)!;
 
   model.addAll(node1, node2, link1);
 
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   const props = {
     diagramEngine: engine,

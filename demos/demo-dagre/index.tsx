@@ -39,9 +39,8 @@ class Demo8Widget extends React.Component<Demo8WidgetProps> {
 
   autoDistribute() {
     const { engine } = this.props;
-    const model = engine.getDiagramModel();
-    const distributedModel = getDistributedModel(engine, model);
-    engine.setDiagramModel(distributedModel);
+    const distributedModel = getDistributedModel(engine);
+    engine.model = distributedModel;
     this.forceUpdate();
   }
 
@@ -56,8 +55,8 @@ class Demo8Widget extends React.Component<Demo8WidgetProps> {
   }
 }
 
-function getDistributedModel(engine: any, model: any) {
-  const serialized = model.serializeDiagram();
+function getDistributedModel(engine: any) {
+  const serialized = engine.model.serializeDiagram();
   const distributedSerializedDiagram = distributeElements(serialized);
 
   //deserialize the model
@@ -113,9 +112,7 @@ export default () => {
   });
 
   //5) load model into engine
-  const model2 = getDistributedModel(engine, model);
-
-  engine.setDiagramModel(model2);
+  engine.model = getDistributedModel(engine);
 
   return <Demo8Widget engine={engine} />;
 };

@@ -50,7 +50,7 @@ function generateNodes(model: DiagramModel, offsetX: number, offsetY: number) {
   node2.setPosition(200 + offsetX, 100 + offsetY);
 
   // 3-C) link the 2 nodes together
-  const link1 = port1.link(port2);
+  const link1 = port1.link(port2)!;
 
   // 4) add the models to the root graph
   model.addAll(node1, node2, link1);

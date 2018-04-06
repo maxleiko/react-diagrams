@@ -2,9 +2,8 @@
   "compileOnSave": false,
   "name": "storm-react-diagrams",
   "compilerOptions": {
-    "suppressExcessPropertyErrors": true,
     "declaration": true,
-    "outDir": "@types",
+    "outDir": "build",
     "target": "es5",
     "sourceMap": true,
     "skipLibCheck": true,
@@ -16,11 +15,14 @@
     "strict": true,
     "jsx": "react",
     "baseUrl": ".",
+    "lib": ["dom", "es2015"],
     "paths": {
-      "storm-react-diagrams": ["src/main.ts"],
-      "pathfinding": ["src/routing/pathfinding.d.ts"]
-    },
-    "lib": ["dom", "es2015"]
+      "storm-react-diagrams": ["src/index"]
+    }
   },
-  "exclude": ["node_modules", "**/*.spec.ts", "./dist", "@types"]
+  "include": [
+    "src/**/*",
+    "demos/**/*"
+  ],
+  "exclude": ["node_modules", "**/*.spec.ts", "./build"]
 }

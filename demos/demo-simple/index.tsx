@@ -26,14 +26,14 @@ export default () => {
   node2.setPosition(400, 100);
 
   // link the ports
-  const link1 = port1.link(port2);
-  (link1 as DefaultLinkModel).addLabel('Hello World!');
+  const link1 = port1.link(port2) as DefaultLinkModel;
+  link1.addLabel('Hello World!');
 
   //4) add the models to the root graph
   model.addAll(node1, node2, link1);
 
   //5) load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   //6) render the diagram!
   return <DiagramWidget className="srd-demo-canvas" diagramEngine={engine} />;

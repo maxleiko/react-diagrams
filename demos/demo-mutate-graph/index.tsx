@@ -18,24 +18,22 @@ class NodeDelayedPosition extends React.Component<NodeDelayedPositionProps> {
 
   updatePosition() {
     const { engine } = this.props;
-    const model = engine.getDiagramModel();
-    const nodes = model.getNodes();
-    const node = nodes[Object.keys(nodes)[0]];
+    const nodes = engine.model.nodes;
+    const node = nodes.values().next().value;
     node.setPosition(node.x + 30, node.y + 30);
     this.forceUpdate();
   }
 
   updatePositionViaSerialize() {
     const { engine } = this.props;
-    const model = engine.getDiagramModel();
-    const str = JSON.stringify(model.serializeDiagram());
+    const str = JSON.stringify(engine.model.serializeDiagram());
     const model2 = new DiagramModel();
     const obj = JSON.parse(str);
     const node = obj.nodes[0];
     node.x += 30;
     node.y += 30;
     model2.deSerializeDiagram(obj, engine);
-    engine.setDiagramModel(model2);
+    engine.model = model2;
     this.forceUpdate();
   }
 
@@ -77,13 +75,13 @@ export default () => {
   node2.setPosition(400, 100);
 
   //3-C) link the 2 nodes together
-  const link1 = port1.link(port2);
+  const link1 = port1.link(port2)!;
 
   //4) add the models to the root graph
   model.addAll(node1, node2, link1);
 
   //5) load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   //6) render the diagram!
   return <NodeDelayedPosition engine={engine} />;

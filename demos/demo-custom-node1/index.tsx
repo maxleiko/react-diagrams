@@ -41,14 +41,14 @@ export default () => {
   node3.setPosition(500, 150);
 
   //3-C) link the 2 nodes together
-  const link1 = port1.link(node2.getPort('left'));
-  const link2 = port3.link(node2.getPort('right'));
+  const link1 = port1.link(node2.getPortFromID('left')!)!;
+  const link2 = port3.link(node2.getPortFromID('right')!)!;
 
   //4) add the models to the root graph
   model.addAll(node1, node2, node3, link1, link2);
 
   //5) load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   //6) render the diagram!
   return <DiagramWidget className="srd-demo-canvas" diagramEngine={engine} />;

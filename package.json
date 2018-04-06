@@ -16,20 +16,21 @@
 		"links",
 		"nodes"
 	],
-	"main": "./dist/main.js",
-	"typings": "./dist/@types/src/main",
+	"main": "./dist/index.js",
+	"typings": "./dist/@types/src/index",
 	"author": "dylanvorster",
 	"scripts": {
+    "clean": "rm -rf build",
 		"build": "yarn run build:ts:prod && yarn run build:sass:prod",
 		"build:ts": "webpack",
 		"build:ts:prod": "webpack -p",
-		"build:sass:prod": "node-sass --output-style compressed ./src/sass/main.scss > ./dist/style.min.css",
+		"build:sass:prod": "node-sass --output-style compressed ./src/sass/main.scss > ./build/style.min.css",
 		"storybook": "start-storybook -p 9001 -c .storybook",
 		"storybook:build": "build-storybook -c .storybook -o .out",
 		"storybook:github": "storybook-to-ghpages",
 		"pretty": "prettier --write \"{src,demos,tests}/**/*.{ts,tsx}\"",
 		"lint": "tslint -p .",
-		"test:ci": "rm -rf ./dist && node ./tests/e2e/generate-e2e.js && jest --no-cache",
+		"test:ci": "rm -rf ./build && node ./tests/e2e/generate-e2e.js && jest --no-cache",
 		"test": "jest --no-cache",
 		"prepublishOnly": "yarn run build"
 	},
@@ -40,7 +41,7 @@
 		"lodash": "^4.17.5",
 		"pathfinding": "^0.4.18",
 		"paths-js": "^0.4.7",
-		"react": "^16.3.1"
+		"react": "16.3.1"
 	},
 	"devDependencies": {
 		"@storybook/addon-actions": "^3.3.15",
@@ -54,7 +55,7 @@
 		"@types/node": "^9.4.7",
 		"@types/promise": "^7.1.30",
 		"@types/puppeteer": "^1.1.0",
-		"@types/react": "^16.3.5",
+		"@types/react": "16.3.1",
 		"awesome-typescript-loader": "^4.0.1",
 		"copy-webpack-plugin": "^4.5.1",
 		"cross-env": "^5.1.4",

@@ -25,13 +25,13 @@ export default () => {
   node2.setPosition(400, 100);
 
   //3-C) link the 2 nodes together
-  const link1 = port1.link(port2);
+  const link1 = port1.link(port2)!;
 
   //4) add the models to the root graph
   model.addAll(node1, node2, link1);
 
   //5) load model into engine
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   //!------------- SERIALIZING ------------------
 
@@ -41,7 +41,7 @@ export default () => {
 
   const model2 = new DiagramModel();
   model2.deSerializeDiagram(JSON.parse(str), engine);
-  engine.setDiagramModel(model2);
+  engine.model = model2;
 
   return (
     <DemoWorkspaceWidget

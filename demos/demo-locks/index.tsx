@@ -29,7 +29,7 @@ export default () => {
   const port2 = node2.addInPort('In');
   node2.setPosition(400, 100);
 
-  const link1 = port1.link(port2);
+  const link1 = port1.link(port2)!;
 
   model.addAll(node1, node2, link1);
 
@@ -42,18 +42,18 @@ export default () => {
   const port4 = node4.addInPort('In');
   node4.setPosition(400, 250);
 
-  const link2 = port3.link(port4);
+  const link2 = port3.link(port4)!;
 
   link2.point(350, 225);
   link2.point(200, 225);
 
   model.addAll(node3, node4, link2);
 
-  engine.setDiagramModel(model);
+  engine.model = model;
 
   //!========================================= <<<<<<<
 
-  model.setLocked(true);
+  model.locked = true;
   const props = {
     diagramEngine: engine,
     allowLooseLinks: false,

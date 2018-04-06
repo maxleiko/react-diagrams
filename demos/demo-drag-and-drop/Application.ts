@@ -4,7 +4,7 @@ import * as SRD from 'storm-react-diagrams';
  * @author Dylan Vorster
  */
 export class Application {
-  protected activeModel: SRD.DiagramModel;
+  protected activeModel: SRD.DiagramModel | null = null;
   protected diagramEngine: SRD.DiagramEngine;
 
   constructor() {
@@ -16,7 +16,7 @@ export class Application {
 
   newModel() {
     this.activeModel = new SRD.DiagramModel();
-    this.diagramEngine.setDiagramModel(this.activeModel);
+    this.diagramEngine.model = this.activeModel;
 
     //3-A) create a default node
     const node1 = new SRD.DefaultNodeModel('Node 1', 'rgb(0,192,255)');
@@ -29,13 +29,9 @@ export class Application {
     node2.setPosition(400, 100);
 
     // link the ports
-    const link1 = port.link(port2);
+    const link1 = port.link(port2)!;
 
     this.activeModel.addAll(node1, node2, link1);
-  }
-
-  getActiveDiagram(): SRD.DiagramModel {
-    return this.activeModel;
   }
 
   getDiagramEngine(): SRD.DiagramEngine {
