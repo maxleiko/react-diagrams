@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { observer } from 'mobx-react';
+
 import { DefaultNodeModel } from '../models/DefaultNodeModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultPortModel } from '../models/DefaultPortModel';
@@ -8,9 +10,7 @@ export interface DefaultNodeProps {
   engine: DiagramEngine;
 }
 
-/**
- * @author Dylan Vorster
- */
+@observer
 export class DefaultNodeWidget extends React.Component<DefaultNodeProps> {
 
   constructor(props: DefaultNodeProps) {

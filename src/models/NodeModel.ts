@@ -1,14 +1,15 @@
+import * as _ from 'lodash';
+import { observable, computed } from 'mobx';
+
 import { BaseModel, BaseModelListener } from './BaseModel';
 import { PortModel } from './PortModel';
-import * as _ from 'lodash';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
 
 export class NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel, BaseModelListener> {
-  private _x: number = 0;
-  private _y: number = 0;
-  private _extras: { [s: string]: any } = {};
-  private _ports: Map<string, P> = new Map();
+  @observable private _x: number = 0;
+  @observable private _y: number = 0;
+  @observable private _ports: Map<string, P> = new Map();
 
   // calculated post rendering so routing can be done correctly
   private _width: number = -1;
@@ -46,7 +47,6 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     super.deSerialize(ob, engine);
     this._x = ob.x;
     this._y = ob.y;
-    this._extras = ob.extras;
 
     // deserialize ports
     if (ob.ports) {
@@ -62,7 +62,6 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     return _.merge(super.serialize(), {
       x: this._x,
       y: this._y,
-      extras: this._extras,
       ports: Array.from(this._ports.values()).map((port) => port.serialize())
     });
   }
@@ -85,18 +84,22 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     return this._ports.get(id);
   }
 
+  @computed
   get ports(): Map<string, P> {
     return this._ports;
   }
 
+  @computed
   get width(): number {
     return this._width;
   }
 
+  @computed
   get height(): number {
     return this._height;
   }
 
+  @computed
   get x(): number {
     return this._x;
   }
@@ -105,6 +108,7 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     this._x = x;
   }
 
+  @computed
   get y(): number {
     return this._y;
   }

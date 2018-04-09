@@ -54,7 +54,7 @@ export class Toolkit {
     ${lastPoint.x - curvyX},${lastPoint.y - curvyY} ${lastPoint.x},${lastPoint.y}`;
   }
 
-  static generateDynamicPath(pathCoords: number[][]) {
+  static generateDynamicPath(pathCoords: number[][]): string {
     let path = Path();
     path = path.moveto(pathCoords[0][0] * ROUTING_SCALING_FACTOR, pathCoords[0][1] * ROUTING_SCALING_FACTOR);
     pathCoords.slice(1).forEach((coords) => {

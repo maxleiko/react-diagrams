@@ -4,10 +4,10 @@
   background: rgba(white,0.1);
 
   &:hover {
-    background: rgb(192,0,162);
+    background: rgba(0.1, 0.1, 0.1, 0.1);
   }
 
-  .selected {
-    background: rgb(192,255,0);
+  &.selected {
+    background: rgba(0.1, 0.1, 0.1, 0.4);
   }
 }

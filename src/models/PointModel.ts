@@ -1,24 +1,19 @@
+import * as _ from 'lodash';
+import { observable, computed } from 'mobx';
+
 import { BaseModel, BaseModelListener } from './BaseModel';
 import { LinkModel } from './LinkModel';
-import * as _ from 'lodash';
 import { DiagramEngine } from '../DiagramEngine';
 
 export class PointModel extends BaseModel<LinkModel, BaseModelListener> {
-  private _x: number;
-  private _y: number;
+  @observable private _x: number;
+  @observable private _y: number;
 
   constructor(link: LinkModel, point: { x: number; y: number }) {
     super();
     this.parent = link;
     this._x = point.x;
     this._y = point.y;
-  }
-
-  getSelectedEntities() {
-    if (this.selected && !this.isConnectedToPort()) {
-      return [this];
-    }
-    return [];
   }
 
   isConnectedToPort(): boolean {
@@ -51,6 +46,7 @@ export class PointModel extends BaseModel<LinkModel, BaseModelListener> {
     this._y = y;
   }
 
+  @computed
   get x(): number {
     return this._x;
   }
@@ -59,15 +55,12 @@ export class PointModel extends BaseModel<LinkModel, BaseModelListener> {
     this._x = x;
   }
 
+  @computed
   get y(): number {
     return this._y;
   }
 
   set y(y: number) {
     this._y = y;
-  }
-
-  get locked(): boolean {
-    return this.locked || (this.parent ? this.parent.locked : false);
   }
 }

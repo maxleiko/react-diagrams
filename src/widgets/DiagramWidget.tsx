@@ -1,7 +1,9 @@
 import * as React from 'react';
 import * as cx from 'classnames';
-import { DiagramEngine } from '../DiagramEngine';
 import * as _ from 'lodash';
+import { observer } from 'mobx-react';
+
+import { DiagramEngine } from '../DiagramEngine';
 import { LinkLayerWidget } from './layers/LinkLayerWidget';
 import { NodeLayerWidget } from './layers/NodeLayerWidget';
 import { Toolkit } from '../Toolkit';
@@ -19,18 +21,9 @@ import { BaseEntity } from '../BaseEntity';
 export interface DiagramProps {
   diagramEngine: DiagramEngine;
 
-  allowLooseLinks?: boolean;
-  allowCanvasTranslation?: boolean;
-  allowCanvasZoom?: boolean;
-  inverseZoom?: boolean;
-  maxNumberPointsPerLink?: number;
-  smartRouting?: boolean;
-
   actionStartedFiring?: (action: BaseAction) => boolean;
   actionStillFiring?: (action: BaseAction) => void;
   actionStoppedFiring?: (action: BaseAction) => void;
-
-  deleteKeys?: number[];
 }
 
 export interface DiagramState {
@@ -42,20 +35,8 @@ export interface DiagramState {
   document: any;
 }
 
-/**
- * @author Dylan Vorster
- */
-export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProps<HTMLDivElement>, DiagramState> {
-  static defaultProps: Partial<DiagramProps> = {
-    allowLooseLinks: true,
-    allowCanvasTranslation: true,
-    allowCanvasZoom: true,
-    inverseZoom: false,
-    maxNumberPointsPerLink: Infinity, // backwards compatible default
-    smartRouting: false,
-    deleteKeys: [46, 8]
-  };
-
+@observer
+export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProps<HTMLDivElement>> {
   constructor(props: DiagramProps) {
     super(props);
     this.state = {
@@ -75,22 +56,26 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     this.onMouseDown = this.onMouseDown.bind(this);
   }
 
+  componentDidMount() {
+    // add a keyboard listener
+    window.addEventListener('keyup', this.onKeyUp);
+
+    this.setState({
+      document,
+      renderedNodes: true,
+    });
+
+    // dont focus the window when in test mode - jsdom fails
+    if (process.env.NODE_ENV !== 'test') {
+      window.focus();
+    }
+  }
+
   componentWillUnmount() {
-    this.props.diagramEngine.removeListener(this.state.diagramEngineListener);
     this.props.diagramEngine.canvas = null;
     window.removeEventListener('mouseup', this.onMouseUp);
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('keyup', this.onKeyUp);
-  }
-
-  componentWillReceiveProps(nextProps: DiagramProps) {
-    if (this.props.diagramEngine !== nextProps.diagramEngine) {
-      this.props.diagramEngine.removeListener(this.state.diagramEngineListener);
-      const diagramEngineListener = nextProps.diagramEngine.addListener({
-        repaintCanvas: () => this.forceUpdate()
-      });
-      this.setState({ diagramEngineListener });
-    }
   }
 
   componentWillUpdate(nextProps: DiagramProps) {
@@ -101,34 +86,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     if (!nextProps.diagramEngine.model.rendered) {
       this.setState({ renderedNodes: false });
       nextProps.diagramEngine.model.rendered = true;
-    }
-  }
-
-  componentDidUpdate() {
-    if (!this.state.renderedNodes) {
-      this.setState({
-        renderedNodes: true
-      });
-    }
-  }
-
-  componentDidMount() {
-    // add a keyboard listener
-    window.addEventListener('keyup', this.onKeyUp);
-
-    this.setState({
-      document,
-      renderedNodes: true,
-      diagramEngineListener: this.props.diagramEngine.addListener({
-        repaintCanvas: () => {
-          this.forceUpdate();
-        }
-      })
-    });
-
-    // dont focus the window when in test mode - jsdom fails
-    if (process.env.NODE_ENV !== 'test') {
-      window.focus();
     }
   }
 
@@ -159,9 +116,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     // look for a point
     element = Toolkit.closest(target, '.srd-point[srd-id]');
     if (element) {
-      const linkId = element.getAttribute('srd-id');
       const pointId = element.getAttribute('srd-id');
-      if (linkId && pointId) {
+      const linkId = element.getAttribute('srd-link-id');
+      if (pointId && linkId) {
         const link = model.getLink(linkId);
         if (link) {
           const point = link.getPointModel(pointId);
@@ -321,6 +278,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     // are we going to connect a link to something?
     if (this.state.action instanceof MoveItemsAction) {
       const elModel = this.getModelAtPosition(event);
+      // tslint:disable-next-line
+      console.log('[mouseup] MoveItemsAction', this.state.action.selectionModels);
       _.forEach(this.state.action.selectionModels, (model) => {
         // only care about points connecting to things
         if (!(model.model instanceof PointModel)) {
@@ -363,8 +322,10 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         }
       });
 
-      // check for / remove any loose links in any models which have been moved
+      // check for / remove any loose links which have been moved
       if (!this.props.allowLooseLinks && this.state.wasMoved) {
+        // tslint:disable-next-line
+        console.log('[mouseup] noLooseLinks + wasMoved', this.state.action.selectionModels);
         _.forEach(this.state.action.selectionModels, (model) => {
           // only care about points connecting to things
           if (!(model.model instanceof PointModel)) {
@@ -392,14 +353,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         if (sourcePort !== null && targetPort !== null) {
           if (!sourcePort.canLinkToPort(targetPort)) {
             // link not allowed
-            link.remove();
-          } else if (
-            _.some(
-              _.values(targetPort.parent!),
-              (l: LinkModel) => l !== link && (l.sourcePort === sourcePort || l.targetPort === sourcePort)
-            )
-          ) {
-            // link is a duplicate
             link.remove();
           }
         }
@@ -483,8 +436,44 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     const elModel = this.getModelAtPosition(event.nativeEvent);
     // tslint:disable-next-line
     console.log('[mousedown] selected model', elModel);
-    // the canvas was selected
-    if (!elModel) {
+    if (elModel) {
+      if (elModel instanceof PortModel) {
+        // its a port element, we want to drag a link
+        if (!this.props.diagramEngine.isModelLocked(elModel)) {
+          const { x, y } = this.props.diagramEngine.getRelativeMousePoint(event);
+          const link = elModel.createLinkModel();
+          if (link) {
+            // define link source to be the current clicked port
+            link.sourcePort = elModel;
+            // update auto-generated link's firstPoint to mouse position
+            link.getFirstPoint().setPosition(x, y);
+            // update auto-generated link's lastPoint to mouse position
+            link.getLastPoint().setPosition(x, y);
+            // unselect all
+            model.clearSelection();
+            // select link & last point
+            link.selected = true;
+            link.getLastPoint().selected = true;
+            model.addLink(link);
+            // tslint:disable-next-line
+            console.log('[mousedown] onMouseDown.link create', link);
+            this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.diagramEngine));
+          }
+        } else {
+          model.clearSelection();
+        }
+      } else {
+        // its some or other element, probably want to move it
+        if (!event.shiftKey && !elModel.selected) {
+          model.clearSelection();
+        }
+        elModel.selected = true;
+        // tslint:disable-next-line
+        console.log('[mousedown] selected model fire action MOVE', { x: event.clientX, y: event.clientY });
+        this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.diagramEngine));
+      }
+    } else {
+      // no selection: the canvas was selected
       if (event.shiftKey) {
         // it is a "multiple selection" action
         const { x, y } = this.props.diagramEngine.getRelativePoint(event.clientX, event.clientY);
@@ -494,37 +483,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         model.clearSelection();
         this.startFiringAction(new MoveCanvasAction(event.clientX, event.clientY, model));
       }
-    } else if (elModel instanceof PortModel) {
-      // its a port element, we want to drag a link
-      if (!this.props.diagramEngine.isModelLocked(elModel)) {
-        const { x, y } = this.props.diagramEngine.getRelativeMousePoint(event);
-        const link = elModel.createLinkModel();
-        if (link) {
-          // tslint:disable-next-line
-          console.log('[mousedown] onMouseDown.link create', link);
-          link.sourcePort = elModel;
-          link.removeMiddlePoints();
-          link.getFirstPoint().setPosition(x, y);
-          const lastPoint = link.getLastPoint();
-          lastPoint.setPosition(x, y);
-          lastPoint.selected = true;
-          model.clearSelection();
-          model.addLink(link);
-          this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.diagramEngine));
-        }
-      } else {
-        model.clearSelection();
-      }
-    } else {
-      // its some or other element, probably want to move it
-      if (!event.shiftKey && !elModel.selected) {
-        model.clearSelection();
-      }
-      elModel.selected = true;
-      // tslint:disable-next-line
-      console.log('[mousedown] selected model fire action MOVE', { x: event.clientX, y: event.clientY });
-      this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.diagramEngine));
     }
+
     this.state.document.addEventListener('mousemove', this.onMouseMove);
     this.state.document.addEventListener('mouseup', this.onMouseUp);
   }

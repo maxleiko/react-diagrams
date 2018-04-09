@@ -7,21 +7,22 @@ import * as _ from 'lodash';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultLabelModel } from './DefaultLabelModel';
 import { LabelModel } from '../../models/LabelModel';
+import { DefaultPortModel } from './DefaultPortModel';
 
-export interface DefaultLinkModelListener extends LinkModelListener {
+export interface DefaultLinkModelListener extends LinkModelListener<DefaultPortModel, DefaultPortModel> {
   colorChanged?(event: BaseEvent<DefaultLinkModel> & { color: null | string }): void;
   widthChanged?(event: BaseEvent<DefaultLinkModel> & { width: 0 | number }): void;
   curvynessChanged?(event: BaseEvent<DefaultLinkModel> & { curvyness: 0 | number }): void;
 }
 
-export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener> {
+export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener, DefaultPortModel, DefaultPortModel> {
   private _color: string;
   private _width: number = -1;
   private _curvyness: number = -1;
 
   constructor(
     type: string = 'default',
-    color: string = 'rgba(255, 255, 255, 0.5)',
+    color: string = 'rgb(255, 255, 255, 0.6)',
     width: number = 3,
     curvyness: number = 50
   ) {

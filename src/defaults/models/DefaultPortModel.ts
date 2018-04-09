@@ -39,7 +39,12 @@ export class DefaultPortModel extends PortModel {
 
   canLinkToPort(port: PortModel): boolean {
     if (port instanceof DefaultPortModel) {
-      return this._in !== port._in;
+      if (this._in !== port._in) {
+        const duplicate = Array.from(this.links.values())
+          .find((link) => link.sourcePort === this && link.targetPort === port);
+        return duplicate === undefined;
+      }
+      return false;
     }
     return true;
   }

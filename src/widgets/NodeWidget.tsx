@@ -1,14 +1,14 @@
 import * as React from 'react';
 import * as cx from 'classnames';
+import { observer } from 'mobx-react';
+
 import { NodeModel } from '../models/NodeModel';
 
 export interface NodeProps {
   node: NodeModel;
 }
 
-/**
- * @author Dylan Vorster
- */
+@observer
 export class NodeWidget extends React.Component<NodeProps> {
 
   render() {

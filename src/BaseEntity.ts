@@ -1,5 +1,7 @@
-import { Toolkit } from './Toolkit';
 import * as _ from 'lodash';
+import { observable, computed } from 'mobx';
+
+import { Toolkit } from './Toolkit';
 import { DiagramEngine } from './DiagramEngine';
 
 /**
@@ -19,9 +21,9 @@ export interface BaseListener<T extends BaseEntity = any> {
 export type BaseEntityType = 'node' | 'link' | 'port' | 'point';
 
 export class BaseEntity<L extends BaseListener = BaseListener> {
-  private _id: string;
+  @observable private _id: string;
   private _listeners: Map<string, L> = new Map();
-  protected _locked: boolean = false;
+  @observable protected _locked: boolean = false;
 
   constructor(id: string = Toolkit.UID()) {
     this._id = id;
@@ -31,6 +33,7 @@ export class BaseEntity<L extends BaseListener = BaseListener> {
    * Getter id
    * @return {string}
    */
+  @computed
   get id(): string {
     return this._id;
   }
@@ -47,6 +50,7 @@ export class BaseEntity<L extends BaseListener = BaseListener> {
    * Getter locked
    * @return {boolean }
    */
+  @computed
   get locked(): boolean {
     return this._locked;
   }

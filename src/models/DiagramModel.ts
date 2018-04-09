@@ -1,5 +1,7 @@
-import { BaseListener, BaseEntity, BaseEvent, BaseEntityType } from '../BaseEntity';
 import * as _ from 'lodash';
+import { observable, computed, action } from 'mobx';
+
+import { BaseListener, BaseEntity, BaseEvent, BaseEntityType } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from './LinkModel';
 import { NodeModel } from './NodeModel';
@@ -43,25 +45,30 @@ export interface DiagramListener<N extends NodeModel = NodeModel, L extends Link
   gridUpdated?(event: GridEvent): void;
 }
 
-/**
- *
- */
 export class DiagramModel extends BaseEntity<DiagramListener> {
   // models
-  private _links: Map<string, LinkModel> = new Map();
-  private _nodes: Map<string, NodeModel> = new Map();
+  @observable private _links: Map<string, LinkModel> = new Map();
+  @observable private _nodes: Map<string, NodeModel> = new Map();
 
   // control variables
-  private _offsetX: number = 0;
-  private _offsetY: number = 0;
-  private _zoom: number = 100;
-  private _rendered: boolean = false;
-  private _gridSize: number = 0;
+  @observable private _offsetX: number = 0;
+  @observable private _offsetY: number = 0;
+  @observable private _zoom: number = 100;
+  @observable private _rendered: boolean = false;
+  @observable private _gridSize: number = 0;
+  @observable private _allowLooseLinks: boolean = false;
+  @observable private _allowCanvasTranslation: boolean = true;
+  @observable private _allowCanvasZoom: boolean = true;
+  @observable private _inverseZoom: boolean = false;
+  @observable private _maxNumberPointsPerLink: number = Infinity;
+  @observable private _smartRouting: boolean = false;
+  @observable private _deleteKeys: number[] = [46, 8];
 
   /**
    * Getter links
    * @return {Map<string, LinkModel> }
    */
+  @computed
   get links(): Map<string, LinkModel> {
     return this._links;
   }
@@ -78,6 +85,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    * Getter nodes
    * @return {Map<string, NodeModel> }
    */
+  @computed
   get nodes(): Map<string, NodeModel> {
     return this._nodes;
   }
@@ -94,6 +102,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    * Getter offsetX
    * @return {number }
    */
+  @computed
   get offsetX(): number {
     return this._offsetX;
   }
@@ -115,6 +124,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    * Getter offsetY
    * @return {number }
    */
+  @computed
   get offsetY(): number {
     return this._offsetY;
   }
@@ -136,6 +146,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    * Getter zoom
    * @return {number }
    */
+  @computed
   get zoom(): number {
     return this._zoom;
   }
@@ -157,6 +168,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    * Getter rendered
    * @return {boolean }
    */
+  @computed
   get rendered(): boolean {
     return this._rendered;
   }
@@ -173,6 +185,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    * Getter gridSize
    * @return {number }
    */
+  @computed
   get gridSize(): number {
     return this._gridSize;
   }
@@ -185,6 +198,126 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     this._gridSize = value;
   }
 
+  /**
+   * Getter allowLooseLinks
+   * @return {boolean }
+   */
+  @computed
+  get allowLooseLinks(): boolean {
+    return this._allowLooseLinks;
+  }
+
+  /**
+   * Setter allowLooseLinks
+   * @param {boolean } value
+   */
+  set allowLooseLinks(value: boolean) {
+    this._allowLooseLinks = value;
+  }
+
+  /**
+   * Getter allowCanvasTranslation
+   * @return {boolean }
+   */
+  @computed
+  get allowCanvasTranslation(): boolean {
+    return this._allowCanvasTranslation;
+  }
+
+  /**
+   * Setter allowCanvasTranslation
+   * @param {boolean } value
+   */
+  set allowCanvasTranslation(value: boolean) {
+    this._allowCanvasTranslation = value;
+  }
+
+  /**
+   * Getter allowCanvasZoom
+   * @return {boolean }
+   */
+  @computed
+  get allowCanvasZoom(): boolean {
+    return this._allowCanvasZoom;
+  }
+
+  /**
+   * Setter allowCanvasZoom
+   * @param {boolean } value
+   */
+  set allowCanvasZoom(value: boolean) {
+    this._allowCanvasZoom = value;
+  }
+
+  /**
+   * Getter inverseZoom
+   * @return {boolean }
+   */
+  @computed
+  get inverseZoom(): boolean {
+    return this._inverseZoom;
+  }
+
+  /**
+   * Setter inverseZoom
+   * @param {boolean } value
+   */
+  set inverseZoom(value: boolean) {
+    this._inverseZoom = value;
+  }
+
+  /**
+   * Getter maxNumberPointsPerLink
+   * @return {number }
+   */
+  @computed
+  get maxNumberPointsPerLink(): number {
+    return this._maxNumberPointsPerLink;
+  }
+
+  /**
+   * Setter maxNumberPointsPerLink
+   * @param {number } value
+   */
+  set maxNumberPointsPerLink(value: number) {
+    this._maxNumberPointsPerLink = value;
+  }
+
+  /**
+   * Getter smartRouting
+   * @return {boolean }
+   */
+  @computed
+  get smartRouting(): boolean {
+    return this._smartRouting;
+  }
+
+  /**
+   * Setter smartRouting
+   * @param {boolean } value
+   */
+  set smartRouting(value: boolean) {
+    this._smartRouting = value;
+  }
+
+  /**
+   * Getter deleteKeys
+   * @return {number[]}
+   */
+  @computed
+  get deleteKeys(): number[] {
+    return this._deleteKeys;
+  }
+
+  /**
+   * Setter smartRouting
+   * @param {number[]} keys
+   */
+  set deleteKeys(keys: number[]) {
+    this._deleteKeys = keys;
+  }
+
+  @action
   setGridSize(size: number = 0) {
     this.gridSize = size;
     this.iterateListeners((listener, event) => {
@@ -237,30 +370,26 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     });
   }
 
+  @action
   clearSelection(ignore: BaseModel<BaseEntity, BaseModelListener> | null = null) {
-    _.forEach(this.getSelectedItems(), (element) => {
-      if (ignore && ignore.id === element.id) {
+    // tslint:disable-next-line
+    console.log('[clearSelection]', this.getSelectedItems());
+    this.getSelectedItems().forEach((item) => {
+      if (ignore && ignore.id === item.id) {
         return;
       }
-      element.selected = false; // TODO dont fire the listener
+      item.selected = false;
     });
   }
 
   getSelectedItems(...filters: BaseEntityType[]): Array<BaseModel<BaseEntity, BaseModelListener>> {
-    if (!Array.isArray(filters)) {
-      filters = [filters];
-    }
     let items: Array<BaseModel<any, any>> = [];
 
     // find all nodes
-    items = items.concat(
-      _.flatten(Array.from(this._nodes.values()).map((node) => node.getSelectedEntities()))
-    );
+    items = items.concat(_.flatten(Array.from(this._nodes.values()).map((node) => node.getSelectedEntities())));
 
     // find all links
-    items = items.concat(
-      _.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities()))
-    );
+    items = items.concat(_.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities())));
 
     items = _.uniq(items);
 
@@ -285,6 +414,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     return items;
   }
 
+  @action
   setOffset(offsetX: number, offsetY: number) {
     this._offsetX = offsetX;
     this._offsetY = offsetY;
@@ -303,6 +433,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     return this._links.get(id);
   }
 
+  @action
   addAll(...models: BaseModel[]): BaseModel[] {
     _.forEach(models, (model) => {
       if (model instanceof LinkModel) {
@@ -314,6 +445,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     return models;
   }
 
+  @action
   addLink(link: LinkModel): LinkModel {
     link.addListener({
       entityRemoved: () => {
@@ -338,6 +470,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     return link;
   }
 
+  @action
   addNode(node: NodeModel): NodeModel {
     node.addListener({
       entityRemoved: () => {
@@ -353,6 +486,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     return node;
   }
 
+  @action
   removeLink(link: LinkModel | string) {
     const l = this._links.get(link instanceof LinkModel ? link.id : link);
     if (l) {
@@ -365,6 +499,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     }
   }
 
+  @action
   removeNode(node: NodeModel | string) {
     const n = this._nodes.get(node instanceof NodeModel ? node.id : node);
     if (n) {

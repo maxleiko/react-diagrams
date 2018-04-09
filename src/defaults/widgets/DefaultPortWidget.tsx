@@ -1,5 +1,7 @@
 import * as React from 'react';
 import * as cx from 'classnames';
+import { observer } from 'mobx-react';
+
 import { DefaultPortModel } from '../models/DefaultPortModel';
 import { PortWidget } from '../../widgets/PortWidget';
 
@@ -7,9 +9,7 @@ export interface DefaultPortWidgetProps {
   port: DefaultPortModel;
 }
 
-/**
- * @author Dylan Vorster
- */
+@observer
 export class DefaultPortWidget extends React.Component<DefaultPortWidgetProps> {
 
   render() {

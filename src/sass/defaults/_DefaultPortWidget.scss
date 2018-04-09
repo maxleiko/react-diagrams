@@ -8,14 +8,14 @@
     align-self: center;
   }
 
-  &.name {
+  .name {
     padding: 0 5px;
   }
 
-  &.out {
+  .out {
     justify-content: flex-end;
 
-    #{$p}__name {
+    .name {
       justify-content: flex-end;
       text-align: right;
     }

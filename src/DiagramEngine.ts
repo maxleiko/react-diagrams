@@ -1,4 +1,6 @@
 import * as _ from 'lodash';
+import { observable, computed, action } from 'mobx';
+
 import { BaseEntity, BaseListener } from './BaseEntity';
 import { DefaultLabelFactory } from './defaults/factories/DefaultLabelFactory';
 import { DefaultLinkFactory } from './defaults/factories/DefaultLinkFactory';
@@ -17,9 +19,7 @@ import { PointModel } from './models/PointModel';
 import { PortModel } from './models/PortModel';
 import { ROUTING_SCALING_FACTOR } from './routing/PathFinding';
 import { Toolkit } from './Toolkit';
-/**
- * @author Dylan Vorster
- */
+
 export interface DiagramEngineListener extends BaseListener {
   portFactoriesUpdated?(): void;
   nodeFactoriesUpdated?(): void;
@@ -29,28 +29,26 @@ export interface DiagramEngineListener extends BaseListener {
 }
 
 /**
- * Passed as a parameter to the DiagramWidget
+ * Passed as prop to the DiagramWidget
  */
 export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
-  private _nodeFactories: { [s: string]: AbstractNodeFactory } = {};
-  private _linkFactories: { [s: string]: AbstractLinkFactory } = {};
-  private _portFactories: { [s: string]: AbstractPortFactory } = {};
-  private _labelFactories: { [s: string]: AbstractLabelFactory } = {};
+  @observable private _nodeFactories: { [s: string]: AbstractNodeFactory } = {};
+  @observable private _linkFactories: { [s: string]: AbstractLinkFactory } = {};
+  @observable private _portFactories: { [s: string]: AbstractPortFactory } = {};
+  @observable private _labelFactories: { [s: string]: AbstractLabelFactory } = {};
 
-  private _model: DiagramModel = new DiagramModel();
-  private _canvas: HTMLDivElement | null = null;
-  private _paintableWidgets: { [s: string]: boolean } = {};
-  private _linksThatHaveInitiallyRendered: { [s: string]: boolean } = {};
-  private _nodesRendered: boolean = false;
-  private _maxNumberPointsPerLink: number = -1;
-  private _smartRouting: boolean = false;
+  @observable private _model: DiagramModel = new DiagramModel();
+  @observable private _canvas: HTMLDivElement | null = null;
+  @observable private _paintableWidgets: { [s: string]: boolean } = {};
+  @observable private _linksThatHaveInitiallyRendered: { [s: string]: boolean } = {};
+  @observable private _nodesRendered: boolean = false;
 
   // calculated only when smart routing is active
-  private _canvasMatrix: number[][] = [];
-  private _routingMatrix: number[][] = [];
+  @observable private _canvasMatrix: number[][] = [];
+  @observable private _routingMatrix: number[][] = [];
   // used when at least one element has negative coordinates
-  private _hAdjustmentFactor: number = 0;
-  private _vAdjustmentFactor: number = 0;
+  @observable private _hAdjustmentFactor: number = 0;
+  @observable private _vAdjustmentFactor: number = 0;
 
   constructor() {
     super();
@@ -65,6 +63,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     }
   }
 
+  @action
   installDefaultFactories() {
     this.registerNodeFactory(new DefaultNodeFactory());
     this.registerLinkFactory(new DefaultLinkFactory());
@@ -110,11 +109,13 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
    * Checks to see if a model is locked by running through
    * its parents to see if they are locked first
    */
+  @computed
   isModelLocked(model: BaseEntity<BaseListener>) {
     // always check the diagram model
     return this._model.locked || model.locked;
   }
 
+  @action
   recalculatePortsVisually() {
     this._nodesRendered = false;
     this._linksThatHaveInitiallyRendered = {};
@@ -129,6 +130,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     return this._paintableWidgets[baseModel.id] !== undefined;
   }
 
+  @computed
   get canvas(): HTMLDivElement | null {
     return this._canvas;
   }
@@ -142,14 +144,17 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     this.recalculatePortsVisually();
   }
 
+  @computed
   get model(): DiagramModel {
     return this._model;
   }
 
+  @computed
   get linksThatHaveInitiallyRendered(): { [s: string]: boolean } {
     return this._linksThatHaveInitiallyRendered;
   }
 
+  @computed
   get nodesRendered(): boolean {
     return this._nodesRendered;
   }
@@ -159,18 +164,22 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
   }
   // !-------------- FACTORIES ------------
 
-  getNodeFactories(): { [s: string]: AbstractNodeFactory } {
+  @computed
+  get nodeFactories(): { [s: string]: AbstractNodeFactory } {
     return this._nodeFactories;
   }
 
-  getLinkFactories(): { [s: string]: AbstractLinkFactory } {
+  @computed
+  get linkFactories(): { [s: string]: AbstractLinkFactory } {
     return this._linkFactories;
   }
 
-  getLabelFactories(): { [s: string]: AbstractLabelFactory } {
+  @computed
+  get labelFactories(): { [s: string]: AbstractLabelFactory } {
     return this._labelFactories;
   }
 
+  @action
   registerLabelFactory(factory: AbstractLabelFactory) {
     this._labelFactories[factory.type] = factory;
     this.iterateListeners((listener) => {
@@ -180,6 +189,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     });
   }
 
+  @action
   registerPortFactory(factory: AbstractPortFactory) {
     this._portFactories[factory.type] = factory;
     this.iterateListeners((listener) => {
@@ -189,6 +199,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     });
   }
 
+  @action
   registerNodeFactory(factory: AbstractNodeFactory) {
     this._nodeFactories[factory.type] = factory;
     this.iterateListeners((listener) => {
@@ -198,6 +209,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     });
   }
 
+  @action
   registerLinkFactory(factory: AbstractLinkFactory) {
     this._linkFactories[factory.type] = factory;
     this.iterateListeners((listener) => {
@@ -263,7 +275,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     return this.getFactoryForPort(port).generateReactWidget(this, port);
   }
 
-  getRelativeMousePoint(event: React.MouseEvent<HTMLElement>): { x: number; y: number } {
+  getRelativeMousePoint(event: React.MouseEvent<Element>): { x: number; y: number } {
     const point = this.getRelativePoint(event.clientX, event.clientY);
     return {
       x: (point.x - this._model.offsetX) / (this._model.zoom / 100.0),
@@ -369,21 +381,6 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     };
   }
 
-  getMaxNumberPointsPerLink(): number {
-    return this._maxNumberPointsPerLink;
-  }
-
-  setMaxNumberPointsPerLink(max: number) {
-    this._maxNumberPointsPerLink = max;
-  }
-
-  isSmartRoutingEnabled() {
-    return !!this._smartRouting;
-  }
-  setSmartRoutingStatus(status: boolean) {
-    this._smartRouting = status;
-  }
-
   /**
    * A representation of the canvas in the following format:
    *
@@ -405,6 +402,8 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
 
     return this._canvasMatrix;
   }
+
+  @action
   calculateCanvasMatrix() {
     const {
       width: canvasWidth,
@@ -445,6 +444,8 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
 
     return this._routingMatrix;
   }
+
+  @action
   calculateRoutingMatrix(): void {
     const matrix = _.cloneDeep(this.getCanvasMatrix());
 
@@ -464,6 +465,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
   translateRoutingX(x: number, reverse: boolean = false) {
     return x + this._hAdjustmentFactor * (reverse ? -1 : 1);
   }
+
   translateRoutingY(y: number, reverse: boolean = false) {
     return y + this._vAdjustmentFactor * (reverse ? -1 : 1);
   }
@@ -584,6 +586,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     }
   }
 
+  @action
   zoomToFit() {
     const xFactor = this._canvas!.clientWidth / this._canvas!.scrollWidth;
     const yFactor = this._canvas!.clientHeight / this._canvas!.scrollHeight;
@@ -591,6 +594,5 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
 
     this._model.zoom = this._model.zoom * zoomFactor;
     this._model.setOffset(0, 0);
-    this.repaintCanvas();
   }
 }

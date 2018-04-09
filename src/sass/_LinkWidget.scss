@@ -1,0 +1,48 @@
+.srd-segment {
+  path {
+    fill: none;
+    pointer-events: all;
+  }
+
+  .halo {
+    opacity: 0;
+  }
+
+  &:hover {
+    .path {
+      cursor: pointer;
+    }
+  }
+
+  &:hover,
+  &.selected {
+    path {
+      stroke: rgb(0, 192, 255);
+    }
+
+    .path {
+      stroke-linecap: round;
+      stroke-dasharray: 10, 2;
+      animation: dash 1s linear infinite;
+    }
+
+    .halo {
+      opacity: 0.1;
+    }
+  }
+
+  &.reverse {
+    .path {
+      animation-direction: reverse;
+    }
+  }
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}

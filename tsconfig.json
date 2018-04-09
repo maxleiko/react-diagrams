@@ -13,6 +13,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "experimentalDecorators": true,
     "strict": true,
     "jsx": "react",
     "lib": ["dom", "es2015"],

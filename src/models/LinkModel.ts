@@ -1,34 +1,40 @@
+import * as _ from 'lodash';
+import { observable, computed } from 'mobx';
+
 import { BaseModel, BaseModelListener } from './BaseModel';
 import { PortModel } from './PortModel';
 import { PointModel } from './PointModel';
-import * as _ from 'lodash';
 import { BaseEvent } from '../BaseEntity';
 import { LabelModel } from './LabelModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
 
-export interface LinkModelListener extends BaseModelListener {
-  sourcePortChanged?(event: BaseEvent<LinkModel> & { port: null | PortModel }): void;
-  targetPortChanged?(event: BaseEvent<LinkModel> & { port: null | PortModel }): void;
+export interface LinkModelListener<S extends PortModel = PortModel, T extends PortModel = PortModel>
+  extends BaseModelListener {
+  sourcePortChanged?(event: BaseEvent<LinkModel> & { port: S | null }): void;
+  targetPortChanged?(event: BaseEvent<LinkModel> & { port: T | null }): void;
 }
 
-export class LinkModel<L extends LinkModelListener = LinkModelListener> extends BaseModel<DiagramModel, L> {
-  private _sourcePort: PortModel | null = null;
-  private _targetPort: PortModel | null = null;
-  private _labels: LabelModel[] = [];
-  private _extras: { [s: string]: any } = {};
-  private _points: PointModel[] = [
-    new PointModel(this, { x: 0, y: 0 }),
-    new PointModel(this, { x: 0, y: 0 })
-  ];
+export class LinkModel<
+  L extends LinkModelListener<S, T> = LinkModelListener<S, T>,
+  S extends PortModel = PortModel,
+  T extends PortModel = PortModel
+> extends BaseModel<DiagramModel, L> {
+  @observable private _sourcePort: S | null = null;
+  @observable private _targetPort: T | null = null;
+  @observable private _labels: LabelModel[] = [];
+  @observable private _points: PointModel[] = [];
 
   constructor(linkType: string = 'default', id?: string) {
     super(linkType, id);
+    this._points = [
+      new PointModel(this, { x: 0, y: 0 }),
+      new PointModel(this, { x: 0, y: 0 })
+    ];
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {
     super.deSerialize(ob, engine);
-    this._extras = ob.extras;
     this._points = _.map(ob.points || [], (point: { x: number; y: number }) => {
       const p = new PointModel(this, { x: point.x, y: point.y });
       p.deSerialize(point, engine);
@@ -42,25 +48,25 @@ export class LinkModel<L extends LinkModelListener = LinkModelListener> extends 
       this.addLabel(labelOb);
     });
 
-    if (ob.target) {
+    if (ob.source) {
       if (this.parent) {
-        const node = this.parent.getNode(ob.target);
+        const node = this.parent.getNode(ob.source);
         if (node) {
-          const port = node.getPortFromID(ob.targetPort);
+          const port = node.getPortFromID(ob.sourcePort) as S | undefined;
           if (port) {
-            this._targetPort = port;
+            this._sourcePort = port;
           }
         }
       }
     }
 
-    if (ob.source) {
+    if (ob.target) {
       if (this.parent) {
-        const node = this.parent.getNode(ob.source);
+        const node = this.parent.getNode(ob.target);
         if (node) {
-          const port = node.getPortFromID(ob.sourcePort);
+          const port = node.getPortFromID(ob.targetPort) as T | undefined;
           if (port) {
-            this._sourcePort = port;
+            this._targetPort = port;
           }
         }
       }
@@ -76,7 +82,6 @@ export class LinkModel<L extends LinkModelListener = LinkModelListener> extends 
       points: _.map(this._points, (point) => {
         return point.serialize();
       }),
-      extras: this._extras,
       labels: this._labels.map((label) => label.serialize())
     });
   }
@@ -142,15 +147,21 @@ export class LinkModel<L extends LinkModelListener = LinkModelListener> extends 
     return this._points[this._points.length - 1];
   }
 
+  getSelectedEntities(): Array<BaseModel<any, any>> {
+    return super.getSelectedEntities().concat(_.flatten(this._points.map((pt) => pt.getSelectedEntities())));
+  }
+
+  @computed
   get labels(): LabelModel[] {
     return this._labels;
   }
 
-  get sourcePort(): PortModel | null {
+  @computed
+  get sourcePort(): S | null {
     return this._sourcePort;
   }
 
-  set sourcePort(port: PortModel | null) {
+  set sourcePort(port: S | null) {
     if (port) {
       port.addLink(this);
     }
@@ -165,11 +176,12 @@ export class LinkModel<L extends LinkModelListener = LinkModelListener> extends 
     });
   }
 
-  get targetPort(): PortModel | null {
+  @computed
+  get targetPort(): T | null {
     return this._targetPort;
   }
 
-  set targetPort(port: PortModel | null) {
+  set targetPort(port: T | null) {
     if (port) {
       port.addLink(this);
     }
@@ -193,13 +205,14 @@ export class LinkModel<L extends LinkModelListener = LinkModelListener> extends 
     this._labels.push(label);
   }
 
+  @computed
   get points(): PointModel[] {
     return this._points;
   }
 
   set points(points: PointModel[]) {
     this._points = points;
-    this._points.forEach((point) => point.parent = this);
+    this._points.forEach((point) => (point.parent = this));
   }
 
   removePoint(pointModel: PointModel) {

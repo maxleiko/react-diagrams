@@ -1,14 +1,14 @@
 import * as React from 'react';
 import * as cx from 'classnames';
+import { observer } from 'mobx-react';
+
 import { PortModel } from '../models/PortModel';
 
 export interface PortProps {
   port: PortModel;
 }
 
-/**
- * @author Dylan Vorster
- */
+@observer
 export class PortWidget extends React.Component<PortProps> {
 
   render() {

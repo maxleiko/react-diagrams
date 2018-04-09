@@ -1,18 +1,20 @@
+import * as _ from 'lodash';
+import { observable, computed, action } from 'mobx';
+
 import { BaseModel, BaseModelListener } from './BaseModel';
 import { NodeModel } from './NodeModel';
 import { LinkModel } from './LinkModel';
-import * as _ from 'lodash';
 import { DiagramEngine } from '../DiagramEngine';
 
 export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> {
-  private _maximumLinks: number;
-  private _links: Map<string, LinkModel> = new Map();
+  @observable private _maximumLinks: number;
+  @observable private _links: Map<string, LinkModel> = new Map();
 
   // calculated post rendering so routing can be done correctly
-  private _x: number = -1;
-  private _y: number = -1;
-  private _width: number = -1;
-  private _height: number = -1;
+  @observable private _x: number = -1;
+  @observable private _y: number = -1;
+  @observable private _width: number = -1;
+  @observable private _height: number = -1;
 
   constructor(name: string, type: string, maximumLinks: number = -1) {
     super(type, name);
@@ -20,11 +22,9 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   }
 
   getSelectedEntities(): Array<BaseModel<any, any>> {
-    if (this.selected) {
-      return ([this] as Array<BaseModel<any, any>>)
-        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities())));
-    }
-    return [];
+    return super.getSelectedEntities().concat(
+      _.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities()))
+    );
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {
@@ -54,14 +54,17 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
     return this._links.size < this._maximumLinks;
   }
 
+  @action
   removeLink(link: LinkModel) {
     return this._links.delete(link.id);
   }
 
+  @action
   addLink(link: LinkModel) {
     this._links.set(link.id, link);
   }
 
+  @action
   updateCoords({ x, y, width, height }: { x: number; y: number; width: number; height: number }) {
     this._x = x;
     this._y = y;
@@ -75,26 +78,32 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
 
   abstract createLinkModel(): LinkModel | null;
 
+  @computed
   get maximumLinks(): number {
     return this._maximumLinks;
   }
 
+  @computed
   get links(): Map<string, LinkModel> {
     return this._links;
   }
 
+  @computed
   get x(): number {
     return this._x;
   }
 
+  @computed
   get y(): number {
     return this._y;
   }
 
+  @computed
   get width(): number {
     return this._width;
   }
 
+  @computed
   get height(): number {
     return this._height;
   }

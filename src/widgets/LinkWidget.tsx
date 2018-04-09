@@ -1,5 +1,7 @@
 import * as React from 'react';
 import * as cx from 'classnames';
+import { observer } from 'mobx-react';
+
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from '../models/LinkModel';
 
@@ -8,9 +10,7 @@ export interface LinkProps {
   diagramEngine: DiagramEngine;
 }
 
-/**
- * @author Dylan Vorster
- */
+@observer
 export class LinkWidget extends React.Component<LinkProps> {
   shouldComponentUpdate() {
     return this.props.diagramEngine.canEntityRepaint(this.props.link);

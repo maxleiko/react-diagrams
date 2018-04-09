@@ -1,5 +1,7 @@
-import { BaseEntity, BaseListener } from '../BaseEntity';
 import * as _ from 'lodash';
+import { observable, computed } from 'mobx';
+
+import { BaseEntity, BaseListener } from '../BaseEntity';
 import { BaseEvent } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
 
@@ -17,14 +19,15 @@ export class BaseModel<
   L extends BaseModelListener = BaseModelListener
 > extends BaseEntity<L> {
   private _type: string;
-  private _selected: boolean = false;
-  private _parent: P | null = null;
+  @observable private _selected: boolean = false;
+  @observable private _parent: P | null = null;
 
   constructor(type: string = 'srd-base', id?: string) {
     super(id);
     this._type = type;
   }
 
+  @computed
   get locked(): boolean {
     if (this._parent) {
       if (this._parent.locked) {
@@ -35,6 +38,7 @@ export class BaseModel<
     return this._locked;
   }
 
+  @computed
   get parent(): P | null {
     return this._parent;
   }
@@ -67,6 +71,7 @@ export class BaseModel<
     return this._type;
   }
 
+  @computed
   get selected(): boolean {
     return this._selected;
   }
