@@ -10,12 +10,11 @@ import { AbstractLabelFactory } from './factories/AbstractLabelFactory';
 import { AbstractLinkFactory } from './factories/AbstractLinkFactory';
 import { AbstractNodeFactory } from './factories/AbstractNodeFactory';
 import { AbstractPortFactory } from './factories/AbstractPortFactory';
-import { BaseModel, BaseModelListener } from './models/BaseModel';
 import { DiagramModel } from './models/DiagramModel';
 import { LabelModel } from './models/LabelModel';
 import { LinkModel } from './models/LinkModel';
 import { NodeModel } from './models/NodeModel';
-import { PointModel } from './models/PointModel';
+import { BaseAction } from './actions/BaseAction';
 import { PortModel } from './models/PortModel';
 import { ROUTING_SCALING_FACTOR } from './routing/PathFinding';
 import { Toolkit } from './Toolkit';
@@ -32,6 +31,7 @@ export interface DiagramEngineListener extends BaseListener {
  * Passed as prop to the DiagramWidget
  */
 export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
+
   @observable private _nodeFactories: { [s: string]: AbstractNodeFactory } = {};
   @observable private _linkFactories: { [s: string]: AbstractLinkFactory } = {};
   @observable private _portFactories: { [s: string]: AbstractPortFactory } = {};
@@ -39,9 +39,6 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
 
   @observable private _model: DiagramModel = new DiagramModel();
   @observable private _canvas: HTMLDivElement | null = null;
-  @observable private _paintableWidgets: { [s: string]: boolean } = {};
-  @observable private _linksThatHaveInitiallyRendered: { [s: string]: boolean } = {};
-  @observable private _nodesRendered: boolean = false;
 
   // calculated only when smart routing is active
   @observable private _canvasMatrix: number[][] = [];
@@ -49,6 +46,8 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
   // used when at least one element has negative coordinates
   @observable private _hAdjustmentFactor: number = 0;
   @observable private _vAdjustmentFactor: number = 0;
+
+  @observable private _action: BaseAction | null = null;
 
   constructor() {
     super();
@@ -79,57 +78,6 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     });
   }
 
-  clearRepaintEntities() {
-    this._paintableWidgets = {};
-  }
-
-  enableRepaintEntities(entities: Array<BaseModel<BaseEntity, BaseModelListener>>) {
-    this._paintableWidgets = {};
-    entities.forEach((entity) => {
-      // if a node is requested to repaint, add all of its links
-      if (entity instanceof NodeModel) {
-        entity.ports.forEach((port) => {
-          if (port instanceof PortModel) {
-            port.links.forEach((link) => {
-              this._paintableWidgets[link.id] = true;
-            });
-          }
-        });
-      }
-
-      if (entity instanceof PointModel) {
-        this._paintableWidgets[entity.parent!.id] = true;
-      }
-
-      this._paintableWidgets[entity.id] = true;
-    });
-  }
-
-  /**
-   * Checks to see if a model is locked by running through
-   * its parents to see if they are locked first
-   */
-  @computed
-  isModelLocked(model: BaseEntity<BaseListener>) {
-    // always check the diagram model
-    return this._model.locked || model.locked;
-  }
-
-  @action
-  recalculatePortsVisually() {
-    this._nodesRendered = false;
-    this._linksThatHaveInitiallyRendered = {};
-  }
-
-  canEntityRepaint(baseModel: BaseModel<BaseEntity, BaseModelListener>) {
-    // no rules applied, allow repaint
-    if (this._paintableWidgets === null) {
-      return true;
-    }
-
-    return this._paintableWidgets[baseModel.id] !== undefined;
-  }
-
   @computed
   get canvas(): HTMLDivElement | null {
     return this._canvas;
@@ -139,28 +87,22 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     this._canvas = canvas;
   }
 
+  @computed
+  get action(): BaseAction | null {
+    return this._action;
+  }
+
+  set action(a: BaseAction | null) {
+    this._action = a;
+  }
+
   set model(model: DiagramModel) {
     this._model = model;
-    this.recalculatePortsVisually();
   }
 
   @computed
   get model(): DiagramModel {
     return this._model;
-  }
-
-  @computed
-  get linksThatHaveInitiallyRendered(): { [s: string]: boolean } {
-    return this._linksThatHaveInitiallyRendered;
-  }
-
-  @computed
-  get nodesRendered(): boolean {
-    return this._nodesRendered;
-  }
-
-  set nodesRendered(rendered: boolean) {
-    this._nodesRendered = rendered;
   }
   // !-------------- FACTORIES ------------
 

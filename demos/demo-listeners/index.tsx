@@ -1,7 +1,7 @@
 import * as React from 'react';
 // @ts-ignore
 import { action } from '@storybook/addon-actions';
-import { DiagramEngine, DiagramModel, DiagramProps, DefaultNodeModel, DiagramWidget } from 'storm-react-diagrams';
+import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget } from 'storm-react-diagrams';
 
 /**
  * Shows some of the events triggered when elements are selected
@@ -12,6 +12,7 @@ export default () => {
   engine.installDefaultFactories();
 
   const model = new DiagramModel();
+  model.maxNumberPointsPerLink = 0; // no extra points so link selection is fired straight away
 
   // sample for link with simple line
   const node1 = new DefaultNodeModel('Node 1', 'rgb(255,99,66)');
@@ -47,11 +48,6 @@ export default () => {
 
   engine.model = model;
 
-  const props = {
-    diagramEngine: engine,
-    maxNumberPointsPerLink: 0 // no extra points so link selection is fired straight away
-  } as DiagramProps;
-
   return (
     <div>
       <p>To see the possible events you can:</p>
@@ -63,7 +59,7 @@ export default () => {
         </li>
         <li>create a link between ports</li>
       </ul>
-      <DiagramWidget className="srd-demo-canvas" {...props} />
+      <DiagramWidget className="srd-demo-canvas" engine={engine} />
     </div>
   );
 };

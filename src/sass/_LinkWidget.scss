@@ -1,33 +1,19 @@
-.srd-segment {
-  path {
-    fill: none;
-    pointer-events: all;
-  }
-
-  .halo {
-    opacity: 0;
-  }
-
-  &:hover {
-    .path {
-      cursor: pointer;
-    }
-  }
-
+.srd-link {
   &:hover,
   &.selected {
-    path {
-      stroke: rgb(0, 192, 255);
-    }
+    .srd-segment {
+      path {
+        stroke: rgb(0, 192, 255);
 
-    .path {
-      stroke-linecap: round;
-      stroke-dasharray: 10, 2;
-      animation: dash 1s linear infinite;
-    }
+        &.halo {
+          opacity: 0.1;
+        }
 
-    .halo {
-      opacity: 0.1;
+        &.path {
+          stroke-dasharray: 10, 5;
+          animation: dash 60s linear infinite;
+        }
+      }
     }
   }
 
@@ -36,11 +22,28 @@
       animation-direction: reverse;
     }
   }
+
+  .srd-segment {
+    path {
+      fill: none;
+      pointer-events: all;
+
+      &.halo {
+        stroke-linecap: round;
+        opacity: 0;
+      }
+
+      &.path {
+        cursor: pointer;
+        stroke-linecap: square;
+      }
+    }
+  }
 }
 
 @keyframes dash {
   from {
-    stroke-dashoffset: 24;
+    stroke-dashoffset: 1000;
   }
   to {
     stroke-dashoffset: 0;

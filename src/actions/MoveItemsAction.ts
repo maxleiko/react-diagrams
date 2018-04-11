@@ -13,12 +13,11 @@ export class MoveItemsAction extends BaseAction {
   constructor(mouseX: number, mouseY: number, diagramEngine: DiagramEngine) {
     super(mouseX, mouseY);
     this.moved = false;
-    diagramEngine.enableRepaintEntities(diagramEngine.model.getSelectedItems());
     let selectedItems = diagramEngine.model.getSelectedItems();
 
     // dont allow items which are locked to move
     selectedItems = selectedItems.filter((item) => {
-      return !diagramEngine.isModelLocked(item);
+      return !diagramEngine.model.locked && !item.locked;
     });
 
     this.selectionModels = selectedItems

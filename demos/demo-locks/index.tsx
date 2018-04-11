@@ -4,7 +4,6 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
-  DiagramProps
 } from 'storm-react-diagrams';
 
 /**
@@ -14,7 +13,7 @@ import {
  * @Author Dylan Vorster
  */
 export default () => {
-  //1) setup the diagram engine
+  // 1) setup the diagram engine
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
 
@@ -51,17 +50,14 @@ export default () => {
 
   engine.model = model;
 
-  //!========================================= <<<<<<<
+  // !========================================= <<<<<<<
 
   model.locked = true;
-  const props = {
-    diagramEngine: engine,
-    allowLooseLinks: false,
-    allowCanvasTranslation: false,
-    allowCanvasZoom: false
-  } as DiagramProps;
+  model.allowLooseLinks = false;
+  model.allowCanvasTranslation = false;
+  model.allowCanvasZoom = false;
 
-  //!=========================================  <<<<<<<
+  // !=========================================  <<<<<<<
 
-  return <DiagramWidget className="srd-demo-canvas" {...props} />;
+  return <DiagramWidget className="srd-demo-canvas" engine={engine} />;
 };

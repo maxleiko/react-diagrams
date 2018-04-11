@@ -4,7 +4,6 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
-  DiagramProps
 } from 'storm-react-diagrams';
 
 /**
@@ -16,13 +15,14 @@ export default () => {
   engine.installDefaultFactories();
 
   const model = new DiagramModel();
+  model.maxNumberPointsPerLink = 5;
 
-  //3-A) create a default node
+  // 3-A) create a default node
   const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
   const port = node1.addOutPort('Out');
   node1.setPosition(100, 100);
 
-  //3-B) create another default node
+  // 3-B) create another default node
   const node2 = new DefaultNodeModel('Node 2', 'rgb(192,255,0)');
   const port2 = node2.addInPort('In');
   node2.setPosition(400, 100);
@@ -34,15 +34,10 @@ export default () => {
 
   engine.model = model;
 
-  const props = {
-    diagramEngine: engine,
-    maxNumberPointsPerLink: 5
-  } as DiagramProps;
-
   return (
     <div>
       <p>A maximum of 5 points can be created per link.</p>
-      <DiagramWidget className="srd-demo-canvas" {...props} />
+      <DiagramWidget className="srd-demo-canvas" engine={engine} />
     </div>
   );
 };

@@ -1,20 +1,8 @@
 .srd-point {
-  fill: rgba(white, 0.5);
-  opacity: 1;
+  fill: rgba(white, 0.6);
   cursor: move;
 
-  .halo {
-    opacity: 0;
-  }
-
   &:hover,
-  &.selected {
-    .halo {
-      fill: rgb(0, 192, 255);
-      opacity: 0.2;
-    }
-  }
-
   &.selected {
     .point {
       fill: rgb(0, 192, 255);

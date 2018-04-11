@@ -16,7 +16,7 @@ function createNode(name: any) {
 let count = 0;
 
 function connectNodes(nodeFrom: any, nodeTo: any) {
-  //just to get id-like structure
+  // just to get id-like structure
   count++;
   const portOut = nodeFrom.addPort(new DefaultPortModel(true, `${nodeFrom.name}-out-${count}`, 'Out'));
   const portTo = nodeTo.addPort(new DefaultPortModel(false, `${nodeFrom.name}-to-${count}`, 'IN'));
@@ -49,7 +49,7 @@ class Demo8Widget extends React.Component<Demo8WidgetProps> {
 
     return (
       <DemoWorkspaceWidget buttons={<button onClick={this.autoDistribute}>Re-distribute</button>}>
-        <DiagramWidget className="srd-demo-canvas" diagramEngine={engine} />
+        <DiagramWidget className="srd-demo-canvas" engine={engine} />
       </DemoWorkspaceWidget>
     );
   }
@@ -59,21 +59,21 @@ function getDistributedModel(engine: any) {
   const serialized = engine.model.serializeDiagram();
   const distributedSerializedDiagram = distributeElements(serialized);
 
-  //deserialize the model
+  // deserialize the model
   const deSerializedModel = new DiagramModel();
   deSerializedModel.deSerializeDiagram(distributedSerializedDiagram, engine);
   return deSerializedModel;
 }
 
 export default () => {
-  //1) setup the diagram engine
+  // 1) setup the diagram engine
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
 
-  //2) setup the diagram model
+  // 2) setup the diagram model
   const model = new DiagramModel();
 
-  //3) create a default nodes
+  // 3) create a default nodes
   const nodesFrom: any[] = [];
   const nodesTo: any[] = [];
 
@@ -85,7 +85,7 @@ export default () => {
   nodesTo.push(createNode('to-2'));
   nodesTo.push(createNode('to-3'));
 
-  //4) link nodes together
+  // 4) link nodes together
   const links = nodesFrom.map((node, index) => {
     return connectNodes(node, nodesTo[index]);
   });
@@ -111,7 +111,7 @@ export default () => {
     model.addLink(link);
   });
 
-  //5) load model into engine
+  // 5) load model into engine
   engine.model = getDistributedModel(engine);
 
   return <Demo8Widget engine={engine} />;

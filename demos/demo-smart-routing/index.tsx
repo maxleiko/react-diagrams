@@ -17,6 +17,8 @@ export default () => {
 
   // setup the diagram model
   const model = new DiagramModel();
+  model.smartRouting = true;
+  model.maxNumberPointsPerLink = 0;
 
   // create four nodes in a way that straight links wouldn't work
   const node1 = new DefaultNodeModel('Node A', 'rgb(0,192,255)');
@@ -57,12 +59,7 @@ export default () => {
         </button>
       }
     >
-      <DiagramWidget
-        className="srd-demo-canvas"
-        diagramEngine={engine}
-        smartRouting={true}
-        maxNumberPointsPerLink={0}
-      />
+      <DiagramWidget className="srd-demo-canvas" engine={engine} />
     </DemoWorkspaceWidget>
   );
 };

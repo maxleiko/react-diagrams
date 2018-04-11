@@ -54,15 +54,14 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
   @observable private _offsetX: number = 0;
   @observable private _offsetY: number = 0;
   @observable private _zoom: number = 100;
-  @observable private _rendered: boolean = false;
   @observable private _gridSize: number = 0;
   @observable private _allowLooseLinks: boolean = false;
   @observable private _allowCanvasTranslation: boolean = true;
   @observable private _allowCanvasZoom: boolean = true;
   @observable private _inverseZoom: boolean = false;
-  @observable private _maxNumberPointsPerLink: number = Infinity;
   @observable private _smartRouting: boolean = false;
   @observable private _deleteKeys: number[] = [46, 8];
+  @observable private _maxNumberPointsPerLink: number = Infinity;
 
   /**
    * Getter links
@@ -162,23 +161,6 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
         listener.zoomUpdated({ ...event, zoom });
       }
     });
-  }
-
-  /**
-   * Getter rendered
-   * @return {boolean }
-   */
-  @computed
-  get rendered(): boolean {
-    return this._rendered;
-  }
-
-  /**
-   * Setter rendered
-   * @param {boolean } value
-   */
-  set rendered(value: boolean) {
-    this._rendered = value;
   }
 
   /**

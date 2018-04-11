@@ -50,7 +50,6 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
     return (
       <g key={point.id} srd-id={point.id} className={cx('srd-point', { selected: point.selected })}>
         <circle cx={point.x} cy={point.y} r={5} className="point" />
-        <circle className="halo" cx={point.x} cy={point.y} r={15} />
       </g>
     );
   }

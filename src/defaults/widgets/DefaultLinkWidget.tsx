@@ -34,7 +34,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
 
   constructor(props: DefaultLinkProps) {
     super(props);
-    if (props.engine.isSmartRoutingEnabled()) {
+    if (props.engine.model.smartRouting) {
       this._pathFinding = new PathFinding(this.props.engine);
     }
 
@@ -148,7 +148,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   isSmartRoutingApplicable(): boolean {
     const { engine, link } = this.props;
 
-    if (!engine.isSmartRoutingEnabled()) {
+    if (!engine.model.smartRouting) {
       return false;
     }
 
@@ -165,9 +165,6 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
 
   render() {
     const { link, engine } = this.props;
-    if (!engine.nodesRendered) {
-      return null;
-    }
 
     // ensure id is present for all points on the path
     const paths: JSX.Element[] = [];

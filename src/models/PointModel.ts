@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { observable, computed } from 'mobx';
+import { observable, computed, action } from 'mobx';
 
 import { BaseModel, BaseModelListener } from './BaseModel';
 import { LinkModel } from './LinkModel';
@@ -41,6 +41,7 @@ export class PointModel extends BaseModel<LinkModel, BaseModelListener> {
     super.remove();
   }
 
+  @action
   setPosition(x: number, y: number) {
     this._x = x;
     this._y = y;
