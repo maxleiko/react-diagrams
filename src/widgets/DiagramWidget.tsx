@@ -237,21 +237,20 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   }
 
   onMouseUp(event: MouseEvent) {
-    const diagramEngine = this.props.engine;
     // are we going to connect a link to something?
     if (this.props.engine.action instanceof MoveItemsAction) {
       const elModel = this.getModelAtPosition(event);
       // tslint:disable-next-line
       console.log('[mouseup] MoveItemsAction', this.props.engine.action.selectionModels);
-      _.forEach(this.props.engine.action.selectionModels, (model) => {
+      this.props.engine.action.selectionModels.forEach((model) => {
         // only care about points connecting to things
         if (!(model.model instanceof PointModel)) {
           return;
         }
-        if (elModel && elModel instanceof PortModel && !diagramEngine.model.locked && !elModel.locked) {
+        if (elModel && (elModel instanceof PortModel) && !this.props.engine.model.locked && !elModel.locked) {
           const link = model.model.parent!;
-          if (link.targetPort !== null) {
-            // if this was a valid link already and we are adding a node in the middle, create 2 links from the original
+          if (link.targetPort) {
+            // we are adding a point in the middle: create 2 links from the original
             if (link.targetPort !== elModel && link.sourcePort !== elModel) {
               const targetPort = link.targetPort;
               if (targetPort) {
@@ -262,7 +261,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
                 targetPort.removeLink(link);
                 newLink.removePointsBefore(newLink.getPoints()[link.getPointIndex(model.model)]);
                 link.removePointsAfter(model.model);
-                diagramEngine.model.addLink(newLink);
+                this.props.engine.model.addLink(newLink);
               } else {
                 // TODO ?? what do we do if targetPort is null
               }
@@ -278,14 +277,14 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               link.remove();
             } else {
               link.targetPort = elModel;
-              diagramEngine.model.connectLink(link);
+              this.props.engine.model.connectLink(link);
             }
           }
         }
       });
 
       // check for / remove any loose links which have been moved
-      if (!diagramEngine.model.allowLooseLinks) {
+      if (!this.props.engine.model.allowLooseLinks) {
         // tslint:disable-next-line
         console.log('[mouseup] noLooseLinks + wasMoved', this.props.engine.action.selectionModels);
         _.forEach(this.props.engine.action.selectionModels, (model) => {
@@ -375,7 +374,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     console.log('[mousedown] selected model', elModel);
     if (elModel) {
       if (elModel instanceof PortModel) {
-        // its a port element, we want to drag a link
+        // its a port element, we want to create a link
         if (!this.props.engine.model.locked && !elModel.locked) {
           const { x, y } = this.props.engine.getRelativeMousePoint(event);
           const link = elModel.createLinkModel();
@@ -406,7 +405,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         }
         elModel.selected = true;
         // tslint:disable-next-line
-        console.log('[mousedown] selected model fire action MOVE', { x: event.clientX, y: event.clientY });
+        console.log('[mousedown] create MoveItemsAction', elModel);
         this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.engine));
       }
     } else {

@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { observable, computed } from 'mobx';
+import { observable, computed, action } from 'mobx';
 
 import { BaseModel, BaseModelListener } from './BaseModel';
 import { PortModel } from './PortModel';
@@ -19,6 +19,7 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     super(nodeType, id);
   }
 
+  @action
   setPosition(x: number, y: number) {
     // store position
     const oldX = this._x;

@@ -364,6 +364,12 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     });
   }
 
+  @computed
+  get selectedItems(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+    return _.flatten(Array.from(this._nodes.values()).map((node) => node.getSelectedEntities()))
+      .concat(_.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities())));
+  }
+
   getSelectedItems(...filters: BaseEntityType[]): Array<BaseModel<BaseEntity, BaseModelListener>> {
     let items: Array<BaseModel<any, any>> = [];
 

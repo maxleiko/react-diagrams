@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { observable, computed } from 'mobx';
+import { observable, computed, action } from 'mobx';
 
 import { BaseEntity, BaseListener } from '../BaseEntity';
 import { BaseEvent } from '../BaseEntity';
@@ -54,6 +54,7 @@ export class BaseModel<
     return [];
   }
 
+  @action
   deSerialize(ob: any, engine: DiagramEngine) {
     super.deSerialize(ob, engine);
     this._type = ob.type;
