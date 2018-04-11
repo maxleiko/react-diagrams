@@ -37,10 +37,10 @@ export class LinkLayerWidget extends React.Component<LinkLayerProps> {
         this.props.engine.canvas &&
           Array.from(links.values()).map((link) => {
             if (link.sourcePort) {
-              this.centerPointInPort(link.getFirstPoint(), link.sourcePort);
+              this.centerPointInPort(link.firstPoint, link.sourcePort);
             }
             if (link.targetPort) {
-              this.centerPointInPort(link.getLastPoint(), link.targetPort);
+              this.centerPointInPort(link.lastPoint, link.targetPort);
             }
 
             return (

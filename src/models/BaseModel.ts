@@ -7,7 +7,6 @@ import { DiagramEngine } from '../DiagramEngine';
 
 export interface BaseModelListener extends BaseListener {
   selectionChanged?(event: BaseEvent<BaseModel> & { isSelected: boolean }): void;
-
   entityRemoved?(event: BaseEvent<BaseModel>): void;
 }
 
@@ -47,7 +46,8 @@ export class BaseModel<
     this._parent = p;
   }
 
-  getSelectedEntities(): Array<BaseModel<any, any>> {
+  @computed
+  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
     if (this.selected) {
       return [this];
     }
@@ -79,18 +79,20 @@ export class BaseModel<
 
   set selected(selected: boolean) {
     this._selected = selected;
-    this.iterateListeners((listener, event) => {
-      if (listener.selectionChanged) {
-        listener.selectionChanged({ ...event, isSelected: selected });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.selectionChanged) {
+    //     listener.selectionChanged({ ...event, isSelected: selected });
+    //   }
+    // });
   }
 
   remove() {
-    this.iterateListeners((listener, event) => {
-      if (listener.entityRemoved) {
-        listener.entityRemoved(event);
-      }
-    });
+    // tslint:disable-next-line
+    console.log('Removing', this.id, this.type);
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.entityRemoved) {
+    //     listener.entityRemoved(event);
+    //   }
+    // });
   }
 }

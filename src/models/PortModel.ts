@@ -5,6 +5,7 @@ import { BaseModel, BaseModelListener } from './BaseModel';
 import { NodeModel } from './NodeModel';
 import { LinkModel } from './LinkModel';
 import { DiagramEngine } from '../DiagramEngine';
+import { BaseEntity } from '../BaseEntity';
 
 export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> {
   @observable private _maximumLinks: number;
@@ -16,15 +17,18 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   @observable private _width: number = -1;
   @observable private _height: number = -1;
 
-  constructor(name: string, type: string, maximumLinks: number = -1) {
+  constructor(name: string, type: string = 'srd-port', maximumLinks: number = -1) {
     super(type, name);
     this._maximumLinks = maximumLinks;
   }
 
-  getSelectedEntities(): Array<BaseModel<any, any>> {
-    return super.getSelectedEntities().concat(
-      _.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities()))
-    );
+  @computed
+  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+    if (this.selected) {
+      return new Array<BaseModel<BaseEntity, BaseModelListener>>(this)
+        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities)));
+    }
+    return [];
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {
@@ -55,12 +59,12 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   }
 
   @action
-  removeLink(link: LinkModel) {
+  removeLink(link: LinkModel<any, any, any, any>) {
     return this._links.delete(link.id);
   }
 
   @action
-  addLink(link: LinkModel) {
+  addLink(link: LinkModel<any, any, any, any>) {
     this._links.set(link.id, link);
   }
 

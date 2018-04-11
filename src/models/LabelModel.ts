@@ -7,7 +7,7 @@ export class LabelModel extends BaseModel<LinkModel> {
   @observable private _offsetX: number = 0;
   @observable private _offsetY: number = 0;
 
-  constructor(type?: string, id?: string) {
+  constructor(type: string = 'srd-label', id?: string) {
     super(type, id);
   }
 

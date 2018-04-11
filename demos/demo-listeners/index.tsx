@@ -31,20 +31,20 @@ export default () => {
   const link = node1Out.link(node3In)!;
 
   // add all the models
-  const models = model.addAll(node1, node2, node3, link);
+  model.addAll(node1, node2, node3, link);
 
   // add a selection listener to each
-  models.forEach((item) => {
-    item.addListener({
-      selectionChanged: action('selectionChanged'),
-      entityRemoved: action('entityRemoved'),
-      lockChanged: action('lockChanged')
-    });
-  });
+  // models.forEach((item) => {
+  //   item.addListener({
+  //     selectionChanged: action('selectionChanged'),
+  //     entityRemoved: action('entityRemoved'),
+  //     lockChanged: action('lockChanged')
+  //   });
+  // });
 
-  model.addListener({
-    linksUpdated: action('linksUpdated')
-  });
+  // model.addListener({
+  //   linksUpdated: action('linksUpdated')
+  // });
 
   engine.model = model;
 

@@ -1,13 +1,11 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseListener, BaseEntity, BaseEvent, BaseEntityType } from '../BaseEntity';
+import { BaseListener, BaseEntity, BaseEvent } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from './LinkModel';
 import { NodeModel } from './NodeModel';
-import { PortModel } from './PortModel';
 import { BaseModel, BaseModelListener } from './BaseModel';
-import { PointModel } from './PointModel';
 
 export interface NodeEvent<T extends NodeModel = NodeModel> extends BaseEvent<DiagramModel> {
   node: T;
@@ -112,11 +110,11 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    */
   set offsetX(value: number) {
     this._offsetX = value;
-    this.iterateListeners((listener, event) => {
-      if (listener.offsetUpdated) {
-        listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.offsetUpdated) {
+    //     listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
+    //   }
+    // });
   }
 
   /**
@@ -134,11 +132,11 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    */
   set offsetY(value: number) {
     this._offsetY = value;
-    this.iterateListeners((listener, event) => {
-      if (listener.offsetUpdated) {
-        listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.offsetUpdated) {
+    //     listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
+    //   }
+    // });
   }
 
   /**
@@ -156,11 +154,11 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
    */
   set zoom(zoom: number) {
     this._zoom = zoom;
-    this.iterateListeners((listener, event) => {
-      if (listener.zoomUpdated) {
-        listener.zoomUpdated({ ...event, zoom });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.zoomUpdated) {
+    //     listener.zoomUpdated({ ...event, zoom });
+    //   }
+    // });
   }
 
   /**
@@ -302,11 +300,11 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
   @action
   setGridSize(size: number = 0) {
     this.gridSize = size;
-    this.iterateListeners((listener, event) => {
-      if (listener.gridUpdated) {
-        listener.gridUpdated({ ...event, size });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.gridUpdated) {
+    //     listener.gridUpdated({ ...event, size });
+    //   }
+    // });
   }
 
   getGridPosition(pos: number) {
@@ -355,8 +353,8 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
   @action
   clearSelection(ignore: BaseModel<BaseEntity, BaseModelListener> | null = null) {
     // tslint:disable-next-line
-    console.log('[clearSelection]', this.getSelectedItems());
-    this.getSelectedItems().forEach((item) => {
+    console.log('[clearSelection]', this.selectedEntities);
+    this.selectedEntities.forEach((item) => {
       if (ignore && ignore.id === item.id) {
         return;
       }
@@ -365,52 +363,20 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
   }
 
   @computed
-  get selectedItems(): Array<BaseModel<BaseEntity, BaseModelListener>> {
-    return _.flatten(Array.from(this._nodes.values()).map((node) => node.getSelectedEntities()))
-      .concat(_.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities())));
-  }
-
-  getSelectedItems(...filters: BaseEntityType[]): Array<BaseModel<BaseEntity, BaseModelListener>> {
-    let items: Array<BaseModel<any, any>> = [];
-
-    // find all nodes
-    items = items.concat(_.flatten(Array.from(this._nodes.values()).map((node) => node.getSelectedEntities())));
-
-    // find all links
-    items = items.concat(_.flatten(Array.from(this._links.values()).map((link) => link.getSelectedEntities())));
-
-    items = _.uniq(items);
-
-    if (filters.length > 0) {
-      items = _.filter(items, (item: BaseModel<any>) => {
-        if (_.includes(filters, 'node') && item instanceof NodeModel) {
-          return true;
-        }
-        if (_.includes(filters, 'link') && item instanceof LinkModel) {
-          return true;
-        }
-        if (_.includes(filters, 'port') && item instanceof PortModel) {
-          return true;
-        }
-        if (_.includes(filters, 'point') && item instanceof PointModel) {
-          return true;
-        }
-        return false;
-      });
-    }
-
-    return items;
+  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+    return _.flatten(Array.from(this._nodes.values()).map((node) => node.selectedEntities))
+      .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities)));
   }
 
   @action
   setOffset(offsetX: number, offsetY: number) {
     this._offsetX = offsetX;
     this._offsetY = offsetY;
-    this.iterateListeners((listener, event) => {
-      if (listener.offsetUpdated) {
-        listener.offsetUpdated({ ...event, offsetX, offsetY });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.offsetUpdated) {
+    //     listener.offsetUpdated({ ...event, offsetX, offsetY });
+    //   }
+    // });
   }
 
   getNode(id: string): NodeModel | undefined {
@@ -435,55 +401,57 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
 
   @action
   addLink(link: LinkModel): LinkModel {
-    link.addListener({
-      entityRemoved: () => {
-        this.removeLink(link);
-      }
-    });
+    // link.addListener({
+    //   entityRemoved: () => {
+    //     this.removeLink(link);
+    //   }
+    // });
     this._links.set(link.id, link);
-    this.iterateListeners((listener, event) => {
-      if (listener.linksUpdated) {
-        listener.linksUpdated({ ...event, link, isCreated: true });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.linksUpdated) {
+    //     listener.linksUpdated({ ...event, link, isCreated: true });
+    //   }
+    // });
     return link;
   }
 
   connectLink(link: LinkModel): LinkModel {
-    this.iterateListeners((listener, event) => {
-      if (listener.linksUpdated) {
-        listener.linksUpdated({ ...event, link });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.linksUpdated) {
+    //     listener.linksUpdated({ ...event, link });
+    //   }
+    // });
     return link;
   }
 
   @action
   addNode(node: NodeModel): NodeModel {
-    node.addListener({
-      entityRemoved: () => {
-        this.removeNode(node);
-      }
-    });
+    // node.addListener({
+    //   entityRemoved: () => {
+    //     this.removeNode(node);
+    //   }
+    // });
     this._nodes.set(node.id, node);
-    this.iterateListeners((listener, event) => {
-      if (listener.nodesUpdated) {
-        listener.nodesUpdated({ ...event, node, isCreated: true });
-      }
-    });
+    // this.iterateListeners((listener, event) => {
+    //   if (listener.nodesUpdated) {
+    //     listener.nodesUpdated({ ...event, node, isCreated: true });
+    //   }
+    // });
     return node;
   }
 
   @action
-  removeLink(link: LinkModel | string) {
+  removeLink(link: LinkModel<any, any, any, any> | string) {
     const l = this._links.get(link instanceof LinkModel ? link.id : link);
     if (l) {
       this._links.delete(l.id);
-      this.iterateListeners((listener, event) => {
-        if (listener.linksUpdated) {
-          listener.linksUpdated({ ...event, link: l, isCreated: false });
-        }
-      });
+      // tslint:disable-next-line
+      console.log('[diagramModel] remove link', l.id);
+      // this.iterateListeners((listener, event) => {
+      //   if (listener.linksUpdated) {
+      //     listener.linksUpdated({ ...event, link: l, isCreated: false });
+      //   }
+      // });
     }
   }
 
@@ -492,11 +460,11 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     const n = this._nodes.get(node instanceof NodeModel ? node.id : node);
     if (n) {
       this._nodes.delete(n.id);
-      this.iterateListeners((listener, event) => {
-        if (listener.nodesUpdated) {
-          listener.nodesUpdated({ ...event, node: n, isCreated: false });
-        }
-      });
+      // this.iterateListeners((listener, event) => {
+      //   if (listener.nodesUpdated) {
+      //     listener.nodesUpdated({ ...event, node: n, isCreated: false });
+      //   }
+      // });
     }
   }
 }

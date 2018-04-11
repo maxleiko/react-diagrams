@@ -5,15 +5,14 @@ import { BaseModel, BaseModelListener } from './BaseModel';
 import { LinkModel } from './LinkModel';
 import { DiagramEngine } from '../DiagramEngine';
 
-export class PointModel extends BaseModel<LinkModel, BaseModelListener> {
+export class PointModel<P extends LinkModel = LinkModel> extends BaseModel<P, BaseModelListener> {
   @observable private _x: number;
   @observable private _y: number;
 
-  constructor(link: LinkModel, point: { x: number; y: number }) {
-    super();
-    this.parent = link;
-    this._x = point.x;
-    this._y = point.y;
+  constructor(type: string = 'srd-point', x: number, y: number) {
+    super(type);
+    this._x = x;
+    this._y = y;
   }
 
   isConnectedToPort(): boolean {

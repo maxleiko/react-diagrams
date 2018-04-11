@@ -8,7 +8,7 @@ import { AbstractNodeFactory } from '../../factories/AbstractNodeFactory';
  */
 export class DefaultNodeFactory extends AbstractNodeFactory<DefaultNodeModel> {
   constructor() {
-    super('default');
+    super('srd-default-node');
   }
 
   generateReactWidget(engine: DiagramEngine, node: DefaultNodeModel): JSX.Element {

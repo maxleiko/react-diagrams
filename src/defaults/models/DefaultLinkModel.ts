@@ -21,7 +21,7 @@ export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener, Defaul
   private _curvyness: number = -1;
 
   constructor(
-    type: string = 'default',
+    type: string = 'srd-default-link',
     color: string = 'rgb(255, 255, 255, 0.6)',
     width: number = 3,
     curvyness: number = 50
@@ -62,11 +62,11 @@ export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener, Defaul
 
   set width(width: number) {
     this._width = width;
-    this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
-      if (listener.widthChanged) {
-        listener.widthChanged({ ...event, width });
-      }
-    });
+    // this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
+    //   if (listener.widthChanged) {
+    //     listener.widthChanged({ ...event, width });
+    //   }
+    // });
   }
 
   get color(): string {
@@ -75,11 +75,11 @@ export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener, Defaul
 
   set color(color: string) {
     this._color = color;
-    this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
-      if (listener.colorChanged) {
-        listener.colorChanged({ ...event, color });
-      }
-    });
+    // this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
+    //   if (listener.colorChanged) {
+    //     listener.colorChanged({ ...event, color });
+    //   }
+    // });
   }
 
   get curvyness(): number {
@@ -88,10 +88,10 @@ export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener, Defaul
 
   set curvyness(curvyness: number) {
     this._curvyness = curvyness;
-    this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
-      if (listener.curvynessChanged) {
-        listener.curvynessChanged({ ...event, curvyness });
-      }
-    });
+    // this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
+    //   if (listener.curvynessChanged) {
+    //     listener.curvynessChanged({ ...event, curvyness });
+    //   }
+    // });
   }
 }

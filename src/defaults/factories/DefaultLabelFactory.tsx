@@ -9,7 +9,7 @@ import { DefaultLabelWidget } from '../widgets/DefaultLabelWidget';
  */
 export class DefaultLabelFactory extends AbstractLabelFactory<DefaultLabelModel> {
   constructor() {
-    super('default');
+    super('srd-default-label');
   }
 
   generateReactWidget(_diagramEngine: DiagramEngine, label: DefaultLabelModel): JSX.Element {

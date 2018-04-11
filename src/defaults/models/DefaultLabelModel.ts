@@ -4,7 +4,7 @@ export class DefaultLabelModel extends LabelModel {
   private _label: string | null = null;
 
   constructor() {
-    super('default');
+    super('srd-default-label');
     this.offsetY = -23;
   }
 

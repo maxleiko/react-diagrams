@@ -20,7 +20,7 @@ export class MoveItemsAction extends BaseAction {
     if (engine.model.locked) {
       this.selectionModels = [];
     } else {
-      this.selectionModels = engine.model.selectedItems
+      this.selectionModels = engine.model.selectedEntities
       .filter((item) => !item.locked) // prevent locked item to move
       .filter(function ensureTyping(item: BaseModel<BaseEntity, BaseModelListener>): item is PointModel | NodeModel {
         return (item instanceof PointModel) || item instanceof NodeModel;

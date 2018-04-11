@@ -13,7 +13,7 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
   private _color: string;
 
   constructor(name: string = 'Untitled', color: string = 'rgb(0,192,255)') {
-    super('default');
+    super('srd-default-node');
     this._name = name;
     this._color = color;
   }

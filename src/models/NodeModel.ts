@@ -5,6 +5,7 @@ import { BaseModel, BaseModelListener } from './BaseModel';
 import { PortModel } from './PortModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
+import { BaseEntity } from '../BaseEntity';
 
 export class NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel, BaseModelListener> {
   @observable private _x: number = 0;
@@ -15,7 +16,7 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
   private _width: number = -1;
   private _height: number = -1;
 
-  constructor(nodeType: string = 'default', id?: string) {
+  constructor(nodeType: string = 'srd-node', id?: string) {
     super(nodeType, id);
   }
 
@@ -24,6 +25,7 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     // store position
     const oldX = this._x;
     const oldY = this._y;
+    // update positions of links
     this._ports.forEach((port) => {
       port.links.forEach((link) => {
         const point = link.getPointForPort(port);
@@ -37,11 +39,13 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     this._y = y;
   }
 
-  getSelectedEntities(): Array<BaseModel<any, any>> {
-    // add the points of each link that are selected here
-    return super.getSelectedEntities().concat(
-      _.flatten(Array.from(this._ports.values()).map((port) => port.getSelectedEntities()))
-    );
+  @computed
+  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+    if (this.selected) {
+      return new Array<BaseModel<BaseEntity, BaseModelListener>>(this)
+        .concat(_.flatten(Array.from(this._ports.values()).map((port) => port.selectedEntities)));
+    }
+    return [];
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {

@@ -10,6 +10,7 @@ import { AbstractLabelFactory } from './factories/AbstractLabelFactory';
 import { AbstractLinkFactory } from './factories/AbstractLinkFactory';
 import { AbstractNodeFactory } from './factories/AbstractNodeFactory';
 import { AbstractPortFactory } from './factories/AbstractPortFactory';
+import { AbstractPointFactory } from './factories/AbstractPointFactory';
 import { DiagramModel } from './models/DiagramModel';
 import { LabelModel } from './models/LabelModel';
 import { LinkModel } from './models/LinkModel';
@@ -18,6 +19,8 @@ import { BaseAction } from './actions/BaseAction';
 import { PortModel } from './models/PortModel';
 import { ROUTING_SCALING_FACTOR } from './routing/PathFinding';
 import { Toolkit } from './Toolkit';
+import { DefaultPointFactory } from './defaults/factories/DefaultPointFactory';
+import { PointModel } from './models/PointModel';
 
 export interface DiagramEngineListener extends BaseListener {
   portFactoriesUpdated?(): void;
@@ -32,10 +35,11 @@ export interface DiagramEngineListener extends BaseListener {
  */
 export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
 
-  @observable private _nodeFactories: { [s: string]: AbstractNodeFactory } = {};
-  @observable private _linkFactories: { [s: string]: AbstractLinkFactory } = {};
-  @observable private _portFactories: { [s: string]: AbstractPortFactory } = {};
-  @observable private _labelFactories: { [s: string]: AbstractLabelFactory } = {};
+  @observable private _nodeFactories: Map<string, AbstractNodeFactory> = new Map();
+  @observable private _linkFactories: Map<string, AbstractLinkFactory> = new Map();
+  @observable private _portFactories: Map<string, AbstractPortFactory> = new Map();
+  @observable private _pointFactories: Map<string, AbstractPointFactory> = new Map();
+  @observable private _labelFactories: Map<string, AbstractLabelFactory> = new Map();
 
   @observable private _model: DiagramModel = new DiagramModel();
   @observable private _canvas: HTMLDivElement | null = null;
@@ -68,14 +72,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     this.registerLinkFactory(new DefaultLinkFactory());
     this.registerPortFactory(new DefaultPortFactory());
     this.registerLabelFactory(new DefaultLabelFactory());
-  }
-
-  repaintCanvas() {
-    this.iterateListeners((listener) => {
-      if (listener.repaintCanvas) {
-        listener.repaintCanvas();
-      }
-    });
+    this.registerPointFactory(new DefaultPointFactory());
   }
 
   @computed
@@ -107,84 +104,106 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
   // !-------------- FACTORIES ------------
 
   @computed
-  get nodeFactories(): { [s: string]: AbstractNodeFactory } {
+  get nodeFactories(): Map<string, AbstractNodeFactory> {
     return this._nodeFactories;
   }
 
   @computed
-  get linkFactories(): { [s: string]: AbstractLinkFactory } {
+  get linkFactories(): Map<string, AbstractLinkFactory> {
     return this._linkFactories;
   }
 
   @computed
-  get labelFactories(): { [s: string]: AbstractLabelFactory } {
+  get labelFactories(): Map<string, AbstractLabelFactory> {
     return this._labelFactories;
+  }
+
+  @computed
+  get pointFactories(): Map<string, AbstractPointFactory> {
+    return this._pointFactories;
   }
 
   @action
   registerLabelFactory(factory: AbstractLabelFactory) {
-    this._labelFactories[factory.type] = factory;
-    this.iterateListeners((listener) => {
-      if (listener.labelFactoriesUpdated) {
-        listener.labelFactoriesUpdated();
-      }
-    });
+    this._labelFactories.set(factory.type, factory);
+    // this.iterateListeners((listener) => {
+    //   if (listener.labelFactoriesUpdated) {
+    //     listener.labelFactoriesUpdated();
+    //   }
+    // });
   }
 
   @action
   registerPortFactory(factory: AbstractPortFactory) {
-    this._portFactories[factory.type] = factory;
-    this.iterateListeners((listener) => {
-      if (listener.portFactoriesUpdated) {
-        listener.portFactoriesUpdated();
-      }
-    });
+    this._portFactories.set(factory.type, factory);
+    // this.iterateListeners((listener) => {
+    //   if (listener.portFactoriesUpdated) {
+    //     listener.portFactoriesUpdated();
+    //   }
+    // });
   }
 
   @action
   registerNodeFactory(factory: AbstractNodeFactory) {
-    this._nodeFactories[factory.type] = factory;
-    this.iterateListeners((listener) => {
-      if (listener.nodeFactoriesUpdated) {
-        listener.nodeFactoriesUpdated();
-      }
-    });
+    this._nodeFactories.set(factory.type, factory);
+    // this.iterateListeners((listener) => {
+    //   if (listener.nodeFactoriesUpdated) {
+    //     listener.nodeFactoriesUpdated();
+    //   }
+    // });
   }
 
   @action
   registerLinkFactory(factory: AbstractLinkFactory) {
-    this._linkFactories[factory.type] = factory;
-    this.iterateListeners((listener) => {
-      if (listener.linkFactoriesUpdated) {
-        listener.linkFactoriesUpdated();
-      }
-    });
+    this._linkFactories.set(factory.type, factory);
+    // this.iterateListeners((listener) => {
+    //   if (listener.linkFactoriesUpdated) {
+    //     listener.linkFactoriesUpdated();
+    //   }
+    // });
+  }
+
+  @action
+  registerPointFactory(factory: AbstractPointFactory) {
+    this._pointFactories.set(factory.type, factory);
   }
 
   getPortFactory(type: string): AbstractPortFactory {
-    if (this._portFactories[type]) {
-      return this._portFactories[type];
+    const factory = this._portFactories.get(type);
+    if (factory) {
+      return factory;
     }
     throw new Error(`Cannot find factory for port of type: [${type}]`);
   }
 
+  getPointFactory(type: string): AbstractPointFactory {
+    const factory = this._pointFactories.get(type);
+    if (factory) {
+      return factory;
+    }
+    throw new Error(`Cannot find factory for point of type: [${type}]`);
+  }
+
   getNodeFactory(type: string): AbstractNodeFactory {
-    if (this._nodeFactories[type]) {
-      return this._nodeFactories[type];
+    const factory = this._nodeFactories.get(type);
+    if (factory) {
+      return factory;
     }
     throw new Error(`Cannot find factory for node of type: [${type}]`);
   }
 
   getLinkFactory(type: string): AbstractLinkFactory {
-    if (this._linkFactories[type]) {
-      return this._linkFactories[type];
+    const factory = this._linkFactories.get(type);
+    if (factory) {
+      return factory;
     }
     throw new Error(`Cannot find factory for link of type: [${type}]`);
   }
 
   getLabelFactory(type: string): AbstractLabelFactory {
-    if (this._labelFactories[type]) {
-      return this._labelFactories[type];
+    const factory = this._labelFactories.get(type);
+    if (factory) {
+      return factory;
     }
     throw new Error(`Cannot find factory for label of type: [${type}]`);
   }
@@ -205,6 +224,10 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     return this.getLabelFactory(label.type);
   }
 
+  getFactoryForPoint(point: PointModel): AbstractPointFactory {
+    return this.getPointFactory(point.type);
+  }
+
   generateWidgetForLink(link: LinkModel): JSX.Element {
     return this.getFactoryForLink(link).generateReactWidget(this, link);
   }
@@ -217,7 +240,11 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     return this.getFactoryForPort(port).generateReactWidget(this, port);
   }
 
-  getRelativeMousePoint(event: React.MouseEvent<Element>): { x: number; y: number } {
+  generateWidgetForPoint(point: PointModel): JSX.Element {
+    return this.getFactoryForPoint(point).generateReactWidget(this, point);
+  }
+
+  getRelativeMousePoint(event: React.MouseEvent<Element> | MouseEvent): { x: number; y: number } {
     const point = this.getRelativePoint(event.clientX, event.clientY);
     return {
       x: (point.x - this._model.offsetX) / (this._model.zoom / 100.0),

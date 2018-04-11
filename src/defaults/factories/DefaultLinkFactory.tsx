@@ -10,7 +10,7 @@ import { PointModel } from '../../models/PointModel';
  * @author Dylan Vorster
  */
 export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
-  constructor(type: string = 'default') {
+  constructor(type: string = 'srd-default-link') {
     super(type);
   }
 
@@ -18,15 +18,7 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
     return <DefaultLinkWidget engine={engine} link={link} />;
   }
 
-  generateSegment(engine: DiagramEngine, link: DefaultLinkModel, key: number, svgPath: string) {
-    const addPoint = (event: React.MouseEvent<SVGPathElement>) => {
-      if (!event.shiftKey) {
-        const point = new PointModel(link, engine.getRelativeMousePoint(event));
-        point.selected = true;
-        link.addPoint(point);
-      }
-    };
-
+  generateSegment(_engine: DiagramEngine, link: DefaultLinkModel, key: number, svgPath: string) {
     return (
       <g key={key} className="srd-segment">
         <path
@@ -39,7 +31,6 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
           className="path"
           strokeWidth={link.width}
           stroke={link.color}
-          onMouseDown={addPoint}
           d={svgPath}
         />
       </g>

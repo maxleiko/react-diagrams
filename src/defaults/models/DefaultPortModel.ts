@@ -9,7 +9,7 @@ export class DefaultPortModel extends PortModel {
   private _label: string;
 
   constructor(isInput: boolean, name: string, label: string | null = null) {
-    super(name, 'default', -1);
+    super(name, 'srd-default-port', -1);
     this._in = isInput;
     this._label = label || name;
   }

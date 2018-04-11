@@ -6,7 +6,7 @@ import { DefaultPortWidget } from '../../defaults/widgets/DefaultPortWidget';
 
 export class DefaultPortFactory extends AbstractPortFactory<DefaultPortModel> {
   constructor() {
-    super('default');
+    super('srd-default-port');
   }
 
   generateReactWidget(_engine: DiagramEngine, model: DefaultPortModel) {
