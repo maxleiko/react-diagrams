@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as cx from 'classnames';
+import { observer } from 'mobx-react';
 
 import { DefaultPointModel } from '../models/DefaultPointModel';
 
@@ -7,6 +8,7 @@ export interface DefaultPointWidgetProps {
   point: DefaultPointModel;
 }
 
+@observer
 export class DefaultPointWidget extends React.Component<DefaultPointWidgetProps> {
   render() {
     return (

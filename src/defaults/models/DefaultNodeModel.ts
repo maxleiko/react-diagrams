@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import { NodeModel } from '../../models/NodeModel';
 import { Toolkit } from '../../Toolkit';
 import { DiagramEngine } from '../../DiagramEngine';
+import { action, computed } from 'mobx';
 
 /**
  * @author Dylan Vorster
@@ -22,6 +23,7 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
    * Getter name
    * @return {string}
    */
+  @computed
   get name(): string {
     return this._name;
   }
@@ -38,6 +40,7 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
    * Getter color
    * @return {string}
    */
+  @computed
   get color(): string {
     return this._color;
   }
@@ -50,10 +53,12 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
     this._color = value;
   }
 
+  @action
   addInPort(label: string): DefaultPortModel {
     return this.addPort(new DefaultPortModel(true, Toolkit.UID(), label));
   }
 
+  @action
   addOutPort(label: string): DefaultPortModel {
     return this.addPort(new DefaultPortModel(false, Toolkit.UID(), label));
   }
@@ -71,11 +76,13 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
     });
   }
 
-  getInPorts(): DefaultPortModel[] {
+  @computed
+  get inputs(): DefaultPortModel[] {
     return Array.from(this.ports.values()).filter((p) => p.in);
   }
 
-  getOutPorts(): DefaultPortModel[] {
+  @computed
+  get outputs(): DefaultPortModel[] {
     return Array.from(this.ports.values()).filter((p) => !p.in);
   }
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { DiagramEngine } from '../../DiagramEngine';
-import { NodeWidget } from '../NodeWidget';
+import { NodeWidgetContainer } from '../NodeWidgetContainer';
 
 export interface NodeLayerProps {
   engine: DiagramEngine;
@@ -24,9 +24,9 @@ export class NodeLayerWidget extends React.Component<NodeLayerProps> {
         style={{ transform: `translate(${offsetX}px, ${offsetY}px) scale(${zoom / 100.0})` }}
       >
         {Array.from(nodes.values()).map((node) => (
-          <NodeWidget key={node.id} node={node}>
+          <NodeWidgetContainer key={node.id} node={node}>
             {this.props.engine.generateWidgetForNode(node)}
-          </NodeWidget>
+          </NodeWidgetContainer>
         ))}
       </div>
     );

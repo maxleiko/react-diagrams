@@ -1,10 +1,18 @@
-.srd-default-link {
-  .label {
-    pointer-events: none;
+.srd-link {
+  .srd-default-link {
+    &.reverse {
+      path.path {
+        animation-direction: reverse;
+      }
+    }
 
-    > div {
-      display: inline-block;
-      position: absolute;
+    .label {
+      pointer-events: none;
+
+      > div {
+        display: inline-block;
+        position: absolute;
+      }
     }
   }
 }

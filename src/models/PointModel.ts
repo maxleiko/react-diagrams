@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { observable, computed, action, autorun } from 'mobx';
+import { observable, computed, action } from 'mobx';
 
 import { BaseModel } from './BaseModel';
 import { LinkModel } from './LinkModel';
@@ -13,11 +13,6 @@ export abstract class PointModel<P extends LinkModel = LinkModel> extends BaseMo
     super(type);
     this._x = x;
     this._y = y;
-
-    autorun(() => {
-      // tslint:disable-next-line
-      console.log(this.id, this._x, this._y);
-    });
   }
 
   isConnectedToPort(): boolean {
@@ -40,12 +35,12 @@ export abstract class PointModel<P extends LinkModel = LinkModel> extends BaseMo
     });
   }
 
+  @action
   remove() {
     // clear references
     if (this.parent) {
       this.parent.removePoint(this);
     }
-    super.remove();
   }
 
   @action

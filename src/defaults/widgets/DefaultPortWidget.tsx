@@ -3,7 +3,7 @@ import * as cx from 'classnames';
 import { observer } from 'mobx-react';
 
 import { DefaultPortModel } from '../models/DefaultPortModel';
-import { PortWidget } from '../../widgets/PortWidget';
+import { PortWidgetContainer } from '../../widgets/PortWidgetContainer';
 
 export interface DefaultPortWidgetProps {
   port: DefaultPortModel;
@@ -13,7 +13,7 @@ export interface DefaultPortWidgetProps {
 export class DefaultPortWidget extends React.Component<DefaultPortWidgetProps> {
 
   render() {
-    const port = <PortWidget port={this.props.port} />;
+    const port = <PortWidgetContainer port={this.props.port} />;
     const label = <div className="name">{this.props.port.label}</div>;
 
     return (

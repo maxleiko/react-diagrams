@@ -19,7 +19,7 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
 
   generateSegment(_engine: DiagramEngine, link: DefaultLinkModel, key: number, svgPath: string) {
     return (
-      <g key={key} className="srd-segment">
+      <g key={key} srd-id={key} className="srd-segment">
         <path
           className="halo"
           strokeWidth={20}

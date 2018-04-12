@@ -48,9 +48,9 @@ export * from './models/PortModel';
 export * from './models/LabelModel';
 
 export * from './widgets/DiagramWidget';
-export * from './widgets/LinkWidget';
-export * from './widgets/NodeWidget';
-export * from './widgets/PortWidget';
+export * from './widgets/LinkWidgetContainer';
+export * from './widgets/NodeWidgetContainer';
+export * from './widgets/PortWidgetContainer';
 
 export * from './widgets/layers/LinkLayerWidget';
 export * from './widgets/layers/NodeLayerWidget';

@@ -78,10 +78,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   }
 
   generatePoint(engine: DiagramEngine, point: PointModel) {
-    return React.cloneElement(
-      engine.getFactoryForPoint(point).generateReactWidget(engine, point),
-      { key: point.id }
-    );
+    return React.cloneElement(engine.getFactoryForPoint(point).generateReactWidget(engine, point), { key: point.id });
   }
 
   findPathAndRelativePositionToRenderLabel(index: number) {
@@ -171,29 +168,27 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
 
     if (this.isSmartRoutingApplicable()) {
       if (this._pathFinding) {
-        if (link.points.length > 1) {
-          // first step: calculate a direct path between the points being linked
-          const directPathCoords = this._pathFinding.calculateDirectPath(_.first(link.points)!, _.last(link.points)!);
+        // first step: calculate a direct path between the points being linked
+        const directPathCoords = this._pathFinding.calculateDirectPath(link.firstPoint, link.lastPoint);
 
-          const routingMatrix = engine.getRoutingMatrix();
-          // now we need to extract, from the routing matrix, the very first walkable points
-          // so they can be used as origin and destination of the link to be created
-          const smartLink = this._pathFinding.calculateLinkStartEndCoords(routingMatrix, directPathCoords);
+        const routingMatrix = engine.getRoutingMatrix();
+        // now we need to extract, from the routing matrix, the very first walkable points
+        // so they can be used as origin and destination of the link to be created
+        const smartLink = this._pathFinding.calculateLinkStartEndCoords(routingMatrix, directPathCoords);
 
-          if (smartLink) {
-            const { start, end, pathToStart, pathToEnd } = smartLink;
+        if (smartLink) {
+          const { start, end, pathToStart, pathToEnd } = smartLink;
 
-            // second step: calculate a path avoiding hitting other elements
-            const simplifiedPath = this._pathFinding.calculateDynamicPath(
-              routingMatrix,
-              start,
-              end,
-              pathToStart,
-              pathToEnd
-            );
+          // second step: calculate a path avoiding hitting other elements
+          const simplifiedPath = this._pathFinding.calculateDynamicPath(
+            routingMatrix,
+            start,
+            end,
+            pathToStart,
+            pathToEnd
+          );
 
-            paths.push(this.generateSegment(engine, link, 0, Toolkit.generateDynamicPath(simplifiedPath)));
-          }
+          paths.push(this.generateSegment(engine, link, 0, Toolkit.generateDynamicPath(simplifiedPath)));
         }
       }
     }
@@ -207,13 +202,13 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
             engine,
             link,
             0,
-            Toolkit.generateCurvePath(link.points[0], link.points[1], link.curvyness)
+            Toolkit.generateCurvePath(link.firstPoint, link.lastPoint, link.curvyness)
           )
         );
 
         // draw the link as dangeling
         if (link.targetPort === null) {
-          paths.push(this.generatePoint(engine, link.points[1]));
+          paths.push(this.generatePoint(engine, link.lastPoint));
         }
       } else {
         // draw the multiple anchors and complex line instead
@@ -229,7 +224,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
         }
 
         if (link.targetPort === null) {
-          paths.push(this.generatePoint(engine, link.points[link.points.length - 1]));
+          paths.push(this.generatePoint(engine, link.lastPoint));
         }
       }
     }

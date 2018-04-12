@@ -1,4 +1,4 @@
-import { observable, computed } from 'mobx';
+import { observable, computed, action } from 'mobx';
 
 import { BaseModel } from './BaseModel';
 import { LinkModel } from './LinkModel';
@@ -27,5 +27,12 @@ export abstract class LabelModel extends BaseModel<LinkModel> {
 
   set offsetY(offsetY: number) {
     this._offsetY = offsetY;
+  }
+
+  @action
+  remove() {
+    if (this.parent) {
+      this.parent.removeLabel(this);
+    }
   }
 }

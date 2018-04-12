@@ -16,6 +16,7 @@ import { PortModel } from '../models/PortModel';
 import { LinkModel } from '../models/LinkModel';
 import { BaseModel } from '../models/BaseModel';
 import { BaseEntity } from '../BaseEntity';
+import { CreateLinkAction } from '../actions/CreateLinkAction';
 
 export interface DiagramProps {
   engine: DiagramEngine;
@@ -41,7 +42,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     this.onWheel = this.onWheel.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-    this.pointAdded = this.pointAdded.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
   }
@@ -66,7 +66,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   /**
    * Gets a model and element under the mouse cursor
    */
-  getModelAtPosition(event: MouseEvent): BaseModel<BaseEntity> | undefined {
+  getModelAtPosition(event: MouseEvent): { el: Element, model: BaseModel<BaseEntity> | undefined } {
     const target = event.target as Element;
     const model = this.props.engine.model;
 
@@ -81,7 +81,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         if (node) {
           const port = node.getPortFromID(portId);
           if (port) {
-            return port;
+            return { el: target, model: port };
           }
         }
       }
@@ -97,7 +97,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         if (link) {
           const point = link.getPointModel(pointId);
           if (point) {
-            return point;
+            return { el: target, model: point };
           }
         }
       }
@@ -110,7 +110,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       if (linkId) {
         const link = model.getLink(linkId);
         if (link) {
-          return link;
+          return { el: target, model: link };
         }
       }
     }
@@ -122,12 +122,12 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       if (nodeId) {
         const node = model.getNode(nodeId);
         if (node) {
-          return node;
+          return { el: target, model: node };
         }
       }
     }
 
-    return;
+    return { el: target, model: undefined };
   }
 
   fireAction() {
@@ -139,6 +139,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   stopFiringAction(shouldSkipEvent?: boolean) {
     if (this.props.actionStoppedFiring && !shouldSkipEvent) {
       if (this.props.engine.action) {
+        this.props.engine.action.end = Date.now();
         this.props.actionStoppedFiring(this.props.engine.action);
       }
     }
@@ -156,49 +157,76 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   }
 
   onMouseDown(event: React.MouseEvent<HTMLDivElement>) {
-    const model = this.props.engine.model;
-
-    const elModel = this.getModelAtPosition(event.nativeEvent);
+    event.preventDefault();
+    const { el, model } = this.getModelAtPosition(event.nativeEvent);
 
     // tslint:disable-next-line
-    console.log('[mousedown] model at position', elModel);
-    if (elModel) {
-      if (elModel instanceof PortModel) {
+    console.log('[mousedown] model at position', model);
+    if (model) {
+      if (model instanceof PortModel) {
         // its a port element, we want to create a link
-        if (!this.props.engine.model.locked && !elModel.locked) {
+        if (!this.props.engine.model.locked && !model.locked) {
           const { x, y } = this.props.engine.getRelativeMousePoint(event);
-          const link = this.props.engine.getPortFactory(elModel.type).getLinkFactory().getNewInstance();
-          if (link) {
-            // define link source to be the current clicked port
-            link.sourcePort = elModel;
-            // update auto-generated link's firstPoint to mouse position
-            // link.firstPoint.setPosition(x, y);
-            // update auto-generated link's lastPoint to mouse position
-            link.lastPoint.setPosition(x, y);
-            // unselect all
-            model.clearSelection();
-            // select link & last point
-            link.selected = true;
-            link.lastPoint.selected = true;
-            model.addLink(link);
-            // tslint:disable-next-line
-            console.log('[mousedown] onMouseDown.link create', link);
-            this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.engine));
+          const link = this.props.engine
+            .getPortFactory(model.type)
+            .getLinkFactory()
+            .getNewInstance();
+          // define link source to be the current clicked port
+          link.sourcePort = model;
+          // update auto-generated link's firstPoint to mouse position
+          link.firstPoint.setPosition(x, y);
+          // update auto-generated link's lastPoint to mouse position
+          link.lastPoint.setPosition(x, y);
+          // unselect all
+          this.props.engine.model.clearSelection();
+          // select link & last point
+          link.selected = true;
+          link.lastPoint.selected = true;
+          this.props.engine.model.addLink(link);
+          // tslint:disable-next-line
+          console.log('[mousedown] create link action', link);
+          this.startFiringAction(new CreateLinkAction(event.clientX, event.clientY, link));
+        }
+      } else if (model instanceof LinkModel) {
+        // we want to create a point
+        if (!this.props.engine.model.locked && !model.locked) {
+          if (event.shiftKey) {
+            // we want to select the link
+            model.selected = true;
           } else {
-            // TODO: tell user that port do not allow port creation
+            // we want to add a point to a link
+            const { x, y } = this.props.engine.getRelativeMousePoint(event);
+            const point = this.props.engine
+              .getLinkFactory(model.type)
+              .getPointFactory()
+              .getNewInstance({ x, y });
+            this.props.engine.model.clearSelection();
+            point.selected = true;
+            let segmentIndex: number | undefined;
+            const segEl = Toolkit.closest(el, 'srd-segment');
+            if (segEl) {
+              segmentIndex = parseInt(segEl.getAttribute('srd-id'), 10) || undefined;
+            }
+            model.addPoint(point, segmentIndex);
+            const action = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
+            // tslint:disable-next-line
+            console.log('[mousedown] new MoveItemsAction()', action.selectionModels.slice());
+            this.startFiringAction(action);
           }
-        } else {
-          model.clearSelection();
         }
       } else {
         // mousedown on an element (not a port): probably wants to move it
-        if (!event.shiftKey && !elModel.selected) {
-          model.clearSelection();
+        if (!event.shiftKey && !model.selected) {
+          this.props.engine.model.clearSelection();
         }
-        elModel.selected = true;
+
+        if (!model.selected) {
+          model.selected = true;
+        }
+        const action = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
         // tslint:disable-next-line
-        console.log('[mousedown] new MoveItemsAction()', elModel);
-        this.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.props.engine));
+        console.log('[mousedown] new MoveItemsAction()', action.selectionModels.slice());
+        this.startFiringAction(action);
       }
     } else {
       // no selection: the canvas was selected
@@ -208,8 +236,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         this.startFiringAction(new SelectingAction(x, y));
       } else {
         // it is a "move the canvas" action
-        model.clearSelection();
-        this.startFiringAction(new MoveCanvasAction(event.clientX, event.clientY, model));
+        this.props.engine.model.clearSelection();
+        this.startFiringAction(new MoveCanvasAction(event.clientX, event.clientY, this.props.engine.model));
       }
     }
 
@@ -218,6 +246,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   }
 
   onMouseMove(event: MouseEvent) {
+    event.preventDefault();
     const engine = this.props.engine;
     const model = engine.model;
     if (this.props.engine.action instanceof SelectingAction) {
@@ -243,6 +272,11 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       this.props.engine.action.mouseY2 = relative.y;
 
       this.fireAction();
+    } else if (this.props.engine.action instanceof CreateLinkAction) {
+      const { x, y } = this.props.engine.getRelativeMousePoint(event);
+      this.props.engine.action.link.lastPoint.setPosition(x, y);
+      this.fireAction();
+
     } else if (this.props.engine.action instanceof MoveItemsAction) {
       const amountX = event.clientX - this.props.engine.action.mouseX;
       const amountY = event.clientY - this.props.engine.action.mouseY;
@@ -250,8 +284,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       this.props.engine.action.selectionModels.forEach((selModel) => {
         // in this case we need to also work out the relative grid position
         if (
-          (selModel.model instanceof NodeModel) ||
-          ((selModel.model instanceof PointModel) && !selModel.model.isConnectedToPort())
+          selModel.model instanceof NodeModel ||
+          (selModel.model instanceof PointModel && !selModel.model.isConnectedToPort())
         ) {
           const x = model.getGridPosition(selModel.initialX + amountX / amountZoom);
           const y = model.getGridPosition(selModel.initialY + amountY / amountZoom);
@@ -276,94 +310,53 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     } else if (this.props.engine.action instanceof MoveCanvasAction) {
       // translate the actual canvas
       if (engine.model.allowCanvasTranslation) {
-        model.setOffset(
-          this.props.engine.action.initialOffsetX + (event.clientX - this.props.engine.action.mouseX),
-          this.props.engine.action.initialOffsetY + (event.clientY - this.props.engine.action.mouseY)
-        );
+        model.offsetX = this.props.engine.action.initialOffsetX + (event.clientX - this.props.engine.action.mouseX);
+        model.offsetY = this.props.engine.action.initialOffsetY + (event.clientY - this.props.engine.action.mouseY);
         this.fireAction();
       }
     }
   }
 
   onMouseUp(event: MouseEvent) {
-    if (this.props.engine.action instanceof MoveItemsAction) {
-      const element = this.getModelAtPosition(event);
-      if (element && !this.props.engine.model.locked && !element.locked) {
-        // are we going to connect a link to something?
-        if (element instanceof PortModel) {
-          // tslint:disable-next-line
-          console.log('[mouseup] MoveItemsAction selections:', this.props.engine.action.selectionModels);
-          this.props.engine.action.selectionModels.forEach((selection) => {
-            // only care about points connecting to things
-            if (selection.model instanceof PointModel) {
-              const link = selection.model.parent!;
-              if (link.targetPort) {
-                // we are adding a point in the middle: create 2 links from the original
-                if (link.targetPort !== element && link.sourcePort !== element) {
-                  const targetPort = link.targetPort;
-                  if (targetPort) {
-                    const newLink = link.clone();
-                    newLink.sourcePort = element;
-                    newLink.targetPort = targetPort;
-                    link.targetPort = element;
-                    targetPort.removeLink(link);
-                    newLink.removePointsBefore(newLink.points[link.getPointIndex(selection.model)]);
-                    link.removePointsAfter(selection.model);
-                    this.props.engine.model.addLink(newLink);
-                  } else {
-                    // TODO ?? what do we do if targetPort is null
-                  }
-                  // if we are connecting to the same target or source, remove tweener points
-                } else if (link.targetPort === element) {
-                  link.removePointsAfter(selection.model);
-                } else if (link.sourcePort === element) {
-                  link.removePointsBefore(selection.model);
-                }
-              } else {
-                // if we are just clicking on a port, then remove the link
-                if (link.sourcePort === element) {
-                  link.remove();
-                } else {
-                  link.targetPort = element;
-                  this.props.engine.model.connectLink(link);
-                }
-              }
+    event.preventDefault();
+    if (this.props.engine.action instanceof CreateLinkAction) {
+      const link = this.props.engine.action.link;
+      const { model } = this.getModelAtPosition(event);
+      if (model) {
+        if (!model.locked && !this.props.engine.model.locked) {
+          if (model instanceof PortModel) {
+            // prevent sourcePort === targetPort
+            if (link.sourcePort !== model) {
+              link.targetPort = model;
+              const { x, y } = this.props.engine.getRelativeMousePoint(event);
+              link.lastPoint.setPosition(x, y);
             }
-          });
-        } else if (element instanceof LinkModel) {
-          if (!event.shiftKey) {
-            // we want to add a point to a link ?
-            const { x, y } = this.props.engine.getRelativeMousePoint(event);
-            const point = this.props.engine.getLinkFactory(element.type).getPointFactory().getNewInstance({ x, y });
-            this.props.engine.model.clearSelection();
-            point.selected = true;
-            element.addPoint(point);
+          } else {
+            // link has been dropped on something that is not a PortModel
+            // so it will dangel: verify
+            if (!this.props.engine.model.allowLooseLinks) {
+              link.remove();
+            }
           }
+        } else {
+          // element or model is locked: remove link
+          link.remove();
+        }
+      } else {
+        // no element where link ended
+        if (!this.props.engine.model.allowLooseLinks) {
+          link.remove();
         }
       }
-
-      // remove any loose links which have been moved
-      if (!this.props.engine.model.allowLooseLinks) {
-        this.props.engine.action.selectionModels.forEach((model) => {
-          // only care about points connecting to things
-          if (model.model instanceof PointModel) {
-            const point: PointModel = model.model;
-            if (point.parent) {
-              const link = point.parent;
-              if (link.sourcePort === null || link.targetPort === null) {
-                this.props.engine.model.removeLink(link);
-              }
-            }
-          }
-        });
-      }
     }
+
     this.stopFiringAction();
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);
   }
 
   onKeyUp(event: KeyboardEvent) {
+    event.preventDefault();
     // delete all selected
     if (this.props.engine.model.deleteKeys.indexOf(event.keyCode) !== -1) {
       // only delete items if model is not locked
@@ -391,9 +384,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       // check if it is pinch gesture
       if (event.ctrlKey && scrollDelta % 1 !== 0) {
         /*Chrome and Firefox sends wheel event with deltaY that
-					have fractional part, also `ctrlKey` prop of the event is true
-					though ctrl isn't pressed
-				*/
+          have fractional part, also `ctrlKey` prop of the event is true
+          though ctrl isn't pressed
+        */
         scrollDelta /= 3;
       } else {
         scrollDelta /= 60;
@@ -418,16 +411,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       const xFactor = (clientX - model.offsetX) / oldZoomFactor / clientWidth;
       const yFactor = (clientY - model.offsetY) / oldZoomFactor / clientHeight;
 
-      model.setOffset(model.offsetX - widthDiff * xFactor, model.offsetY - heightDiff * yFactor);
+      model.offsetX = model.offsetX - widthDiff * xFactor;
+      model.offsetY = model.offsetY - heightDiff * yFactor;
     }
-  }
-
-  pointAdded(point: PointModel, event: MouseEvent) {
-    document.addEventListener('mousemove', this.onMouseMove);
-    document.addEventListener('mouseup', this.onMouseUp);
-    event.stopPropagation();
-    this.props.engine.model.clearSelection(point);
-    this.props.engine.action = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
   }
 
   render() {
@@ -442,8 +428,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       >
         <LinkLayerWidget engine={diagramEngine} />
         <NodeLayerWidget engine={diagramEngine} />
-        {this.props.engine.action instanceof SelectingAction
-          && <div className="selection-box" style={this.props.engine.action.styles} />}
+        {this.props.engine.action instanceof SelectingAction && (
+          <div className="selection-box" style={this.props.engine.action.styles} />
+        )}
       </div>
     );
   }

@@ -25,8 +25,6 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
     // store position
     const oldX = this._x;
     const oldY = this._y;
-    // tslint:disable-next-line
-    console.log(this.id, this.x, this.y);
     // update positions of links
     this._ports.forEach((port) => {
       port.links.forEach((link) => {
@@ -34,9 +32,6 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
         if (point) {
           point.x = point.x + x - oldX;
           point.y = point.y + y - oldY;
-        } else {
-          // tslint:disable-next-line
-          console.log(this.id, 'unable to find point for port');
         }
       });
     });
@@ -83,11 +78,14 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
       .forEach((port) => clone.addPort(port.clone(lookupTable)));
   }
 
+  @action
   remove() {
-    super.remove();
     this._ports.forEach((port) => {
       port.links.forEach((link) => link.remove());
     });
+    if (this.parent) {
+      this.parent.removeNode(this);
+    }
   }
 
   getPortFromID(id: string): P | undefined {
@@ -127,6 +125,7 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
     this._y = y;
   }
 
+  @action
   removePort(port: PortModel) {
     // clear the parent node reference
     const p = this._ports.get(port.id);

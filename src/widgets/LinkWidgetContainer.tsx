@@ -9,7 +9,7 @@ export interface LinkProps {
 }
 
 @observer
-export class LinkWidget extends React.Component<LinkProps> {
+export class LinkWidgetContainer extends React.Component<LinkProps> {
 
   render() {
     return (

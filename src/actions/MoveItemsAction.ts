@@ -1,5 +1,3 @@
-import { observable } from 'mobx';
-
 import { BaseAction } from './BaseAction';
 import { SelectionModel } from '../models/SelectionModel';
 import { PointModel } from '../models/PointModel';
@@ -9,8 +7,8 @@ import { BaseEntity } from '../BaseEntity';
 import { BaseModel } from '../models/BaseModel';
 
 export class MoveItemsAction extends BaseAction {
-  @observable selectionModels: SelectionModel[];
-  @observable moved: boolean;
+  selectionModels: SelectionModel[];
+  moved: boolean;
 
   constructor(mouseX: number, mouseY: number, engine: DiagramEngine) {
     super(mouseX, mouseY);

@@ -64,6 +64,13 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   @action
+  remove() {
+    if (this.parent) {
+      this.parent.removePort(this);
+    }
+  }
+
+  @action
   addLink(link: LinkModel<PortModel, PortModel>) {
     this._links.set(link.id, link);
   }

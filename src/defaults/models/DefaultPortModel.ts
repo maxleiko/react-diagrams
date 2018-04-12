@@ -1,10 +1,11 @@
 import * as _ from 'lodash';
 import { PortModel } from '../../models/PortModel';
 import { DiagramEngine } from '../../DiagramEngine';
+import { observable } from 'mobx';
 
 export class DefaultPortModel extends PortModel {
-  private _in: boolean;
-  private _label: string;
+  @observable private _in: boolean;
+  @observable private _label: string;
 
   constructor(isInput: boolean, name: string, label: string | null = null) {
     super(name, 'srd-default-port', -1);

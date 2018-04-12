@@ -506,6 +506,7 @@ export class DiagramEngine extends BaseEntity {
     const zoomFactor = xFactor < yFactor ? xFactor : yFactor;
 
     this._model.zoom = this._model.zoom * zoomFactor;
-    this._model.setOffset(0, 0);
+    this._model.offsetX = 0;
+    this._model.offsetY = 0;
   }
 }

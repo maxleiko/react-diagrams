@@ -10,9 +10,20 @@ export interface DefaultNodeProps {
   engine: DiagramEngine;
 }
 
+interface PortsProps {
+  className: 'in'|'out';
+  ports: DefaultPortModel[];
+  engine: DiagramEngine;
+}
+
+const Ports = observer(({ className, ports, engine }: PortsProps) => (
+  <div className={className}>
+    {ports.map((port) => (<div key={port.id}>{engine.generateWidgetForPort(port)}</div>))}
+  </div>
+));
+
 @observer
 export class DefaultNodeWidget extends React.Component<DefaultNodeProps> {
-
   constructor(props: DefaultNodeProps) {
     super(props);
     this.renderPort = this.renderPort.bind(this);
@@ -29,8 +40,8 @@ export class DefaultNodeWidget extends React.Component<DefaultNodeProps> {
           <div className="name">{this.props.node.name}</div>
         </div>
         <div className="ports">
-          <div className="in">{this.props.node.getInPorts().map(this.renderPort)}</div>
-          <div className="out">{this.props.node.getOutPorts().map(this.renderPort)}</div>
+          <Ports className="in" engine={this.props.engine} ports={this.props.node.inputs} />
+          <Ports className="out" engine={this.props.engine} ports={this.props.node.outputs} />
         </div>
       </div>
     );

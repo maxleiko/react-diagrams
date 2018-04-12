@@ -9,7 +9,7 @@ export interface PortProps {
 }
 
 @observer
-export class PortWidget extends React.Component<PortProps> {
+export class PortWidgetContainer extends React.Component<PortProps> {
 
   render() {
     return (

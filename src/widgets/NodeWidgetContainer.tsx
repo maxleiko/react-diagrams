@@ -9,7 +9,7 @@ export interface NodeProps {
 }
 
 @observer
-export class NodeWidget extends React.Component<NodeProps> {
+export class NodeWidgetContainer extends React.Component<NodeProps> {
 
   render() {
     return (

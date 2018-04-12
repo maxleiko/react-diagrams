@@ -48,8 +48,8 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
 
   @observable private _sourcePort: S | null = null;
   @observable private _targetPort: T | null = null;
-  @observable private _labels: LabelModel[] = [];
   @observable private _points: PointModel[] = [];
+  @observable private _labels: LabelModel[] = [];
 
   constructor(pointFactory: AbstractPointFactory, linkType: string = 'srd-link', id?: string) {
     super(linkType, id);
@@ -57,7 +57,8 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
     firstPoint.parent = this;
     const lastPoint = pointFactory.getNewInstance({ x: 0, y: 0 });
     lastPoint.parent = this;
-    this._points = [firstPoint, lastPoint];
+    this._points.push(firstPoint);
+    this._points.push(lastPoint);
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {
@@ -137,7 +138,6 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
     if (this.parent) {
       this.parent.removeLink(this);
     }
-    super.remove();
   }
 
   @action
@@ -194,8 +194,8 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
     if (port) {
       port.addLink(this);
     }
-    if (this.targetPort) {
-      this.targetPort.removeLink(this);
+    if (this._targetPort) {
+      this._targetPort.removeLink(this);
     }
     this._targetPort = port;
   }
@@ -211,14 +211,14 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
     return this._points;
   }
 
-  set points(points: PointModel[]) {
-    this._points = points;
-    this._points.forEach((point) => (point.parent = this));
-  }
-
   @action
   removePoint(point: PointModel) {
     this._points.splice(this.getPointIndex(point), 1);
+  }
+
+  @action
+  removeLabel(label: LabelModel) {
+    this._labels.splice(this.labels.findIndex((l) => l.id === label.id), 1);
   }
 
   @action
@@ -240,8 +240,13 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
 
   @action
   addPoint(point: PointModel, index: number = 1): PointModel {
-    point.parent = this;
-    this._points.splice(index, 0, point);
-    return point;
+    if (index > 0 && index < this._points.length) {
+      // tslint:disable-next-line
+      console.log('ADD POINT at index', index);
+      point.parent = this;
+      this._points.splice(index, 0, point);
+      return point;
+    }
+    throw new Error(`Link's first and last points are not mutable (tried to modified point at index ${index})`);
   }
 }

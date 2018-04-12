@@ -98,11 +98,6 @@ export class DiagramModel extends BaseEntity {
    */
   set offsetX(value: number) {
     this._offsetX = value;
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.offsetUpdated) {
-    //     listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
-    //   }
-    // });
   }
 
   /**
@@ -120,11 +115,6 @@ export class DiagramModel extends BaseEntity {
    */
   set offsetY(value: number) {
     this._offsetY = value;
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.offsetUpdated) {
-    //     listener.offsetUpdated({ ...event, offsetX: this.offsetX, offsetY: this.offsetY });
-    //   }
-    // });
   }
 
   /**
@@ -142,11 +132,6 @@ export class DiagramModel extends BaseEntity {
    */
   set zoom(zoom: number) {
     this._zoom = zoom;
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.zoomUpdated) {
-    //     listener.zoomUpdated({ ...event, zoom });
-    //   }
-    // });
   }
 
   /**
@@ -288,11 +273,6 @@ export class DiagramModel extends BaseEntity {
   @action
   setGridSize(size: number = 0) {
     this.gridSize = size;
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.gridUpdated) {
-    //     listener.gridUpdated({ ...event, size });
-    //   }
-    // });
   }
 
   getGridPosition(pos: number) {
@@ -352,19 +332,11 @@ export class DiagramModel extends BaseEntity {
 
   @computed
   get selectedEntities(): Array<BaseModel<any>> {
-    return _.flatten(Array.from(this._nodes.values()).map((node) => node.selectedEntities))
-      .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities)));
-  }
-
-  @action
-  setOffset(offsetX: number, offsetY: number) {
-    this._offsetX = offsetX;
-    this._offsetY = offsetY;
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.offsetUpdated) {
-    //     listener.offsetUpdated({ ...event, offsetX, offsetY });
-    //   }
-    // });
+    return _.uniqBy(
+      _.flatten(Array.from(this._nodes.values()).map((node) => node.selectedEntities))
+        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities))),
+      (item) => `${item.type}:${item.id}`
+    );
   }
 
   getNode(id: string): NodeModel | undefined {
@@ -389,16 +361,14 @@ export class DiagramModel extends BaseEntity {
 
   @action
   addLink(link: LinkModel): LinkModel {
+    link.parent = this;
     this._links.set(link.id, link);
-    return link;
-  }
-
-  connectLink(link: LinkModel): LinkModel {
     return link;
   }
 
   @action
   addNode(node: NodeModel): NodeModel {
+    node.parent = this;
     this._nodes.set(node.id, node);
     return node;
   }

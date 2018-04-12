@@ -21,6 +21,8 @@ export class SelectingAction extends BaseAction {
 
   constructor(mouseX: number, mouseY: number) {
     super(mouseX, mouseY);
+    this.mouseX = mouseX;
+    this.mouseY = mouseY;
     this.mouseX2 = mouseX;
     this.mouseY2 = mouseY;
   }

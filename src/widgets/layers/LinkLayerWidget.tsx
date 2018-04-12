@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { DiagramEngine } from '../../DiagramEngine';
 import { PointModel } from '../../models/PointModel';
 import { PortModel } from '../../models/PortModel';
-import { LinkWidget } from '../LinkWidget';
+import { LinkWidgetContainer } from '../LinkWidgetContainer';
 
 export interface LinkLayerProps {
   engine: DiagramEngine;
@@ -36,17 +36,17 @@ export class LinkLayerWidget extends React.Component<LinkLayerProps> {
         {// only perform these actions when we have a diagram
         this.props.engine.canvas &&
           Array.from(links.values()).map((link) => {
-            if (link.sourcePort) {
+            if (link.sourcePort && link.firstPoint) {
               this.centerPointInPort(link.firstPoint, link.sourcePort);
             }
-            if (link.targetPort) {
+            if (link.targetPort && link.lastPoint) {
               this.centerPointInPort(link.lastPoint, link.targetPort);
             }
 
             return (
-              <LinkWidget key={link.id} link={link}>
+              <LinkWidgetContainer key={link.id} link={link}>
                 {this.props.engine.generateWidgetForLink(link)}
-              </LinkWidget>
+              </LinkWidgetContainer>
             );
           })}
       </svg>

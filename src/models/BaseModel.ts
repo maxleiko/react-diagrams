@@ -17,6 +17,8 @@ export abstract class BaseModel<P extends BaseEntity = BaseEntity> extends BaseE
     this._type = type;
   }
 
+  abstract remove(): void;
+
   @computed
   get locked(): boolean {
     if (this._parent) {
@@ -73,16 +75,6 @@ export abstract class BaseModel<P extends BaseEntity = BaseEntity> extends BaseE
     // this.iterateListeners((listener, event) => {
     //   if (listener.selectionChanged) {
     //     listener.selectionChanged({ ...event, isSelected: selected });
-    //   }
-    // });
-  }
-
-  remove() {
-    // tslint:disable-next-line
-    console.log('Removing', this.id, this.type);
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.entityRemoved) {
-    //     listener.entityRemoved(event);
     //   }
     // });
   }
