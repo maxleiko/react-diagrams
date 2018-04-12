@@ -1,22 +1,13 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseEntity, BaseListener } from '../BaseEntity';
-import { BaseEvent } from '../BaseEntity';
+import { BaseEntity } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
-
-export interface BaseModelListener extends BaseListener {
-  selectionChanged?(event: BaseEvent<BaseModel> & { isSelected: boolean }): void;
-  entityRemoved?(event: BaseEvent<BaseModel>): void;
-}
 
 /**
  * @author Dylan Vorster
  */
-export class BaseModel<
-  P extends BaseEntity = BaseEntity,
-  L extends BaseModelListener = BaseModelListener
-> extends BaseEntity<L> {
+export abstract class BaseModel<P extends BaseEntity = BaseEntity> extends BaseEntity {
   private _type: string;
   @observable private _selected: boolean = false;
   @observable private _parent: P | null = null;
@@ -47,7 +38,7 @@ export class BaseModel<
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+  get selectedEntities(): Array<BaseModel<BaseEntity>> {
     if (this.selected) {
       return [this];
     }

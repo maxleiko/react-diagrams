@@ -1,8 +1,6 @@
 import * as _ from 'lodash';
 import { PortModel } from '../../models/PortModel';
 import { DiagramEngine } from '../../DiagramEngine';
-import { DefaultLinkModel } from './DefaultLinkModel';
-import { LinkModel } from '../../models/LinkModel';
 
 export class DefaultPortModel extends PortModel {
   private _in: boolean;
@@ -27,33 +25,25 @@ export class DefaultPortModel extends PortModel {
     });
   }
 
-  link(port: PortModel): LinkModel | null {
-    const link = this.createLinkModel();
-    if (link) {
-      link.sourcePort = this;
-      link.targetPort = port;
-      return link;
-    }
-    return null;
-  }
-
   canLinkToPort(port: PortModel): boolean {
-    if (port instanceof DefaultPortModel) {
-      if (this._in !== port._in) {
-        const duplicate = Array.from(this.links.values())
-          .find((link) => link.sourcePort === this && link.targetPort === port);
-        return duplicate === undefined;
+    if (this.id !== port.id) {
+      if (port instanceof DefaultPortModel) {
+        if (this._in !== port._in) {
+          const duplicate = Array.from(this.links.values()).find((link) => {
+            if (link.sourcePort && link.sourcePort.id === port.id) {
+              return true;
+            }
+            if (link.targetPort && link.targetPort.id === port.id) {
+              return true;
+            }
+            return false;
+          });
+          return duplicate === undefined;
+        }
+        return false;
       }
-      return false;
     }
-    return true;
-  }
-
-  createLinkModel(): LinkModel | null {
-    if (this.canCreateLink()) {
-      return new DefaultLinkModel();
-    }
-    return null;
+    return false;
   }
 
   get in(): boolean {

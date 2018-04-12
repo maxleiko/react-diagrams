@@ -1,32 +1,26 @@
 /**
  * @author Dylan Vorster
  */
-import { LinkModel, LinkModelListener } from '../../models/LinkModel';
-import { BaseEvent } from '../../BaseEntity';
+import { LinkModel } from '../../models/LinkModel';
 import * as _ from 'lodash';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultLabelModel } from './DefaultLabelModel';
 import { LabelModel } from '../../models/LabelModel';
 import { DefaultPortModel } from './DefaultPortModel';
+import { AbstractPointFactory } from '../../factories/AbstractPointFactory';
 
-export interface DefaultLinkModelListener extends LinkModelListener<DefaultPortModel, DefaultPortModel> {
-  colorChanged?(event: BaseEvent<DefaultLinkModel> & { color: null | string }): void;
-  widthChanged?(event: BaseEvent<DefaultLinkModel> & { width: 0 | number }): void;
-  curvynessChanged?(event: BaseEvent<DefaultLinkModel> & { curvyness: 0 | number }): void;
-}
-
-export class DefaultLinkModel extends LinkModel<DefaultLinkModelListener, DefaultPortModel, DefaultPortModel> {
+export class DefaultLinkModel extends LinkModel<DefaultPortModel, DefaultPortModel> {
   private _color: string;
   private _width: number = -1;
   private _curvyness: number = -1;
 
   constructor(
-    type: string = 'srd-default-link',
+    ptFactory: AbstractPointFactory,
     color: string = 'rgb(255, 255, 255, 0.6)',
     width: number = 3,
     curvyness: number = 50
   ) {
-    super(type);
+    super(ptFactory, 'srd-default-link');
     this._color = color;
     this._width = width;
     this._curvyness = curvyness;

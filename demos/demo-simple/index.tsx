@@ -3,7 +3,8 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
-  DefaultLinkModel
+  DefaultLinkModel,
+  DefaultPointFactory
 } from 'storm-react-diagrams';
 import * as React from 'react';
 
@@ -26,7 +27,9 @@ export default () => {
   node2.setPosition(400, 100);
 
   // link the ports
-  const link1 = port1.link(port2) as DefaultLinkModel;
+  const ptFactory = new DefaultPointFactory();
+  const link1 = new DefaultLinkModel(ptFactory);
+  link1.connect(port1, port2);
   link1.addLabel('Hello World!');
 
   // 4) add the models to the root graph

@@ -3,7 +3,7 @@ import { observable, computed } from 'mobx';
 import { BaseModel } from './BaseModel';
 import { LinkModel } from './LinkModel';
 
-export class LabelModel extends BaseModel<LinkModel> {
+export abstract class LabelModel extends BaseModel<LinkModel> {
   @observable private _offsetX: number = 0;
   @observable private _offsetY: number = 0;
 

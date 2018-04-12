@@ -14,15 +14,10 @@ export interface BaseEvent<T extends BaseEntity = any> {
   id: string;
 }
 
-export interface BaseListener<T extends BaseEntity = any> {
-  lockChanged?(event: BaseEvent<T> & { locked: boolean }): void;
-}
-
 export type BaseEntityType = 'node' | 'link' | 'port' | 'point';
 
-export abstract class BaseEntity<L extends BaseListener = BaseListener> {
+export abstract class BaseEntity {
   @observable private _id: string;
-  @observable private _listeners: Map<string, L> = new Map();
   @observable protected _locked: boolean = false;
 
   constructor(id: string = Toolkit.UID()) {
@@ -61,20 +56,6 @@ export abstract class BaseEntity<L extends BaseListener = BaseListener> {
    */
   set locked(value: boolean) {
     this._locked = value;
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.lockChanged) {
-    //     listener.lockChanged({ ...event, locked: value });
-    //   }
-    // });
-  }
-
-  /**
-   * Getter listeners
-   * @return {Map<string, L> }
-   */
-  @computed
-  get listeners(): Map<string, L> {
-    return this._listeners;
   }
 
   doClone(_lookupTable: { [s: string]: any } = {}, _clone: any) {
@@ -109,37 +90,4 @@ export abstract class BaseEntity<L extends BaseListener = BaseListener> {
       id: this._id
     };
   }
-
-  // iterateListeners(cb: (t: L, event: BaseEvent) => any) {
-  //   const event: BaseEvent = {
-  //     id: Toolkit.UID(),
-  //     firing: true,
-  //     entity: this,
-  //     stopPropagation: () => {
-  //       event.firing = false;
-  //     }
-  //   };
-
-  //   for (const uid in this._listeners) {
-  //     if (this.listeners.hasOwnProperty(uid)) {
-  //       const listener = this._listeners.get(uid)!;
-  //       if (!event.firing) {
-  //         return;
-  //       }
-  //       action(cb(listener, event));
-  //     }
-  //   }
-  // }
-
-  // @action
-  // removeListener(uid: string): boolean {
-  //   return this._listeners.delete(uid);
-  // }
-
-  // @action
-  // addListener(listener: L): string {
-  //   const uid = Toolkit.UID();
-  //   this._listeners.set(uid, listener);
-  //   return uid;
-  // }
 }

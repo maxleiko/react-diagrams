@@ -5,7 +5,9 @@ import {
   LinkModel,
   NodeModel,
   DiagramWidget,
-  BaseModel
+  BaseModel,
+  DefaultPointFactory,
+  DefaultLinkModel
 } from 'storm-react-diagrams';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -75,7 +77,9 @@ export default () => {
   node2.setPosition(400, 100);
 
   // link the ports
-  const link1 = port.link(port2);
+  const ptFactory = new DefaultPointFactory();
+  const link1 = new DefaultLinkModel(ptFactory);
+  link1.connect(port, port2);
   if (link1) {
     // 4) add the models to the root graph
     model.addAll(node1, node2, link1);

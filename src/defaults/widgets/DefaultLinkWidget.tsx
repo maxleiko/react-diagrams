@@ -79,8 +79,8 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
 
   generatePoint(engine: DiagramEngine, point: PointModel) {
     return React.cloneElement(
-      engine.getFactoryForLink(point.parent!).generatePoint(engine, point),
-      { 'srd-link-id': point.parent!.id }
+      engine.getFactoryForPoint(point).generateReactWidget(engine, point),
+      { key: point.id }
     );
   }
 

@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseEntity, BaseListener } from './BaseEntity';
+import { BaseEntity } from './BaseEntity';
 import { DefaultLabelFactory } from './defaults/factories/DefaultLabelFactory';
 import { DefaultLinkFactory } from './defaults/factories/DefaultLinkFactory';
 import { DefaultNodeFactory } from './defaults/factories/DefaultNodeFactory';
@@ -10,7 +10,6 @@ import { AbstractLabelFactory } from './factories/AbstractLabelFactory';
 import { AbstractLinkFactory } from './factories/AbstractLinkFactory';
 import { AbstractNodeFactory } from './factories/AbstractNodeFactory';
 import { AbstractPortFactory } from './factories/AbstractPortFactory';
-import { AbstractPointFactory } from './factories/AbstractPointFactory';
 import { DiagramModel } from './models/DiagramModel';
 import { LabelModel } from './models/LabelModel';
 import { LinkModel } from './models/LinkModel';
@@ -19,26 +18,16 @@ import { BaseAction } from './actions/BaseAction';
 import { PortModel } from './models/PortModel';
 import { ROUTING_SCALING_FACTOR } from './routing/PathFinding';
 import { Toolkit } from './Toolkit';
-import { DefaultPointFactory } from './defaults/factories/DefaultPointFactory';
 import { PointModel } from './models/PointModel';
-
-export interface DiagramEngineListener extends BaseListener {
-  portFactoriesUpdated?(): void;
-  nodeFactoriesUpdated?(): void;
-  linkFactoriesUpdated?(): void;
-  labelFactoriesUpdated?(): void;
-  repaintCanvas?(): void;
-}
+import { AbstractPointFactory } from './factories/AbstractPointFactory';
 
 /**
  * Passed as prop to the DiagramWidget
  */
-export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
-
+export class DiagramEngine extends BaseEntity {
   @observable private _nodeFactories: Map<string, AbstractNodeFactory> = new Map();
   @observable private _linkFactories: Map<string, AbstractLinkFactory> = new Map();
   @observable private _portFactories: Map<string, AbstractPortFactory> = new Map();
-  @observable private _pointFactories: Map<string, AbstractPointFactory> = new Map();
   @observable private _labelFactories: Map<string, AbstractLabelFactory> = new Map();
 
   @observable private _model: DiagramModel = new DiagramModel();
@@ -72,7 +61,6 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     this.registerLinkFactory(new DefaultLinkFactory());
     this.registerPortFactory(new DefaultPortFactory());
     this.registerLabelFactory(new DefaultLabelFactory());
-    this.registerPointFactory(new DefaultPointFactory());
   }
 
   @computed
@@ -118,54 +106,24 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     return this._labelFactories;
   }
 
-  @computed
-  get pointFactories(): Map<string, AbstractPointFactory> {
-    return this._pointFactories;
-  }
-
   @action
   registerLabelFactory(factory: AbstractLabelFactory) {
     this._labelFactories.set(factory.type, factory);
-    // this.iterateListeners((listener) => {
-    //   if (listener.labelFactoriesUpdated) {
-    //     listener.labelFactoriesUpdated();
-    //   }
-    // });
   }
 
   @action
   registerPortFactory(factory: AbstractPortFactory) {
     this._portFactories.set(factory.type, factory);
-    // this.iterateListeners((listener) => {
-    //   if (listener.portFactoriesUpdated) {
-    //     listener.portFactoriesUpdated();
-    //   }
-    // });
   }
 
   @action
   registerNodeFactory(factory: AbstractNodeFactory) {
     this._nodeFactories.set(factory.type, factory);
-    // this.iterateListeners((listener) => {
-    //   if (listener.nodeFactoriesUpdated) {
-    //     listener.nodeFactoriesUpdated();
-    //   }
-    // });
   }
 
   @action
   registerLinkFactory(factory: AbstractLinkFactory) {
     this._linkFactories.set(factory.type, factory);
-    // this.iterateListeners((listener) => {
-    //   if (listener.linkFactoriesUpdated) {
-    //     listener.linkFactoriesUpdated();
-    //   }
-    // });
-  }
-
-  @action
-  registerPointFactory(factory: AbstractPointFactory) {
-    this._pointFactories.set(factory.type, factory);
   }
 
   getPortFactory(type: string): AbstractPortFactory {
@@ -174,14 +132,6 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
       return factory;
     }
     throw new Error(`Cannot find factory for port of type: [${type}]`);
-  }
-
-  getPointFactory(type: string): AbstractPointFactory {
-    const factory = this._pointFactories.get(type);
-    if (factory) {
-      return factory;
-    }
-    throw new Error(`Cannot find factory for point of type: [${type}]`);
   }
 
   getNodeFactory(type: string): AbstractNodeFactory {
@@ -225,7 +175,10 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
   }
 
   getFactoryForPoint(point: PointModel): AbstractPointFactory {
-    return this.getPointFactory(point.type);
+    if (point.parent) {
+      return this.getLinkFactory(point.parent.type).getPointFactory();
+    }
+    throw new Error(`PointModel has no parent. Unable to find associated LinkFactory`);
   }
 
   generateWidgetForLink(link: LinkModel): JSX.Element {
@@ -240,8 +193,10 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
     return this.getFactoryForPort(port).generateReactWidget(this, port);
   }
 
-  generateWidgetForPoint(point: PointModel): JSX.Element {
-    return this.getFactoryForPoint(point).generateReactWidget(this, point);
+  generateWidgetForPoint(link: LinkModel, point: PointModel): JSX.Element {
+    return this.getFactoryForLink(link)
+      .getPointFactory()
+      .generateReactWidget(this, point);
   }
 
   getRelativeMousePoint(event: React.MouseEvent<Element> | MouseEvent): { x: number; y: number } {
@@ -271,33 +226,23 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
         `.srd-node[srd-id="${port.parent.id}"] .srd-port[srd-id="${port.id}"]`
       );
       if (selector === null) {
-        throw new Error(
-          'Cannot find Node Port element with nodeID: [' +
-            port.parent.id +
-            '] and name: [' +
-            port.id +
-            ']'
-        );
+        throw new Error(`Cannot find Node Port element with nodeID: [${port.parent.id}] and name: [${port.id}]`);
       }
       return selector;
     }
     return null;
   }
 
-  getPortCenter(port: PortModel): { x: number, y: number } | null {
-    const sourceElement = this.getNodePortElement(port);
-    if (sourceElement) {
-      const sourceRect = sourceElement.getBoundingClientRect();
+  getPortCenter(port: PortModel): { x: number; y: number } | null {
+    const portEl = this.getNodePortElement(port);
+    if (portEl) {
+      const sourceRect = portEl.getBoundingClientRect();
 
       const rel = this.getRelativePoint(sourceRect.left, sourceRect.top);
 
       return {
-        x:
-          sourceElement.offsetWidth / 2 +
-          (rel.x - this._model.offsetX) / (this._model.zoom / 100.0),
-        y:
-          sourceElement.offsetHeight / 2 +
-          (rel.y - this._model.offsetY) / (this._model.zoom / 100.0)
+        x: portEl.offsetWidth / 2 + (rel.x - this._model.offsetX) / (this._model.zoom / 100.0),
+        y: portEl.offsetHeight / 2 + (rel.y - this._model.offsetY) / (this._model.zoom / 100.0)
       };
     }
     return null;
@@ -528,8 +473,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
    */
   markPorts = (matrix: number[][]): void => {
     const allElements = _.flatMap(
-      Array.from(this._model.links.values())
-        .map((link) => [link.sourcePort, link.targetPort])
+      Array.from(this._model.links.values()).map((link) => [link.sourcePort, link.targetPort])
     );
     allElements
       .filter(function filter(port: PortModel | null): port is PortModel {
@@ -546,7 +490,7 @@ export class DiagramEngine extends BaseEntity<DiagramEngineListener> {
             this.markMatrixPoint(matrix, this.translateRoutingX(x), this.translateRoutingY(y));
           }
         }
-    });
+      });
   }
 
   markMatrixPoint = (matrix: number[][], x: number, y: number) => {

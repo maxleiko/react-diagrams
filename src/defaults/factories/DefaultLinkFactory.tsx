@@ -1,10 +1,9 @@
 import * as React from 'react';
-import * as cx from 'classnames';
 import { DefaultLinkWidget } from '../widgets/DefaultLinkWidget';
 import { DiagramEngine } from '../../DiagramEngine';
 import { AbstractLinkFactory } from '../../factories/AbstractLinkFactory';
 import { DefaultLinkModel } from '../models/DefaultLinkModel';
-import { PointModel } from '../../models/PointModel';
+import { DefaultPointFactory } from './DefaultPointFactory';
 
 /**
  * @author Dylan Vorster
@@ -37,15 +36,11 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
     );
   }
 
-  generatePoint(_engine: DiagramEngine, point: PointModel) {
-    return (
-      <g key={point.id} srd-id={point.id} className={cx('srd-point', { selected: point.selected })}>
-        <circle cx={point.x} cy={point.y} r={5} className="point" />
-      </g>
-    );
+  getNewInstance(_initialConfig?: any): DefaultLinkModel {
+    return new DefaultLinkModel(this.getPointFactory());
   }
 
-  getNewInstance(_initialConfig?: any): DefaultLinkModel {
-    return new DefaultLinkModel();
+  getPointFactory(): DefaultPointFactory {
+    return new DefaultPointFactory();
   }
 }

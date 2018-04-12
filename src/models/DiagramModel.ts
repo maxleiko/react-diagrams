@@ -1,11 +1,12 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseListener, BaseEntity, BaseEvent } from '../BaseEntity';
+import { BaseEntity, BaseEvent } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from './LinkModel';
 import { NodeModel } from './NodeModel';
-import { BaseModel, BaseModelListener } from './BaseModel';
+import { BaseModel } from './BaseModel';
+import { PortModel } from './PortModel';
 
 export interface NodeEvent<T extends NodeModel = NodeModel> extends BaseEvent<DiagramModel> {
   node: T;
@@ -30,20 +31,7 @@ export interface GridEvent extends BaseEvent<DiagramModel> {
   size: number;
 }
 
-/**
- * @author Dylan Vorster
- *
- */
-export interface DiagramListener<N extends NodeModel = NodeModel, L extends LinkModel = LinkModel>
-  extends BaseListener {
-  nodesUpdated?(event: NodeEvent<N>): void;
-  linksUpdated?(event: LinkEvent<L>): void;
-  offsetUpdated?(event: OffsetEvent): void;
-  zoomUpdated?(event: ZoomEvent): void;
-  gridUpdated?(event: GridEvent): void;
-}
-
-export class DiagramModel extends BaseEntity<DiagramListener> {
+export class DiagramModel extends BaseEntity {
   // models
   @observable private _links: Map<string, LinkModel> = new Map();
   @observable private _nodes: Map<string, NodeModel> = new Map();
@@ -351,7 +339,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
   }
 
   @action
-  clearSelection(ignore: BaseModel<BaseEntity, BaseModelListener> | null = null) {
+  clearSelection(ignore: BaseModel<any> | null = null) {
     // tslint:disable-next-line
     console.log('[clearSelection]', this.selectedEntities);
     this.selectedEntities.forEach((item) => {
@@ -363,7 +351,7 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+  get selectedEntities(): Array<BaseModel<any>> {
     return _.flatten(Array.from(this._nodes.values()).map((node) => node.selectedEntities))
       .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities)));
   }
@@ -401,57 +389,27 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
 
   @action
   addLink(link: LinkModel): LinkModel {
-    // link.addListener({
-    //   entityRemoved: () => {
-    //     this.removeLink(link);
-    //   }
-    // });
     this._links.set(link.id, link);
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.linksUpdated) {
-    //     listener.linksUpdated({ ...event, link, isCreated: true });
-    //   }
-    // });
     return link;
   }
 
   connectLink(link: LinkModel): LinkModel {
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.linksUpdated) {
-    //     listener.linksUpdated({ ...event, link });
-    //   }
-    // });
     return link;
   }
 
   @action
   addNode(node: NodeModel): NodeModel {
-    // node.addListener({
-    //   entityRemoved: () => {
-    //     this.removeNode(node);
-    //   }
-    // });
     this._nodes.set(node.id, node);
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.nodesUpdated) {
-    //     listener.nodesUpdated({ ...event, node, isCreated: true });
-    //   }
-    // });
     return node;
   }
 
   @action
-  removeLink(link: LinkModel<any, any, any, any> | string) {
+  removeLink(link: LinkModel<PortModel, PortModel> | string) {
     const l = this._links.get(link instanceof LinkModel ? link.id : link);
     if (l) {
       this._links.delete(l.id);
       // tslint:disable-next-line
       console.log('[diagramModel] remove link', l.id);
-      // this.iterateListeners((listener, event) => {
-      //   if (listener.linksUpdated) {
-      //     listener.linksUpdated({ ...event, link: l, isCreated: false });
-      //   }
-      // });
     }
   }
 
@@ -460,11 +418,6 @@ export class DiagramModel extends BaseEntity<DiagramListener> {
     const n = this._nodes.get(node instanceof NodeModel ? node.id : node);
     if (n) {
       this._nodes.delete(n.id);
-      // this.iterateListeners((listener, event) => {
-      //   if (listener.nodesUpdated) {
-      //     listener.nodesUpdated({ ...event, node: n, isCreated: false });
-      //   }
-      // });
     }
   }
 }

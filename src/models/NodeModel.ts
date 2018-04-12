@@ -1,13 +1,13 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseModel, BaseModelListener } from './BaseModel';
+import { BaseModel } from './BaseModel';
 import { PortModel } from './PortModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
 import { BaseEntity } from '../BaseEntity';
 
-export class NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel, BaseModelListener> {
+export abstract class NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel> {
   @observable private _x: number = 0;
   @observable private _y: number = 0;
   @observable private _ports: Map<string, P> = new Map();
@@ -25,6 +25,8 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
     // store position
     const oldX = this._x;
     const oldY = this._y;
+    // tslint:disable-next-line
+    console.log(this.id, this.x, this.y);
     // update positions of links
     this._ports.forEach((port) => {
       port.links.forEach((link) => {
@@ -32,6 +34,9 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
         if (point) {
           point.x = point.x + x - oldX;
           point.y = point.y + y - oldY;
+        } else {
+          // tslint:disable-next-line
+          console.log(this.id, 'unable to find point for port');
         }
       });
     });
@@ -40,12 +45,12 @@ export class NodeModel<P extends PortModel = PortModel> extends BaseModel<Diagra
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+  get selectedEntities(): Array<BaseModel<BaseEntity>> {
+    const entities = new Array<BaseModel<BaseEntity>>();
     if (this.selected) {
-      return new Array<BaseModel<BaseEntity, BaseModelListener>>(this)
-        .concat(_.flatten(Array.from(this._ports.values()).map((port) => port.selectedEntities)));
+      entities.push(this);
     }
-    return [];
+    return entities.concat(_.flatten(Array.from(this._ports.values()).map((port) => port.selectedEntities)));
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {

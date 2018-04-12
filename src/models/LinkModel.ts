@@ -2,65 +2,62 @@ import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 import { createTransformer } from 'mobx-utils';
 
-import { BaseModel, BaseModelListener } from './BaseModel';
+import { BaseModel } from './BaseModel';
 import { PortModel } from './PortModel';
 import { PointModel } from './PointModel';
-import { BaseEvent, BaseEntity } from '../BaseEntity';
+import { BaseEntity } from '../BaseEntity';
 import { LabelModel } from './LabelModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
+import { AbstractPointFactory } from '../factories/AbstractPointFactory';
 
-export interface LinkModelListener<S extends PortModel = PortModel, T extends PortModel = PortModel>
-  extends BaseModelListener {
-  sourcePortChanged?(event: BaseEvent<LinkModel> & { port: S | null }): void;
-  targetPortChanged?(event: BaseEvent<LinkModel> & { port: T | null }): void;
-}
-
-export class LinkModel<
-  L extends LinkModelListener<S, T> = LinkModelListener<S, T>,
-  S extends PortModel = PortModel,
-  T extends PortModel = PortModel,
-  P extends PointModel = PointModel,
-> extends BaseModel<DiagramModel, L> {
-  getPointForPort = createTransformer((port: PortModel): P | null => {
-    if (this._sourcePort !== null && this._sourcePort.id === port.id) {
+export abstract class LinkModel<S extends PortModel = PortModel, T extends PortModel = PortModel> extends BaseModel<
+  DiagramModel
+> {
+  getPointForPort = createTransformer((port: PortModel): PointModel | null => {
+    if (this.sourcePort && this.sourcePort.id === port.id) {
       return this.firstPoint;
     }
-    if (this._targetPort !== null && this._targetPort.id === port.id) {
+    if (this.targetPort && this.targetPort.id === port.id) {
       return this.lastPoint;
     }
     return null;
   });
 
-  getPortForPoint = createTransformer((point: P): S | T | null => {
-    if (this._sourcePort !== null && this.firstPoint.id === point.id) {
-      return this._sourcePort;
+  getPortForPoint = createTransformer((point: PointModel): S | T | null => {
+    if (this.sourcePort && this.firstPoint.id === point.id) {
+      return this.sourcePort;
     }
-    if (this._targetPort !== null && this.lastPoint.id === point.id) {
-      return this._targetPort;
+    if (this.targetPort && this.lastPoint.id === point.id) {
+      return this.targetPort;
     }
     return null;
   });
 
-  isLastPoint = createTransformer((point: P): boolean => {
+  isLastPoint = createTransformer((point: PointModel): boolean => {
     return this.getPointIndex(point) === this._points.length - 1;
   });
 
-  getPointModel = createTransformer((id: string): P | undefined => {
+  getPointModel = createTransformer((id: string): PointModel | undefined => {
     return this._points.find((pt) => pt.id === id);
   });
 
-  getPointIndex = createTransformer((point: P): number => {
+  getPointIndex = createTransformer((point: PointModel): number => {
     return this._points.findIndex((pt) => pt === point);
   });
 
   @observable private _sourcePort: S | null = null;
   @observable private _targetPort: T | null = null;
   @observable private _labels: LabelModel[] = [];
-  @observable private _points: P[] = [];
+  @observable private _points: PointModel[] = [];
 
-  constructor(linkType: string = 'srd-link', id?: string) {
+  constructor(pointFactory: AbstractPointFactory, linkType: string = 'srd-link', id?: string) {
     super(linkType, id);
+    const firstPoint = pointFactory.getNewInstance({ x: 0, y: 0 });
+    firstPoint.parent = this;
+    const lastPoint = pointFactory.getNewInstance({ x: 0, y: 0 });
+    lastPoint.parent = this;
+    this._points = [firstPoint, lastPoint];
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {
@@ -68,7 +65,7 @@ export class LinkModel<
     // deserialize points
     const points: any[] = ob.points || [];
     points.forEach((point) => {
-      const p = engine.getPointFactory(point.type).getNewInstance() as P;
+      const p = engine.getFactoryForPoint(point).getNewInstance();
       p.deSerialize(point, engine);
       this.addPoint(p);
     });
@@ -129,6 +126,7 @@ export class LinkModel<
     }
   }
 
+  @action
   remove() {
     if (this._sourcePort) {
       this._sourcePort.removeLink(this);
@@ -140,26 +138,31 @@ export class LinkModel<
       this.parent.removeLink(this);
     }
     super.remove();
-    
+  }
+
+  @action
+  connect(source: S, target: T) {
+    this.sourcePort = source;
+    this.targetPort = target;
   }
 
   @computed
-  get firstPoint(): P {
+  get firstPoint(): PointModel {
     return this._points[0];
   }
 
   @computed
-  get lastPoint(): P {
+  get lastPoint(): PointModel {
     return this._points[this._points.length - 1];
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+  get selectedEntities(): Array<BaseModel<BaseEntity>> {
+    const entities = new Array<BaseModel<BaseEntity>>();
     if (this.selected) {
-      return new Array<BaseModel<BaseEntity, BaseModelListener>>(this)
-        .concat(_.flatten(this._points.map((pt) => pt.selectedEntities)));
+      entities.push(this);
     }
-    return [];
+    return entities.concat(_.flatten(this._points.map((pt) => pt.selectedEntities)));
   }
 
   @computed
@@ -180,11 +183,6 @@ export class LinkModel<
       this._sourcePort.removeLink(this);
     }
     this._sourcePort = port;
-    // this.iterateListeners((listener: LinkModelListener, event) => {
-    //   if (listener.sourcePortChanged) {
-    //     listener.sourcePortChanged({ ...event, port });
-    //   }
-    // });
   }
 
   @computed
@@ -200,11 +198,6 @@ export class LinkModel<
       this.targetPort.removeLink(this);
     }
     this._targetPort = port;
-    // this.iterateListeners((listener: LinkModelListener, event) => {
-    //   if (listener.targetPortChanged) {
-    //     listener.targetPortChanged({ ...event, port });
-    //   }
-    // });
   }
 
   @action
@@ -214,27 +207,27 @@ export class LinkModel<
   }
 
   @computed
-  get points(): P[] {
+  get points(): PointModel[] {
     return this._points;
   }
 
-  set points(points: P[]) {
+  set points(points: PointModel[]) {
     this._points = points;
     this._points.forEach((point) => (point.parent = this));
   }
 
   @action
-  removePoint(point: P) {
+  removePoint(point: PointModel) {
     this._points.splice(this.getPointIndex(point), 1);
   }
 
   @action
-  removePointsBefore(point: P) {
+  removePointsBefore(point: PointModel) {
     this._points.splice(0, this.getPointIndex(point));
   }
 
   @action
-  removePointsAfter(point: P) {
+  removePointsAfter(point: PointModel) {
     this._points.splice(this.getPointIndex(point) + 1);
   }
 
@@ -246,7 +239,7 @@ export class LinkModel<
   }
 
   @action
-  addPoint(point: P, index: number = 1): P {
+  addPoint(point: PointModel, index: number = 1): PointModel {
     point.parent = this;
     this._points.splice(index, 0, point);
     return point;

@@ -14,7 +14,7 @@ import { NodeModel } from '../models/NodeModel';
 import { PointModel } from '../models/PointModel';
 import { PortModel } from '../models/PortModel';
 import { LinkModel } from '../models/LinkModel';
-import { BaseModel, BaseModelListener } from '../models/BaseModel';
+import { BaseModel } from '../models/BaseModel';
 import { BaseEntity } from '../BaseEntity';
 
 export interface DiagramProps {
@@ -66,7 +66,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   /**
    * Gets a model and element under the mouse cursor
    */
-  getModelAtPosition(event: MouseEvent): BaseModel<BaseEntity, BaseModelListener> | undefined {
+  getModelAtPosition(event: MouseEvent): BaseModel<BaseEntity> | undefined {
     const target = event.target as Element;
     const model = this.props.engine.model;
 
@@ -167,7 +167,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         // its a port element, we want to create a link
         if (!this.props.engine.model.locked && !elModel.locked) {
           const { x, y } = this.props.engine.getRelativeMousePoint(event);
-          const link = elModel.createLinkModel();
+          const link = this.props.engine.getPortFactory(elModel.type).getLinkFactory().getNewInstance();
           if (link) {
             // define link source to be the current clicked port
             link.sourcePort = elModel;
@@ -333,45 +333,30 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         } else if (element instanceof LinkModel) {
           if (!event.shiftKey) {
             // we want to add a point to a link ?
-            // tslint:disable-next-line
-            console.log('[mouseup] on link', element.id);
             const { x, y } = this.props.engine.getRelativeMousePoint(event);
-            const point = element.newPoint(x, y);
+            const point = this.props.engine.getLinkFactory(element.type).getPointFactory().getNewInstance({ x, y });
             this.props.engine.model.clearSelection();
             point.selected = true;
+            element.addPoint(point);
           }
         }
       }
 
-      // check for / remove any loose links which have been moved
+      // remove any loose links which have been moved
       if (!this.props.engine.model.allowLooseLinks) {
         this.props.engine.action.selectionModels.forEach((model) => {
           // only care about points connecting to things
-          if (!(model.model instanceof PointModel)) {
-            return;
-          }
-
-          const selectedPoint: PointModel = model.model;
-          const link: LinkModel = selectedPoint.parent!;
-          if (link.sourcePort === null || link.targetPort === null) {
-            link.remove();
+          if (model.model instanceof PointModel) {
+            const point: PointModel = model.model;
+            if (point.parent) {
+              const link = point.parent;
+              if (link.sourcePort === null || link.targetPort === null) {
+                this.props.engine.model.removeLink(link);
+              }
+            }
           }
         });
       }
-
-      // remove any invalid links
-      this.props.engine.action.selectionModels.forEach((model) => {
-        // only care about points connecting to things
-        if (model.model instanceof PointModel) {
-          const link = model.model.parent!;
-          if (link.sourcePort && link.targetPort) {
-            if (!link.sourcePort.canLinkToPort(link.targetPort)) {
-              // link not allowed
-              link.remove();
-            }
-          }
-        }
-      });
     }
     this.stopFiringAction();
     document.removeEventListener('mousemove', this.onMouseMove);

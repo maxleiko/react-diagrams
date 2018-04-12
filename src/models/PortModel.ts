@@ -1,13 +1,13 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseModel, BaseModelListener } from './BaseModel';
+import { BaseModel } from './BaseModel';
 import { NodeModel } from './NodeModel';
 import { LinkModel } from './LinkModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { BaseEntity } from '../BaseEntity';
 
-export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> {
+export abstract class PortModel extends BaseModel<NodeModel> {
   @observable private _maximumLinks: number;
   @observable private _links: Map<string, LinkModel> = new Map();
 
@@ -23,12 +23,12 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity, BaseModelListener>> {
+  get selectedEntities(): Array<BaseModel<BaseEntity>> {
+    const entities = new Array<BaseModel<BaseEntity>>();
     if (this.selected) {
-      return new Array<BaseModel<BaseEntity, BaseModelListener>>(this)
-        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities)));
+      entities.push(this);
     }
-    return [];
+    return entities.concat(_.flatten(Array.from(this._links.values()).map((l) => l.selectedEntities)));
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {
@@ -59,12 +59,12 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   }
 
   @action
-  removeLink(link: LinkModel<any, any, any, any>) {
+  removeLink(link: LinkModel<PortModel, PortModel>) {
     return this._links.delete(link.id);
   }
 
   @action
-  addLink(link: LinkModel<any, any, any, any>) {
+  addLink(link: LinkModel<PortModel, PortModel>) {
     this._links.set(link.id, link);
   }
 
@@ -79,8 +79,6 @@ export abstract class PortModel extends BaseModel<NodeModel, BaseModelListener> 
   canLinkToPort(_port: PortModel): boolean {
     return true;
   }
-
-  abstract createLinkModel(): LinkModel | null;
 
   @computed
   get maximumLinks(): number {

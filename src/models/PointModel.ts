@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
-import { observable, computed, action } from 'mobx';
+import { observable, computed, action, autorun } from 'mobx';
 
-import { BaseModel, BaseModelListener } from './BaseModel';
+import { BaseModel } from './BaseModel';
 import { LinkModel } from './LinkModel';
 import { DiagramEngine } from '../DiagramEngine';
 
-export class PointModel<P extends LinkModel = LinkModel> extends BaseModel<P, BaseModelListener> {
+export abstract class PointModel<P extends LinkModel = LinkModel> extends BaseModel<P> {
   @observable private _x: number;
   @observable private _y: number;
 
@@ -13,10 +13,18 @@ export class PointModel<P extends LinkModel = LinkModel> extends BaseModel<P, Ba
     super(type);
     this._x = x;
     this._y = y;
+
+    autorun(() => {
+      // tslint:disable-next-line
+      console.log(this.id, this._x, this._y);
+    });
   }
 
   isConnectedToPort(): boolean {
-    return this.parent!.getPortForPoint(this) !== null;
+    if (this.parent) {
+      return this.parent.getPortForPoint(this) !== null;
+    }
+    return false;
   }
 
   deSerialize(ob: any, engine: DiagramEngine) {
