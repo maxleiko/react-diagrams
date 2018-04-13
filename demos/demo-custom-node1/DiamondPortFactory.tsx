@@ -8,8 +8,8 @@ export class DiamondPortFactory extends AbstractPortFactory<DiamondPortModel> {
     super('diamond');
   }
 
-  generateReactWidget(_engine: DiagramEngine, model: DiamondPortModel) {
-    return <PortWidgetContainer port={model} />;
+  generateReactWidget(engine: DiagramEngine, model: DiamondPortModel) {
+    return <PortWidgetContainer engine={engine} port={model} />;
   }
 
   getNewInstance(_conf?: any): DiamondPortModel {

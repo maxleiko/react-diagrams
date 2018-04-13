@@ -10,13 +10,10 @@ export interface LinkProps {
 
 @observer
 export class LinkWidgetContainer extends React.Component<LinkProps> {
-
   render() {
+    const { id, selected } = this.props.link;
     return (
-      <g
-        srd-id={this.props.link.id}
-        className={cx('srd-link', { 'selected': this.props.link.selected })}
-      >
+      <g srd-id={id} className={cx('srd-link', { selected })}>
         {this.props.children}
       </g>
     );

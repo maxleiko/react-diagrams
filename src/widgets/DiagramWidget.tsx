@@ -451,16 +451,12 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     return (
       <div
         className={cx('srd-diagram', this.props.className)}
-        ref={(ref) => {
-          if (ref) {
-            this.props.engine.canvas = ref;
-          }
-        }}
+        ref={(ref) => this.props.engine.canvas = ref}
         onWheel={this.onWheel}
         onMouseDown={this.onMouseDown}
       >
-        <LinkLayerWidget engine={diagramEngine} />
         <NodeLayerWidget engine={diagramEngine} />
+        <LinkLayerWidget engine={diagramEngine} />
         {this.props.engine.action instanceof SelectingAction && (
           <div className="selection-box" style={this.props.engine.action.styles} />
         )}

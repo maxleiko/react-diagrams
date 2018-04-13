@@ -13,8 +13,6 @@ export class NodeWidgetContainer extends React.Component<NodeProps> {
 
   render() {
     const { id, x, y, selected } = this.props.node;
-    // tslint:disable-next-line
-    console.log(this.props.node, x, y);
 
     return (
       <div

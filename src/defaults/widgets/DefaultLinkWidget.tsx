@@ -204,7 +204,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
             engine,
             link,
             0,
-            Toolkit.generateCurvePath(link.firstPoint, link.lastPoint, link.curvyness, engine)
+            Toolkit.generateCurvePath(link.firstPoint, link.lastPoint, link.curvyness)
           )
         );
 
@@ -216,7 +216,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
         // draw the multiple anchors and complex line instead
         for (let j = 0; j < link.points.length - 1; j++) {
           paths.push(
-            this.generateSegment(engine, link, j, Toolkit.generateLinePath(link.points[j], link.points[j + 1], engine))
+            this.generateSegment(engine, link, j, Toolkit.generateLinePath(link.points[j], link.points[j + 1]))
           );
         }
 

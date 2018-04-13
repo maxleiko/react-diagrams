@@ -78,8 +78,12 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   setPosition(x: number, y: number) {
     this._x = x;
     this._y = y;
-    // tslint:disable-next-line
-    console.log('PortModel coords updated', x, y);
+    this._links.forEach((link) => {
+      const point = link.getPointForPort(this);
+      if (point) {
+        point.setPosition(x, y);
+      }
+    });
   }
 
   canLinkToPort(_port: PortModel): boolean {

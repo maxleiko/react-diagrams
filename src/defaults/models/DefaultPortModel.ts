@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { PortModel } from '../../models/PortModel';
 import { DiagramEngine } from '../../DiagramEngine';
-import { observable, action } from 'mobx';
+import { observable } from 'mobx';
 import { DefaultLinkModel } from './DefaultLinkModel';
 import { DefaultPointFactory } from 'storm-react-diagrams';
 
@@ -32,16 +32,6 @@ export class DefaultPortModel extends PortModel {
     const link = new DefaultLinkModel(new DefaultPointFactory());
     link.connect(this, port);
     return link;
-  }
-
-  @action
-  setPosition(x: number, y: number) {
-    super.setPosition(x, y);
-    if (this._in) {
-      this.links.forEach((link) => link.lastPoint.setPosition(x, y));
-    } else {
-      this.links.forEach((link) => link.firstPoint.setPosition(x, y));
-    }
   }
 
   canLinkToPort(port: PortModel): boolean {

@@ -32,6 +32,7 @@ export class DiagramEngine extends BaseEntity {
 
   @observable private _model: DiagramModel = new DiagramModel();
   @observable private _canvas: HTMLDivElement | null = null;
+  @observable private _portRefs: Map<string, { port: PortModel, ref: HTMLElement }> = new Map();
 
   // calculated only when smart routing is active
   @observable private _canvasMatrix: number[][] = [];
@@ -70,6 +71,9 @@ export class DiagramEngine extends BaseEntity {
 
   set canvas(canvas: HTMLDivElement | null) {
     this._canvas = canvas;
+    if (this._canvas) {
+      this.updatePortRefPositions();
+    }
   }
 
   @computed
@@ -216,18 +220,37 @@ export class DiagramEngine extends BaseEntity {
       .generateReactWidget(this, point);
   }
 
+  @action
+  registerPortRef(port: PortModel, ref: HTMLElement) {
+    this._portRefs.set(port.id, { port, ref });
+  }
+
+  @action
+  unregisterPortRef(port: PortModel) {
+    this._portRefs.delete(port.id);
+  }
+
+  @action
+  updatePortRefPositions() {
+    this._portRefs.forEach(({ port, ref }) => {
+      const rect = ref.getBoundingClientRect();
+      const point = this.getRelativePoint(rect.left, rect.top);
+      const x = ref.offsetWidth / 2 + point.x;
+      const y = ref.offsetHeight / 2 + point.y;
+
+      if (port.x !== x || port.y !== y) {
+        // update port position for points only if necessary
+        port.setPosition(x, y);
+      }
+    });
+  }
+
   getRelativePoint(x: number, y: number) {
-    // tslint:disable-next-line
-    console.log('getRelativePoint', x, y);
     const pt = this.getPointRelativeToCanvas(x, y);
-    // tslint:disable-next-line
-    console.log('relative to canvas', pt.x, pt.y);
     const point = {
       x: (pt.x - this._model.offsetX) / (this._model.zoom / 100.0),
       y: (pt.y - this._model.offsetY) / (this._model.zoom / 100.0)
     };
-    // tslint:disable-next-line
-    console.log('with offset & zoom', point.x, point.y);
     return point;
   }
 
@@ -237,13 +260,9 @@ export class DiagramEngine extends BaseEntity {
 
   getPointRelativeToCanvas(x: number, y: number) {
     if (this._canvas) {
-      // tslint:disable-next-line
-      console.log('has canvas');
       const rect = this._canvas.getBoundingClientRect();
       return { x: x - rect.left, y: y - rect.top };
     }
-    // tslint:disable-next-line
-    console.log('NO canvas');
     return { x, y };
   }
 

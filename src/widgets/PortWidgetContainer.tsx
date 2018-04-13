@@ -12,32 +12,23 @@ export interface PortProps {
 
 @observer
 export class PortWidgetContainer extends React.Component<PortProps> {
-
   private _elem: HTMLDivElement | null = null;
 
   componentDidMount() {
     if (this._elem) {
-      const rect = this._elem.getBoundingClientRect();
-
-      const point = this.props.engine.getRelativePoint(rect.left, rect.top);
-      const x = this._elem.offsetWidth / 2 + point.x;
-      const y = this._elem.offsetHeight / 2 + point.y;
-
-      // prevent unecessary re-rendering
-      if (this.props.port.x !== x || this.props.port.y !== y) {
-        // update port position for points
-        this.props.port.setPosition(x, y);
-      }
+      this.props.engine.registerPortRef(this.props.port, this._elem);
     }
   }
 
+  componentWillUnmount() {
+    this.props.engine.unregisterPortRef(this.props.port);
+  }
+
   render() {
+    const { id, selected } = this.props.port;
+
     return (
-      <div
-        ref={(elem) => this._elem = elem}
-        srd-id={this.props.port.id}
-        className={cx('srd-port', { 'selected': this.props.port.selected })}
-      >
+      <div ref={(elem) => (this._elem = elem)} srd-id={id} className={cx('srd-port', { selected })}>
         {this.props.children}
       </div>
     );
