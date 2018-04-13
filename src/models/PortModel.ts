@@ -38,7 +38,7 @@ export abstract class PortModel extends BaseModel<NodeModel> {
 
   serialize() {
     return _.merge(super.serialize(), {
-      links: this._links.keys(),
+      links: Array.from(this._links.keys()),
       maximumLinks: this._maximumLinks
     });
   }
@@ -64,8 +64,11 @@ export abstract class PortModel extends BaseModel<NodeModel> {
 
   @action
   remove() {
+    this._links.forEach((link) => link.remove());
+    this._links.clear();
     if (this.parent) {
       this.parent.removePort(this);
+      this.parent = null;
     }
   }
 

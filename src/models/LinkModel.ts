@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { observable, computed, action } from 'mobx';
+import { observable, computed, action, IObservableArray } from 'mobx';
 import { createTransformer } from 'mobx-utils';
 
 import { BaseModel } from './BaseModel';
@@ -134,14 +134,13 @@ export abstract class LinkModel extends BaseModel<
 
   @action
   remove() {
-    if (this._sourcePort) {
-      this._sourcePort.removeLink(this);
-    }
-    if (this._targetPort) {
-      this._targetPort.removeLink(this);
-    }
+    this._sourcePort = null;
+    this._targetPort = null;
+    (this._points as IObservableArray<PointModel>).clear();
+    (this._labels as IObservableArray<LabelModel>).clear();
     if (this.parent) {
       this.parent.removeLink(this);
+      this.parent = null;
     }
   }
 
@@ -181,13 +180,10 @@ export abstract class LinkModel extends BaseModel<
   }
 
   set sourcePort(port: PortModel | null) {
+    this._sourcePort = port;
     if (port) {
       port.addLink(this);
     }
-    if (this._sourcePort) {
-      this._sourcePort.removeLink(this);
-    }
-    this._sourcePort = port;
   }
 
   @computed
@@ -196,13 +192,10 @@ export abstract class LinkModel extends BaseModel<
   }
 
   set targetPort(port: PortModel | null) {
+    this._targetPort = port;
     if (port) {
       port.addLink(this);
     }
-    if (this._targetPort) {
-      this._targetPort.removeLink(this);
-    }
-    this._targetPort = port;
   }
 
   @action

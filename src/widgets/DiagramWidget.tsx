@@ -18,7 +18,6 @@ import { LinkModel } from '../models/LinkModel';
 import { BaseModel } from '../models/BaseModel';
 import { BaseEntity } from '../BaseEntity';
 import { CreateLinkAction } from '../actions/CreateLinkAction';
-import { LabelModel } from '../models/LabelModel';
 
 export interface DiagramProps {
   engine: DiagramEngine;
@@ -66,6 +65,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     const target = event.target as Element;
     const model = this.props.engine.model;
 
+    // tslint:disable-next-line
+    console.log('getModelAtPosition', target);
+
     // look for a port
     let element = Toolkit.closest(target, '.srd-port[srd-id]');
     if (element) {
@@ -107,22 +109,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         const link = model.getLink(linkId);
         if (link) {
           return { el: target, model: link };
-        }
-      }
-    }
-
-    // look for a label
-    element = Toolkit.closest(target, '.srd-label[srd-id]');
-    if (element) {
-      const labelId = element.getAttribute('srd-id');
-      const linkId = element.getAttribute('srd-link-id');
-      if (labelId && linkId) {
-        const link = model.getLink(linkId);
-        if (link) {
-          const label = link.getLabel(labelId);
-          if (label) {
-            return { el: target, model: label };
-          }
         }
       }
     }
@@ -232,10 +218,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               this.startFiringAction(a);
             }
           }
-        }
-      } else if (model instanceof LabelModel) {
-        if (model.parent) {
-          model.parent.selected = true;
         }
       } else {
         // mousedown on an element (not a port): probably wants to move it
@@ -351,32 +333,42 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           if (model instanceof PortModel) {
             // prevent sourcePort === targetPort
             if (link.sourcePort !== model) {
-              link.targetPort = model;
-              const { x, y } = this.props.engine.getRelativeMousePoint(event);
-              link.lastPoint.setPosition(x, y);
+              // check if link can connect to that port
+              if (link.sourcePort!.canLinkToPort(model)) {
+                // link is now connected from end-to-end
+                link.targetPort = model;
+                this.props.engine.model.clearSelection();
+              } else {
+                // invalid link connection
+                link.remove();
+                this.props.engine.model.clearSelection();
+              }
             } else {
               // link.sourcePort === targetPort which is not allowed
               link.remove();
+              this.props.engine.model.clearSelection();
             }
           } else {
             // link has been dropped on something that is not a PortModel
             // so it will dangel: verify
             if (!this.props.engine.model.allowLooseLinks) {
               link.remove();
+              this.props.engine.model.clearSelection();
             }
           }
         } else {
           // element or model is locked: remove link
           link.remove();
+          this.props.engine.model.clearSelection();
         }
       } else {
         // no element where link ended
         if (!this.props.engine.model.allowLooseLinks) {
           link.remove();
+          this.props.engine.model.clearSelection();
         }
       }
     }
-
     this.stopFiringAction();
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);

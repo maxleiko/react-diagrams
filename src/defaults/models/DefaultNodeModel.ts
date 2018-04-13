@@ -4,14 +4,14 @@ import * as _ from 'lodash';
 import { NodeModel } from '../../models/NodeModel';
 import { Toolkit } from '../../Toolkit';
 import { DiagramEngine } from '../../DiagramEngine';
-import { action, computed } from 'mobx';
+import { action, computed, observable } from 'mobx';
 
 /**
  * @author Dylan Vorster
  */
 export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
-  private _name: string;
-  private _color: string;
+  @observable private _name: string;
+  @observable private _color: string;
 
   constructor(name: string = 'Untitled', color: string = 'rgb(0,192,255)') {
     super('srd-default-node');

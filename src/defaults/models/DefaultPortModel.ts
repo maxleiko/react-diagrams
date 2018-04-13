@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { PortModel } from '../../models/PortModel';
 import { DiagramEngine } from '../../DiagramEngine';
-import { observable } from 'mobx';
+import { observable, computed, action } from 'mobx';
 import { DefaultLinkModel } from './DefaultLinkModel';
 import { DefaultPointFactory } from 'storm-react-diagrams';
 
@@ -28,6 +28,7 @@ export class DefaultPortModel extends PortModel {
     });
   }
 
+  @action
   link(port: DefaultPortModel): DefaultLinkModel {
     const link = new DefaultLinkModel(new DefaultPointFactory());
     link.connect(this, port);
@@ -55,10 +56,12 @@ export class DefaultPortModel extends PortModel {
     return false;
   }
 
+  @computed
   get in(): boolean {
     return this._in;
   }
 
+  @computed
   get label(): string {
     return this._label;
   }

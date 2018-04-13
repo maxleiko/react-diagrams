@@ -80,9 +80,7 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
 
   @action
   remove() {
-    this._ports.forEach((port) => {
-      port.links.forEach((link) => link.remove());
-    });
+    this._ports.forEach((port) => port.remove());
     if (this.parent) {
       this.parent.removeNode(this);
     }

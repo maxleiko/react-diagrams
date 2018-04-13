@@ -7,11 +7,12 @@ import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultLabelModel } from './DefaultLabelModel';
 import { LabelModel } from '../../models/LabelModel';
 import { AbstractPointFactory } from '../../factories/AbstractPointFactory';
+import { computed, action, observable } from 'mobx';
 
 export class DefaultLinkModel extends LinkModel {
-  private _color: string;
-  private _width: number = -1;
-  private _curvyness: number = -1;
+  @observable private _color: string;
+  @observable private _width: number = -1;
+  @observable private _curvyness: number = -1;
 
   constructor(
     ptFactory: AbstractPointFactory,
@@ -40,6 +41,7 @@ export class DefaultLinkModel extends LinkModel {
     this.curvyness = ob.curvyness;
   }
 
+  @action
   addLabel(label: LabelModel | string) {
     if (label instanceof LabelModel) {
       return super.addLabel(label);
@@ -49,42 +51,30 @@ export class DefaultLinkModel extends LinkModel {
     return super.addLabel(labelOb);
   }
 
+  @computed
   get width(): number {
     return this._width;
   }
 
   set width(width: number) {
     this._width = width;
-    // this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
-    //   if (listener.widthChanged) {
-    //     listener.widthChanged({ ...event, width });
-    //   }
-    // });
   }
 
+  @computed
   get color(): string {
     return this._color;
   }
 
   set color(color: string) {
     this._color = color;
-    // this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
-    //   if (listener.colorChanged) {
-    //     listener.colorChanged({ ...event, color });
-    //   }
-    // });
   }
 
+  @computed
   get curvyness(): number {
     return this._curvyness;
   }
 
   set curvyness(curvyness: number) {
     this._curvyness = curvyness;
-    // this.iterateListeners((listener: DefaultLinkModelListener, event: BaseEvent) => {
-    //   if (listener.curvynessChanged) {
-    //     listener.curvynessChanged({ ...event, curvyness });
-    //   }
-    // });
   }
 }
