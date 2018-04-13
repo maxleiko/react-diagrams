@@ -29,7 +29,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   // DOM references to the label and paths (if label is given), used to calculate dynamic positioning
   private _elem: SVGGElement | null = null;
   private _labelElems: { [id: string]: HTMLDivElement | null } = {};
-  private _pathElems: SVGPathElement[] = [];
+  // private _pathElems: SVGPathElement[] = [];
   private _pathFinding: PathFinding | null = null; // only set when smart routing is active
 
   constructor(props: DefaultLinkProps) {
@@ -95,10 +95,10 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
 
       // find the path where the label will be rendered and calculate the relative position
       let pathIndex = 0;
-      while (pathIndex < this._pathElems.length) {
+      while (pathIndex < this.props.link.points.length - 1) {
         if (labelPosition - lengths[pathIndex] < 0) {
           return {
-            path: this._pathElems[pathIndex],
+            path: this._elem.querySelector<SVGPathElement>(`.srd-segment[srd-id="${pathIndex}"] path.path`)!,
             position: labelPosition
           };
         }
@@ -218,19 +218,18 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
           );
         }
 
-        // render the circles
+        // render only the middle points (not firstPoint and lastPoint)
         for (let i = 1; i < link.points.length - 1; i++) {
           paths.push(this.generatePoint(engine, link.points[i]));
         }
 
+        // draw the dangeling point if link is not connected to a targetPort
         if (link.targetPort === null) {
           paths.push(this.generatePoint(engine, link.lastPoint));
         }
       }
     }
 
-    // reset path elems on each render()
-    this._pathElems = [];
     const reverse = link.sourcePort && link.sourcePort.in;
     return (
       <g className={cx('srd-default-link', { reverse })} ref={(elem) => (this._elem = elem)}>
