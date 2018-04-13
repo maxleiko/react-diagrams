@@ -29,7 +29,6 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   // DOM references to the label and paths (if label is given), used to calculate dynamic positioning
   private _elem: SVGGElement | null = null;
   private _labelElems: { [id: string]: HTMLDivElement | null } = {};
-  // private _pathElems: SVGPathElement[] = [];
   private _pathFinding: PathFinding | null = null; // only set when smart routing is active
 
   constructor(props: DefaultLinkProps) {

@@ -202,16 +202,17 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               .getNewInstance({ x, y });
             this.props.engine.model.clearSelection();
             point.selected = true;
-            let segmentIndex: number | undefined;
-            // tslint:disable-next-line
-            console.log('clicked element', el);
+            // retrieve clicked .srd-segment in order to position point properly
+            let segmentIndex: number = 0;
             const segEl = Toolkit.closest(el, '.srd-segment');
             if (segEl) {
-              segmentIndex = parseInt(segEl.getAttribute('srd-id'), 10) || undefined;
+              const idAttr = segEl.getAttribute('srd-id');
+              if (idAttr) {
+                segmentIndex = parseInt(idAttr, 10);
+              }
             }
-            // tslint:disable-next-line
-            console.log('adding point', point.id, 'with segmentIndex', segmentIndex);
-            model.addPoint(point, segmentIndex);
+            // point should be placed at index = segmentIndex + 1
+            model.addPoint(point, segmentIndex + 1);
             const action = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
             // tslint:disable-next-line
             console.log('[mousedown] new MoveItemsAction()', action.selectionModels.slice());
