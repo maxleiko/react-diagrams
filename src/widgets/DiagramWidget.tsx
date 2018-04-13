@@ -335,6 +335,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               link.targetPort = model;
               const { x, y } = this.props.engine.getRelativeMousePoint(event);
               link.lastPoint.setPosition(x, y);
+            } else {
+              // link.sourcePort === targetPort which is not allowed
+              link.remove();
             }
           } else {
             // link has been dropped on something that is not a PortModel
