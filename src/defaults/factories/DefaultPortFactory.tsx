@@ -11,8 +11,8 @@ export class DefaultPortFactory extends AbstractPortFactory<DefaultPortModel> {
     super('srd-default-port');
   }
 
-  generateReactWidget(_engine: DiagramEngine, model: DefaultPortModel) {
-    return <DefaultPortWidget port={model} />;
+  generateReactWidget(engine: DiagramEngine, port: DefaultPortModel) {
+    return <DefaultPortWidget engine={engine} port={port} />;
   }
 
   getNewInstance(_initialConfig?: any): DefaultPortModel {

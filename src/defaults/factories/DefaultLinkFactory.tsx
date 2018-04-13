@@ -18,6 +18,8 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
   }
 
   generateSegment(_engine: DiagramEngine, link: DefaultLinkModel, key: number, svgPath: string) {
+    // tslint:disable-next-line
+    console.log(`segment-${key}`, svgPath);
     return (
       <g key={`segment-${key}`} srd-index={key} className="srd-segment">
         <path

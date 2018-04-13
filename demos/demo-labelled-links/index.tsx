@@ -3,7 +3,8 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
-  DefaultLinkModel
+  DefaultLinkModel,
+  DefaultPointFactory
 } from 'storm-react-diagrams';
 import * as React from 'react';
 import { DemoWorkspaceWidget } from '../.helpers/DemoWorkspaceWidget';
@@ -35,18 +36,21 @@ export default () => {
   const port4 = node4.addInPort('In');
   node4.setPosition(300, 250);
 
+  const ptFactory = new DefaultPointFactory();
+
   // link node A and B together and give it a label
-  const link1 = port1.link(port2)! as DefaultLinkModel;
-  link1.addLabel('Custom label 1');
+  const link1 = new DefaultLinkModel(ptFactory);
   link1.addLabel('Custom label 2');
+  link1.connect(port1, port2);
 
   // no label for A and C, just a link
-  const link2 = port1.link(port3)!;
+  const link2 = new DefaultLinkModel(ptFactory);
+  link2.connect(port1, port3);
 
   // also a label for A and D
-  const link3 = port1.link(port4)!;
-  link3.targetPort = port4;
-  (link3 as DefaultLinkModel).addLabel('Emoji label: 🎉');
+  const link3 = new DefaultLinkModel(ptFactory);
+  link3.addLabel('Emoji label: 🎉');
+  link3.connect(port1, port4);
 
   // add all to the main model
   model.addAll(node1, node2, node3, node4, link1, link2, link3);

@@ -28,7 +28,7 @@ export default () => {
 
   // 3-A) create a default node
   const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
-  const port1 = node1.addOutPort('Out');
+  node1.addOutPort('Out');
   node1.setPosition(100, 150);
 
   // 3-B) create our new custom node
@@ -36,15 +36,15 @@ export default () => {
   node2.setPosition(250, 108);
 
   const node3 = new DefaultNodeModel('Node 3', 'red');
-  const port3 = node3.addInPort('In');
+  node3.addInPort('In');
   node3.setPosition(500, 150);
 
   // 3-C) link the 2 nodes together
-  const link1 = port1.link(node2.getPortFromID('left')!)!;
-  const link2 = port3.link(node2.getPortFromID('right')!)!;
+  // const link1 = port1.link(node2.getPortFromID('left')!)!;
+  // const link2 = port3.link(node2.getPortFromID('right')!)!;
 
   // 4) add the models to the root graph
-  model.addAll(node1, node2, node3, link1, link2);
+  model.addAll(node1, node2, node3);
 
   // 5) load model into engine
   engine.model = model;

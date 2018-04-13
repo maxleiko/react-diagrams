@@ -13,37 +13,40 @@ const pathFinderInstance = new PF.JumpPointFinder({
   diagonalMovement: PF.DiagonalMovement.Never
 });
 
+export type Path = number[][];
+export interface Point {
+  x: number;
+  y: number;
+}
+export interface Link {
+  start: Point;
+  end: Point;
+  pathToStart: Path;
+  pathToEnd: Path;
+}
+
 export class PathFinding {
   instance: any;
-  diagramEngine: DiagramEngine;
+  engine: DiagramEngine;
 
-  constructor(diagramEngine: DiagramEngine) {
+  constructor(engine: DiagramEngine) {
     this.instance = pathFinderInstance;
-    this.diagramEngine = diagramEngine;
+    this.engine = engine;
   }
 
   /**
    * Taking as argument a fully unblocked walking matrix, this method
    * finds a direct path from point A to B.
    */
-  calculateDirectPath(
-    from: {
-      x: number;
-      y: number;
-    },
-    to: {
-      x: number;
-      y: number;
-    }
-  ): number[][] {
-    const matrix = this.diagramEngine.getCanvasMatrix();
+  calculateDirectPath(from: Point, to: Point): Path {
+    const matrix = this.engine.getCanvasMatrix();
     const grid = new PF.Grid(matrix);
 
     return pathFinderInstance.findPath(
-      this.diagramEngine.translateRoutingX(Math.floor(from.x / ROUTING_SCALING_FACTOR)),
-      this.diagramEngine.translateRoutingY(Math.floor(from.y / ROUTING_SCALING_FACTOR)),
-      this.diagramEngine.translateRoutingX(Math.floor(to.x / ROUTING_SCALING_FACTOR)),
-      this.diagramEngine.translateRoutingY(Math.floor(to.y / ROUTING_SCALING_FACTOR)),
+      this.engine.translateRoutingX(Math.floor(from.x / ROUTING_SCALING_FACTOR)),
+      this.engine.translateRoutingY(Math.floor(from.y / ROUTING_SCALING_FACTOR)),
+      this.engine.translateRoutingX(Math.floor(to.x / ROUTING_SCALING_FACTOR)),
+      this.engine.translateRoutingY(Math.floor(to.y / ROUTING_SCALING_FACTOR)),
       grid
     );
   }
@@ -53,21 +56,7 @@ export class PathFinding {
    * determine the first walkable point found in the matrix that includes
    * blocked paths.
    */
-  calculateLinkStartEndCoords(
-    matrix: number[][],
-    path: number[][]
-  ): {
-    start: {
-      x: number;
-      y: number;
-    };
-    end: {
-      x: number;
-      y: number;
-    };
-    pathToStart: number[][];
-    pathToEnd: number[][];
-  } | undefined {
+  calculateLinkStartEndCoords(matrix: Path, path: Path): Link | undefined {
     const startIndex = path.findIndex((point) => matrix[point[1]][point[0]] === 0);
     const endIndex =
       path.length -
@@ -104,19 +93,7 @@ export class PathFinding {
    * Puts everything together: merges the paths from/to the centre of the ports,
    * with the path calculated around other elements.
    */
-  calculateDynamicPath(
-    routingMatrix: number[][],
-    start: {
-      x: number;
-      y: number;
-    },
-    end: {
-      x: number;
-      y: number;
-    },
-    pathToStart: number[][],
-    pathToEnd: number[][]
-  ) {
+  calculateDynamicPath(routingMatrix: Path, start: Point, end: Point, pathToStart: Path, pathToEnd: Path) {
     // generate the path based on the matrix with obstacles
     const grid = new PF.Grid(routingMatrix);
     const dynamicPath = pathFinderInstance.findPath(start.x, start.y, end.x, end.y, grid);
@@ -125,8 +102,8 @@ export class PathFinding {
     const pathCoords = pathToStart
       .concat(dynamicPath, pathToEnd)
       .map((coords) => [
-        this.diagramEngine.translateRoutingX(coords[0], true),
-        this.diagramEngine.translateRoutingY(coords[1], true)
+        this.engine.translateRoutingX(coords[0], true),
+        this.engine.translateRoutingY(coords[1], true)
       ]);
     return PF.Util.compressPath(pathCoords);
   }

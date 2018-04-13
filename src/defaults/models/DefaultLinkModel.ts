@@ -6,10 +6,9 @@ import * as _ from 'lodash';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultLabelModel } from './DefaultLabelModel';
 import { LabelModel } from '../../models/LabelModel';
-import { DefaultPortModel } from './DefaultPortModel';
 import { AbstractPointFactory } from '../../factories/AbstractPointFactory';
 
-export class DefaultLinkModel extends LinkModel<DefaultPortModel, DefaultPortModel> {
+export class DefaultLinkModel extends LinkModel {
   private _color: string;
   private _width: number = -1;
   private _curvyness: number = -1;
@@ -46,7 +45,7 @@ export class DefaultLinkModel extends LinkModel<DefaultPortModel, DefaultPortMod
       return super.addLabel(label);
     }
     const labelOb = new DefaultLabelModel();
-    labelOb.label = label;
+    labelOb.title = label;
     return super.addLabel(labelOb);
   }
 

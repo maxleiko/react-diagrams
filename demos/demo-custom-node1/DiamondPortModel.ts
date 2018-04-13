@@ -1,5 +1,10 @@
 import * as _ from 'lodash';
-import { LinkModel, DiagramEngine, PortModel, DefaultLinkModel } from 'storm-react-diagrams';
+import {
+  DiagramEngine,
+  PortModel,
+  DefaultLinkModel,
+  DefaultPointFactory
+} from 'storm-react-diagrams';
 
 type Position = 'top' | 'bottom' | 'left' | 'right';
 
@@ -22,7 +27,9 @@ export class DiamondPortModel extends PortModel {
     this.position = data.position;
   }
 
-  createLinkModel(): LinkModel {
-    return new DefaultLinkModel();
+  link(port: DiamondPortModel): DefaultLinkModel {
+    const link = new DefaultLinkModel(new DefaultPointFactory());
+    link.connect(this, port);
+    return link;
   }
 }

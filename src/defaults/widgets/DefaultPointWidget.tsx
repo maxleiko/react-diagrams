@@ -11,14 +11,16 @@ export interface DefaultPointWidgetProps {
 @observer
 export class DefaultPointWidget extends React.Component<DefaultPointWidgetProps> {
   render() {
+    const { id, selected, x, y, parent } = this.props.point;
+
     return (
       <g
-        key={this.props.point.id}
-        srd-id={this.props.point.id}
-        srd-link-id={this.props.point.parent!.id}
-        className={cx('srd-point', { selected: this.props.point.selected })}
+        key={id}
+        srd-id={id}
+        srd-link-id={parent!.id}
+        className={cx('srd-point', { selected })}
       >
-        <circle cx={this.props.point.x} cy={this.props.point.y} r={5} className="point" />
+        <circle cx={x} cy={y} r={5} className="point" />
       </g>
     );
   }

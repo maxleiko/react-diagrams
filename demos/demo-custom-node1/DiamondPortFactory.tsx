@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AbstractPortFactory, DiagramEngine, PortWidget } from 'storm-react-diagrams';
+import { AbstractPortFactory, DiagramEngine, PortWidgetContainer, DefaultLinkFactory } from 'storm-react-diagrams';
 import { DiamondPortModel } from './DiamondPortModel';
 
 export class DiamondPortFactory extends AbstractPortFactory<DiamondPortModel> {
@@ -9,10 +9,14 @@ export class DiamondPortFactory extends AbstractPortFactory<DiamondPortModel> {
   }
 
   generateReactWidget(_engine: DiagramEngine, model: DiamondPortModel) {
-    return <PortWidget port={model} />;
+    return <PortWidgetContainer port={model} />;
   }
 
   getNewInstance(_conf?: any): DiamondPortModel {
     return new DiamondPortModel();
+  }
+
+  getLinkFactory(): DefaultLinkFactory {
+    return new DefaultLinkFactory();
   }
 }

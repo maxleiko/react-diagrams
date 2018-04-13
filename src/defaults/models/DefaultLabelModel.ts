@@ -2,7 +2,7 @@ import { computed, observable } from 'mobx';
 import { LabelModel } from '../../models/LabelModel';
 
 export class DefaultLabelModel extends LabelModel {
-  @observable private _label: string | null = null;
+  @observable private _title: string | null = null;
 
   constructor() {
     super('srd-default-label');
@@ -10,11 +10,11 @@ export class DefaultLabelModel extends LabelModel {
   }
 
   @computed
-  get label(): string | null {
-    return this._label;
+  get title(): string | null {
+    return this._title;
   }
 
-  set label(label: string | null) {
-    this._label = label;
+  set title(title: string | null) {
+    this._title = title;
   }
 }

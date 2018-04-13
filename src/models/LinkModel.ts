@@ -11,7 +11,7 @@ import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
 import { AbstractPointFactory } from '../factories/AbstractPointFactory';
 
-export abstract class LinkModel<S extends PortModel = PortModel, T extends PortModel = PortModel> extends BaseModel<
+export abstract class LinkModel extends BaseModel<
   DiagramModel
 > {
   getPointForPort = createTransformer((port: PortModel): PointModel | null => {
@@ -24,7 +24,7 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
     return null;
   });
 
-  getPortForPoint = createTransformer((point: PointModel): S | T | null => {
+  getPortForPoint = createTransformer((point: PointModel): PortModel | null => {
     if (this.sourcePort && this.firstPoint.id === point.id) {
       return this.sourcePort;
     }
@@ -42,12 +42,16 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
     return this._points.find((pt) => pt.id === id);
   });
 
+  getLabel = createTransformer((id: string): LabelModel | undefined => {
+    return this._labels.find((l) => l.id === id);
+  });
+
   getPointIndex = createTransformer((point: PointModel): number => {
     return this._points.findIndex((pt) => pt === point);
   });
 
-  @observable private _sourcePort: S | null = null;
-  @observable private _targetPort: T | null = null;
+  @observable private _sourcePort: PortModel | null = null;
+  @observable private _targetPort: PortModel | null = null;
   @observable private _points: PointModel[] = [];
   @observable private _labels: LabelModel[] = [];
 
@@ -63,10 +67,36 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
 
   deSerialize(ob: any, engine: DiagramEngine) {
     super.deSerialize(ob, engine);
+
+    if (ob.sourcePort) {
+      if (this.parent) {
+        const node = this.parent.getNode(ob.sourcePortParent);
+        if (node) {
+          const port = node.getPortFromID(ob.sourcePort) as PortModel | undefined;
+          if (port) {
+            this._sourcePort = port;
+          }
+        }
+      }
+    }
+
+    if (ob.targetPort) {
+      if (this.parent) {
+        const node = this.parent.getNode(ob.targetPortParent);
+        if (node) {
+          const port = node.getPortFromID(ob.targetPort) as PortModel | undefined;
+          if (port) {
+            this._targetPort = port;
+          }
+        }
+      }
+    }
+
     // deserialize points
     const points: any[] = ob.points || [];
     points.forEach((point) => {
-      const p = engine.getFactoryForPoint(point).getNewInstance();
+      const p = engine.getLinkFactory(this.type).getPointFactory().getNewInstance();
+      p.parent = this;
       p.deSerialize(point, engine);
       this.addPoint(p);
     });
@@ -75,44 +105,19 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
     const labels: any[] = ob.labels || [];
     labels.forEach((label) => {
       const l = engine.getLabelFactory(label.type).getNewInstance();
+      l.parent = this;
       l.deSerialize(label, engine);
       this.addLabel(l);
     });
-
-    if (ob.source) {
-      if (this.parent) {
-        const node = this.parent.getNode(ob.source);
-        if (node) {
-          const port = node.getPortFromID(ob.sourcePort) as S | undefined;
-          if (port) {
-            this._sourcePort = port;
-          }
-        }
-      }
-    }
-
-    if (ob.target) {
-      if (this.parent) {
-        const node = this.parent.getNode(ob.target);
-        if (node) {
-          const port = node.getPortFromID(ob.targetPort) as T | undefined;
-          if (port) {
-            this._targetPort = port;
-          }
-        }
-      }
-    }
   }
 
   serialize() {
     return _.merge(super.serialize(), {
-      source: this._sourcePort ? (this._sourcePort.parent ? this._sourcePort.parent.id : null) : null,
       sourcePort: this._sourcePort ? this._sourcePort.id : null,
-      target: this._targetPort ? (this._targetPort.parent ? this._targetPort.parent.id : null) : null,
+      sourcePortParent: this._sourcePort ? (this._sourcePort.parent ? this._sourcePort.parent.id : null) : null,
       targetPort: this._targetPort ? this._targetPort.id : null,
-      points: _.map(this._points, (point) => {
-        return point.serialize();
-      }),
+      targetPortParent: this._targetPort ? (this._targetPort.parent ? this._targetPort.parent.id : null) : null,
+      points: this._points.map((point) => point.serialize()),
       labels: this._labels.map((label) => label.serialize())
     });
   }
@@ -141,7 +146,7 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
   }
 
   @action
-  connect(source: S, target: T) {
+  connect(source: PortModel, target: PortModel) {
     this.sourcePort = source;
     this.targetPort = target;
   }
@@ -171,11 +176,11 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
   }
 
   @computed
-  get sourcePort(): S | null {
+  get sourcePort(): PortModel | null {
     return this._sourcePort;
   }
 
-  set sourcePort(port: S | null) {
+  set sourcePort(port: PortModel | null) {
     if (port) {
       port.addLink(this);
     }
@@ -186,11 +191,11 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
   }
 
   @computed
-  get targetPort(): T | null {
+  get targetPort(): PortModel | null {
     return this._targetPort;
   }
 
-  set targetPort(port: T | null) {
+  set targetPort(port: PortModel | null) {
     if (port) {
       port.addLink(this);
     }
@@ -241,8 +246,6 @@ export abstract class LinkModel<S extends PortModel = PortModel, T extends PortM
   @action
   addPoint(point: PointModel, index: number = 1): PointModel {
     if (index > 0 && index < this._points.length) {
-      // tslint:disable-next-line
-      console.log('ADD POINT at index', index);
       point.parent = this;
       this._points.splice(index, 0, point);
       return point;

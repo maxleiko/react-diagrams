@@ -5,14 +5,14 @@ import {
   DefaultPortModel,
   DiagramWidget,
   DefaultLinkModel,
-  DefaultLinkFactory
+  DefaultLinkFactory,
+  DefaultPointFactory
 } from 'storm-react-diagrams';
 import * as React from 'react';
 
 export class AdvancedLinkModel extends DefaultLinkModel {
   constructor() {
-    super('advanced');
-    this.width = 10;
+    super(new DefaultPointFactory(), undefined, 10);
   }
 }
 

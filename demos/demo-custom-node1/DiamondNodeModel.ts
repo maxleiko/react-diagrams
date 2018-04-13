@@ -1,7 +1,7 @@
 import { NodeModel } from 'storm-react-diagrams';
 import { DiamondPortModel } from './DiamondPortModel';
 
-export class DiamondNodeModel extends NodeModel {
+export class DiamondNodeModel extends NodeModel<DiamondPortModel> {
   constructor() {
     super('diamond');
     this.addPort(new DiamondPortModel('top'));

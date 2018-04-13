@@ -12,11 +12,15 @@ export interface NodeProps {
 export class NodeWidgetContainer extends React.Component<NodeProps> {
 
   render() {
+    const { id, x, y, selected } = this.props.node;
+    // tslint:disable-next-line
+    console.log(this.props.node, x, y);
+
     return (
       <div
-        srd-id={this.props.node.id}
-        className={cx('srd-node', { 'selected': this.props.node.selected })}
-        style={{ top: this.props.node.y, left: this.props.node.x }}
+        srd-id={id}
+        className={cx('srd-node', { selected })}
+        style={{ transform: `translate(${x}px, ${y}px)` }}
       >
         {this.props.children}
       </div>

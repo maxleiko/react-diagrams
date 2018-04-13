@@ -89,6 +89,7 @@ export class DiagramEngine extends BaseEntity {
   get model(): DiagramModel {
     return this._model;
   }
+
   // !-------------- FACTORIES ------------
 
   @computed
@@ -104,6 +105,22 @@ export class DiagramEngine extends BaseEntity {
   @computed
   get labelFactories(): Map<string, AbstractLabelFactory> {
     return this._labelFactories;
+  }
+
+  @computed
+  get canvasLeft(): number {
+    if (this._canvas) {
+      return this._canvas.getBoundingClientRect().left;
+    }
+    return 0;
+  }
+
+  @computed
+  get canvasTop(): number {
+    if (this._canvas) {
+      return this._canvas.getBoundingClientRect().top;
+    }
+    return 0;
   }
 
   @action
@@ -199,17 +216,35 @@ export class DiagramEngine extends BaseEntity {
       .generateReactWidget(this, point);
   }
 
-  getRelativeMousePoint(event: React.MouseEvent<Element> | MouseEvent): { x: number; y: number } {
-    const point = this.getRelativePoint(event.clientX, event.clientY);
-    return {
-      x: (point.x - this._model.offsetX) / (this._model.zoom / 100.0),
-      y: (point.y - this._model.offsetY) / (this._model.zoom / 100.0)
+  getRelativePoint(x: number, y: number) {
+    // tslint:disable-next-line
+    console.log('getRelativePoint', x, y);
+    const pt = this.getPointRelativeToCanvas(x, y);
+    // tslint:disable-next-line
+    console.log('relative to canvas', pt.x, pt.y);
+    const point = {
+      x: (pt.x - this._model.offsetX) / (this._model.zoom / 100.0),
+      y: (pt.y - this._model.offsetY) / (this._model.zoom / 100.0)
     };
+    // tslint:disable-next-line
+    console.log('with offset & zoom', point.x, point.y);
+    return point;
   }
 
-  getRelativePoint(x: number, y: number) {
-    const canvasRect = this._canvas!.getBoundingClientRect();
-    return { x: x - canvasRect.left, y: y - canvasRect.top };
+  getRelativeMousePoint(event: React.MouseEvent<Element> | MouseEvent): { x: number; y: number } {
+    return this.getRelativePoint(event.clientX, event.clientY);
+  }
+
+  getPointRelativeToCanvas(x: number, y: number) {
+    if (this._canvas) {
+      // tslint:disable-next-line
+      console.log('has canvas');
+      const rect = this._canvas.getBoundingClientRect();
+      return { x: x - rect.left, y: y - rect.top };
+    }
+    // tslint:disable-next-line
+    console.log('NO canvas');
+    return { x, y };
   }
 
   getNodeElement(node: NodeModel): Element {
@@ -229,21 +264,6 @@ export class DiagramEngine extends BaseEntity {
         throw new Error(`Cannot find Node Port element with nodeID: [${port.parent.id}] and name: [${port.id}]`);
       }
       return selector;
-    }
-    return null;
-  }
-
-  getPortCenter(port: PortModel): { x: number; y: number } | null {
-    const portEl = this.getNodePortElement(port);
-    if (portEl) {
-      const sourceRect = portEl.getBoundingClientRect();
-
-      const rel = this.getRelativePoint(sourceRect.left, sourceRect.top);
-
-      return {
-        x: portEl.offsetWidth / 2 + (rel.x - this._model.offsetX) / (this._model.zoom / 100.0),
-        y: portEl.offsetHeight / 2 + (rel.y - this._model.offsetY) / (this._model.zoom / 100.0)
-      };
     }
     return null;
   }

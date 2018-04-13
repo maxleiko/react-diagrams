@@ -38,7 +38,6 @@ export abstract class PortModel extends BaseModel<NodeModel> {
 
   serialize() {
     return _.merge(super.serialize(), {
-      parentNode: this.parent ? this.parent.id : null,
       links: this._links.keys(),
       maximumLinks: this._maximumLinks
     });
@@ -59,7 +58,7 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   @action
-  removeLink(link: LinkModel<PortModel, PortModel>) {
+  removeLink(link: LinkModel) {
     return this._links.delete(link.id);
   }
 
@@ -71,16 +70,16 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   @action
-  addLink(link: LinkModel<PortModel, PortModel>) {
+  addLink(link: LinkModel) {
     this._links.set(link.id, link);
   }
 
   @action
-  updateCoords({ x, y, width, height }: { x: number; y: number; width: number; height: number }) {
+  setPosition(x: number, y: number) {
     this._x = x;
     this._y = y;
-    this._width = width;
-    this._height = height;
+    // tslint:disable-next-line
+    console.log('PortModel coords updated', x, y);
   }
 
   canLinkToPort(_port: PortModel): boolean {

@@ -6,7 +6,6 @@ import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from './LinkModel';
 import { NodeModel } from './NodeModel';
 import { BaseModel } from './BaseModel';
-import { PortModel } from './PortModel';
 
 export interface NodeEvent<T extends NodeModel = NodeModel> extends BaseEvent<DiagramModel> {
   node: T;
@@ -282,8 +281,8 @@ export class DiagramModel extends BaseEntity {
     return this.gridSize * Math.floor((pos + this.gridSize / 2) / this.gridSize);
   }
 
-  deSerializeDiagram(object: any, diagramEngine: DiagramEngine) {
-    this.deSerialize(object, diagramEngine);
+  deSerializeDiagram(object: any, engine: DiagramEngine) {
+    this.deSerialize(object, engine);
 
     this.offsetX = object.offsetX;
     this.offsetY = object.offsetY;
@@ -291,18 +290,20 @@ export class DiagramModel extends BaseEntity {
     this.gridSize = object.gridSize;
 
     // deserialize nodes
-    _.forEach(object.nodes, (node: any) => {
-      const nodeOb = diagramEngine.getNodeFactory(node.type).getNewInstance(node);
+    object.nodes = object.nodes || [];
+    object.nodes.forEach((node: any) => {
+      const nodeOb = engine.getNodeFactory(node.type).getNewInstance(node);
       nodeOb.parent = this;
-      nodeOb.deSerialize(node, diagramEngine);
+      nodeOb.deSerialize(node, engine);
       this.addNode(nodeOb);
     });
 
     // deserialze links
-    _.forEach(object.links, (link: any) => {
-      const linkOb = diagramEngine.getLinkFactory(link.type).getNewInstance();
+    object.links = object.links || [];
+    object.links.forEach((link: any) => {
+      const linkOb = engine.getLinkFactory(link.type).getNewInstance();
       linkOb.parent = this;
-      linkOb.deSerialize(link, diagramEngine);
+      linkOb.deSerialize(link, engine);
       this.addLink(linkOb);
     });
   }
@@ -374,7 +375,7 @@ export class DiagramModel extends BaseEntity {
   }
 
   @action
-  removeLink(link: LinkModel<PortModel, PortModel> | string) {
+  removeLink(link: LinkModel | string) {
     const l = this._links.get(link instanceof LinkModel ? link.id : link);
     if (l) {
       this._links.delete(l.id);

@@ -8,6 +8,7 @@ import { DefaultLinkModel } from '../models/DefaultLinkModel';
 import { PathFinding } from '../../routing/PathFinding';
 import * as _ from 'lodash';
 import { LabelModel } from '../../models/LabelModel';
+import { DefaultPortModel } from 'storm-react-diagrams';
 
 export interface DefaultLinkProps {
   color?: string;
@@ -203,7 +204,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
             engine,
             link,
             0,
-            Toolkit.generateCurvePath(link.firstPoint, link.lastPoint, link.curvyness)
+            Toolkit.generateCurvePath(link.firstPoint, link.lastPoint, link.curvyness, engine)
           )
         );
 
@@ -215,7 +216,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
         // draw the multiple anchors and complex line instead
         for (let j = 0; j < link.points.length - 1; j++) {
           paths.push(
-            this.generateSegment(engine, link, j, Toolkit.generateLinePath(link.points[j], link.points[j + 1]))
+            this.generateSegment(engine, link, j, Toolkit.generateLinePath(link.points[j], link.points[j + 1], engine))
           );
         }
 
@@ -231,9 +232,9 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
       }
     }
 
-    const reverse = link.sourcePort && link.sourcePort.in;
+    const reverse = link.sourcePort && (link.sourcePort as DefaultPortModel).in;
     return (
-      <g className={cx('srd-default-link', { reverse })} ref={(elem) => (this._elem = elem)}>
+      <g ref={(elem) => (this._elem = elem)} className={cx('srd-default-link', { reverse })}>
         {paths}
         {link.labels.map((labelModel) => this.generateLabel(labelModel))}
       </g>

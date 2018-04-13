@@ -13,7 +13,7 @@ export class DefaultLabelFactory extends AbstractLabelFactory<DefaultLabelModel>
   }
 
   generateReactWidget(_diagramEngine: DiagramEngine, label: DefaultLabelModel): JSX.Element {
-    return <DefaultLabelWidget model={label} />;
+    return <DefaultLabelWidget label={label} />;
   }
 
   getNewInstance(_initialConfig?: any): DefaultLabelModel {

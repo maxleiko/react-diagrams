@@ -7,6 +7,16 @@ export interface NodeLayerProps {
   engine: DiagramEngine;
 }
 
+const NodesLayer = observer(({ engine }: { engine: DiagramEngine }) => (
+  <>
+    {Array.from(engine.model.nodes.values()).map((node) => (
+      <NodeWidgetContainer key={node.id} node={node}>
+        {engine.generateWidgetForNode(node)}
+      </NodeWidgetContainer>
+    ))}
+  </>
+));
+
 @observer
 export class NodeLayerWidget extends React.Component<NodeLayerProps> {
 
@@ -17,17 +27,13 @@ export class NodeLayerWidget extends React.Component<NodeLayerProps> {
   }
 
   render() {
-    const { nodes, offsetX, offsetY, zoom } = this.props.engine.model;
+    const { offsetX, offsetY, zoom } = this.props.engine.model;
     return (
       <div
         className="srd-node-layer"
         style={{ transform: `translate(${offsetX}px, ${offsetY}px) scale(${zoom / 100.0})` }}
       >
-        {Array.from(nodes.values()).map((node) => (
-          <NodeWidgetContainer key={node.id} node={node}>
-            {this.props.engine.generateWidgetForNode(node)}
-          </NodeWidgetContainer>
-        ))}
+        <NodesLayer engine={this.props.engine} />
       </div>
     );
   }

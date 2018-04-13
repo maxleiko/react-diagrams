@@ -35,7 +35,7 @@ export default () => {
 
   // !------------- SERIALIZING ------------------
 
-  const str = JSON.stringify(model.serializeDiagram());
+  const str = JSON.stringify(model.serializeDiagram(), null, 2);
 
   // !------------- DESERIALIZING ----------------
 

@@ -4,6 +4,7 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
+  DefaultPointModel,
 } from 'storm-react-diagrams';
 
 /**
@@ -43,8 +44,8 @@ export default () => {
 
   const link2 = port3.link(port4)!;
 
-  link2.point(350, 225);
-  link2.point(200, 225);
+  link2.addPoint(new DefaultPointModel(350, 225));
+  link2.addPoint(new DefaultPointModel(200, 225));
 
   model.addAll(node3, node4, link2);
 
