@@ -216,6 +216,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               // tslint:disable-next-line
               console.log('[mousedown] new MoveItemsAction()', a.selectionModels.slice());
               this.startFiringAction(a);
+            } else {
+              // if we cannot create more points, then just select the link
+              model.selected = true;
             }
           }
         }
