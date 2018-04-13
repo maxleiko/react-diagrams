@@ -77,7 +77,9 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   }
 
   generatePoint(engine: DiagramEngine, point: PointModel) {
-    return React.cloneElement(engine.getFactoryForPoint(point).generateReactWidget(engine, point), { key: point.id });
+    return React.cloneElement(engine.getFactoryForPoint(point).generateReactWidget(engine, point), {
+      key: `point-${point.id}`
+    });
   }
 
   findPathAndRelativePositionToRenderLabel(index: number) {
@@ -97,7 +99,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
       while (pathIndex < this.props.link.points.length - 1) {
         if (labelPosition - lengths[pathIndex] < 0) {
           return {
-            path: this._elem.querySelector<SVGPathElement>(`.srd-segment[srd-id="${pathIndex}"] path.path`)!,
+            path: this._elem.querySelector<SVGPathElement>(`.srd-segment[srd-index="${pathIndex}"] path.path`)!,
             position: labelPosition
           };
         }

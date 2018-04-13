@@ -206,9 +206,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
             let segmentIndex: number = 0;
             const segEl = Toolkit.closest(el, '.srd-segment');
             if (segEl) {
-              const idAttr = segEl.getAttribute('srd-id');
-              if (idAttr) {
-                segmentIndex = parseInt(idAttr, 10);
+              const indexAttr = segEl.getAttribute('srd-index');
+              if (indexAttr) {
+                segmentIndex = parseInt(indexAttr, 10);
               }
             }
             // point should be placed at index = segmentIndex + 1
