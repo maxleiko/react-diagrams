@@ -5,10 +5,6 @@ export interface DemoWorkspaceWidgetProps {
 }
 
 export class DemoWorkspaceWidget extends React.Component<DemoWorkspaceWidgetProps> {
-  constructor(props: DemoWorkspaceWidgetProps) {
-    super(props);
-    this.state = {};
-  }
 
   render() {
     return (

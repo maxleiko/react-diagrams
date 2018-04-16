@@ -7,7 +7,7 @@ import {
 } from 'storm-react-diagrams';
 import { distributeElements } from './dagre-utils';
 import * as React from 'react';
-import { DemoWorkspaceWidget } from '../.helpers/DemoWorkspaceWidget';
+import { DemoWorkspaceWidget } from '../../utils/DemoWorkspaceWidget';
 
 function createNode(name: any) {
   return new DefaultNodeModel(name, 'rgb(0,192,255)');

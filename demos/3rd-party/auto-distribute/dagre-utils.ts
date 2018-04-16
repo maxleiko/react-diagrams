@@ -24,7 +24,7 @@ function distributeGraph(model: any) {
   const graph = new dagre.graphlib.Graph();
   graph.setGraph({});
   graph.setDefaultEdgeLabel(() => ({}));
-  //add elements to dagre graph
+  // add elements to dagre graph
   nodes.forEach((node: any) => {
     graph.setNode(node.id, node.metadata);
   });
@@ -33,7 +33,7 @@ function distributeGraph(model: any) {
       graph.setEdge(edge.from, edge.to);
     }
   });
-  //auto-distribute
+  // auto-distribute
   dagre.layout(graph);
   return graph.nodes().map((node: any) => graph.node(node));
 }

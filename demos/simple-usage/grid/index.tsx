@@ -11,7 +11,7 @@ export default () => {
 
   // 2) setup the diagram model
   const model = new DiagramModel();
-  model.setGridSize(50);
+  model.gridSize = 50;
 
   // 3-A) create a default node
   const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');

@@ -28,8 +28,8 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
               className="polygon"
               fill="purple"
               stroke="#000000"
-              stroke-width="3"
-              stroke-miterlimit="10"
+              strokeWidth="3"
+              strokeMiterlimit="10"
               points={`10,${size / 2} ${size / 2},10 ${size - 10},${size / 2} ${size / 2},${size - 10}`}
             />
           </g>

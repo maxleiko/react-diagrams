@@ -11,7 +11,7 @@ import {
 } from 'storm-react-diagrams';
 import * as _ from 'lodash';
 import * as React from 'react';
-import { DemoWorkspaceWidget } from '../.helpers/DemoWorkspaceWidget';
+import { DemoWorkspaceWidget } from '../../utils/DemoWorkspaceWidget';
 
 /**
  * Tests cloning

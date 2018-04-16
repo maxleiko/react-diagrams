@@ -3,7 +3,7 @@ import { PortModel } from '../../models/PortModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { observable, computed, action } from 'mobx';
 import { DefaultLinkModel } from './DefaultLinkModel';
-import { DefaultPointFactory } from 'storm-react-diagrams';
+import { DefaultPointFactory } from '../factories/DefaultPointFactory';
 
 export class DefaultPortModel extends PortModel {
   @observable private _in: boolean;

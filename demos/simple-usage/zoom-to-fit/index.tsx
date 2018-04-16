@@ -5,7 +5,7 @@ import {
   DiagramWidget
 } from 'storm-react-diagrams';
 import * as React from 'react';
-import { DemoWorkspaceWidget } from '../.helpers/DemoWorkspaceWidget';
+import { DemoWorkspaceWidget } from '../../utils/DemoWorkspaceWidget';
 
 /**
  *

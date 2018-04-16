@@ -269,18 +269,6 @@ export class DiagramModel extends BaseEntity {
     this._deleteKeys = keys;
   }
 
-  @action
-  setGridSize(size: number = 0) {
-    this.gridSize = size;
-  }
-
-  getGridPosition(pos: number) {
-    if (this.gridSize === 0) {
-      return pos;
-    }
-    return this.gridSize * Math.floor((pos + this.gridSize / 2) / this.gridSize);
-  }
-
   deSerializeDiagram(object: any, engine: DiagramEngine) {
     this.deSerialize(object, engine);
 
