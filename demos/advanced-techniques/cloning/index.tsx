@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   DiagramEngine,
   DiagramModel,
@@ -5,89 +6,74 @@ import {
   LinkModel,
   NodeModel,
   DiagramWidget,
-  BaseModel,
-  DefaultPointFactory,
-  DefaultLinkModel
 } from 'storm-react-diagrams';
-import * as _ from 'lodash';
-import * as React from 'react';
-import { DemoWorkspaceWidget } from '../../utils/DemoWorkspaceWidget';
+import { DemoWorkspace } from '../../DemoWorkspace';
 
-/**
- * Tests cloning
- */
-class CloneSelected extends React.Component<any, any> {
-  constructor(props: any) {
+class CloneSelectedDemo extends React.Component {
+
+  private engine = new DiagramEngine();
+
+  constructor(props: {}) {
     super(props);
     this.cloneSelected = this.cloneSelected.bind(this);
   }
 
-  cloneSelected() {
-    const { engine } = this.props;
-    const offset = { x: 100, y: 100 };
-    const model = engine.getDiagramModel();
+  componentWillMount() {
+    // 1) setup the diagram engine
+    this.engine.installDefaultFactories();
 
-    const itemMap = {};
-    _.forEach(model.getSelectedItems(), (item: BaseModel<any>) => {
-      const newItem = item.clone(itemMap);
+    // 2) setup the diagram model
+    const model = new DiagramModel();
+
+    // 3-A) create a default node
+    const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
+    const port = node1.addOutPort('Out');
+    node1.setPosition(100, 100);
+
+    // 3-B) create another default node
+    const node2 = new DefaultNodeModel('Node 2', 'rgb(192,255,0)');
+    const port2 = node2.addInPort('In');
+    node2.setPosition(400, 100);
+
+    // 3-C) link the ports
+    const link = port.link(port2);
+
+    // 4) add the models to the root graph
+    model.addAll(node1, node2, link);
+
+    // 5) load model into engine
+    this.engine.model = model;
+  }
+
+  cloneSelected() {
+    const offset = { x: 100, y: 100 };
+
+    const lookupTable = {};
+    this.engine.model.selectedEntities.forEach((item) => {
+      const newItem = item.clone(lookupTable);
 
       // offset the nodes slightly
       if (newItem instanceof NodeModel) {
         newItem.setPosition(newItem.x + offset.x, newItem.y + offset.y);
-        model.addNode(newItem);
+        this.engine.model.addNode(newItem);
       } else if (newItem instanceof LinkModel) {
         // offset the link points
         newItem.points.forEach((p) => {
           p.setPosition(p.x + offset.x, p.y + offset.y);
         });
-        model.addLink(newItem);
+        this.engine.model.addLink(newItem);
       }
       newItem.selected = false;
     });
-
-    this.forceUpdate();
   }
 
   render() {
-    const { engine } = this.props;
     return (
-      <DemoWorkspaceWidget buttons={<button onClick={this.cloneSelected}>Clone Selected</button>}>
-        <DiagramWidget className="srd-demo-canvas" engine={engine} />
-      </DemoWorkspaceWidget>
+      <DemoWorkspace header={<button onClick={this.cloneSelected}>Clone Selected</button>}>
+        <DiagramWidget engine={this.engine} />
+      </DemoWorkspace>
     );
   }
 }
 
-export default () => {
-  // 1) setup the diagram engine
-  const engine = new DiagramEngine();
-  engine.installDefaultFactories();
-
-  // 2) setup the diagram model
-  const model = new DiagramModel();
-
-  // 3-A) create a default node
-  const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
-  const port = node1.addOutPort('Out');
-  node1.setPosition(100, 100);
-
-  // 3-B) create another default node
-  const node2 = new DefaultNodeModel('Node 2', 'rgb(192,255,0)');
-  const port2 = node2.addInPort('In');
-  node2.setPosition(400, 100);
-
-  // link the ports
-  const ptFactory = new DefaultPointFactory();
-  const link1 = new DefaultLinkModel(ptFactory);
-  link1.connect(port, port2);
-  if (link1) {
-    // 4) add the models to the root graph
-    model.addAll(node1, node2, link1);
-  }
-
-  // 5) load model into engine
-  engine.model = model;
-
-  // 6) render the diagram!
-  return <CloneSelected engine={engine} model={model} />;
-};
+export default () => <CloneSelectedDemo />;

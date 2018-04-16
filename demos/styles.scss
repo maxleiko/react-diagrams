@@ -40,12 +40,11 @@
   background: rgb(60, 60, 60);
   border-radius: 10px;
   overflow: hidden;
-  padding: 10px;
   margin-top: 20px;
   margin-bottom: 20px;
 }
 
-.srd-demo-canvas {
+.srd-diagram {
   height: 100%;
   min-height: 300px;
   background-color: rgb(60, 60, 60) !important;
@@ -75,14 +74,4 @@
       transparent
     );
   background-size: 50px 50px;
-
-  .pointui {
-    fill: rgba(white, 0.5);
-  }
-
-  .srd-node.selected {
-    .diamond-node .polygon {
-      stroke: yellow;
-    }
-  }
 }

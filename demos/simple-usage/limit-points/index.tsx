@@ -28,16 +28,11 @@ export default () => {
   node2.setPosition(400, 100);
 
   // link the ports
-  const link1 = port.link(port2)!;
+  const link = port.link(port2);
 
-  model.addAll(node1, node2, link1);
+  model.addAll(node1, node2, link);
 
   engine.model = model;
 
-  return (
-    <div>
-      <p>A maximum of 5 points can be created per link.</p>
-      <DiagramWidget className="srd-demo-canvas" engine={engine} />
-    </div>
-  );
+  return <DiagramWidget engine={engine} />;
 };

@@ -1,11 +1,11 @@
+import * as React from 'react';
 import {
   DiagramEngine,
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget
 } from 'storm-react-diagrams';
-import * as React from 'react';
-import { DemoWorkspaceWidget } from '../../utils/DemoWorkspaceWidget';
+import { DemoWorkspace } from '../../DemoWorkspace';
 
 /**
  *
@@ -32,9 +32,9 @@ export default () => {
 
   // 6) render the diagram!
   return (
-    <DemoWorkspaceWidget buttons={<button onClick={() => engine.zoomToFit()}>Zoom to fit</button>}>
-      <DiagramWidget className="srd-demo-canvas" engine={engine} />
-    </DemoWorkspaceWidget>
+    <DemoWorkspace header={<button onClick={() => engine.zoomToFit()}>Zoom to fit</button>}>
+      <DiagramWidget style={{ height: '100%' }} engine={engine} />
+    </DemoWorkspace>
   );
 };
 

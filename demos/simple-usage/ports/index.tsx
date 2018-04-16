@@ -3,8 +3,6 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
-  DefaultLinkModel,
-  DefaultPointFactory
 } from 'storm-react-diagrams';
 import * as React from 'react';
 
@@ -17,23 +15,29 @@ export default () => {
   const model = new DiagramModel();
 
   // 3-A) create a default node
-  const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
-  const port1 = node1.addOutPort('Out');
-  node1.setPosition(100, 100);
+  const emitter = new DefaultNodeModel('Emitter', 'rgb(168,192,255)');
+  emitter.addOutPort('text');
+  const emitterJson = emitter.addOutPort('json');
+  emitter.setPosition(100, 100);
 
-  // 3-B) create another default node
-  const node2 = new DefaultNodeModel('Node 2', 'rgb(192,255,0)');
-  const port2 = node2.addInPort('In');
-  node2.setPosition(400, 100);
+  // 3-B) create a default node
+  const proxy = new DefaultNodeModel('Proxy', 'rgb(168,255,192)');
+  const proxyIn = proxy.addInPort('in');
+  const proxyOut = proxy.addOutPort('out');
+  proxy.setPosition(250, 100);
+
+  // 3-C) create another default node
+  const receiver = new DefaultNodeModel('Receiver', 'rgb(255,168,0)');
+  const receiverJson = receiver.addInPort('json');
+  receiver.addInPort('text');
+  receiver.setPosition(400, 100);
 
   // link the ports
-  const ptFactory = new DefaultPointFactory();
-  const link1 = new DefaultLinkModel(ptFactory);
-  link1.connect(port1, port2);
-  link1.addLabel('Hello World!');
+  const link0 = emitterJson.link(proxyIn);
+  const link1 = proxyOut.link(receiverJson);
 
   // 4) add the models to the root graph
-  model.addAll(node1, node2, link1);
+  model.addAll(emitter, receiver, proxy, link0, link1);
 
   // 5) load model into engine
   engine.model = model;

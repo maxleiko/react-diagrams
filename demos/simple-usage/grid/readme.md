@@ -1,0 +1,2 @@
+# Canvas grid size
+<!-- STORY -->

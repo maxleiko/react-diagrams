@@ -11,11 +11,23 @@ export interface NodeProps {
 @observer
 export class NodeWidgetContainer extends React.Component<NodeProps> {
 
+  private _elem: HTMLDivElement | null = null;
+
+  componentDidMount() {
+    if (this._elem) {
+      this.props.node.width = this._elem.offsetWidth;
+      this.props.node.height = this._elem.offsetHeight;
+      // tslint:disable-next-line
+      console.log('update node', this.props.node.id, 'width=' + this.props.node.width, 'height=' + this.props.node.height);
+    }
+  }
+
   render() {
     const { id, x, y, selected } = this.props.node;
 
     return (
       <div
+        ref={(elem) => this._elem = elem}
         srd-id={id}
         className={cx('srd-node', { selected })}
         style={{ transform: `translate(${x}px, ${y}px)` }}

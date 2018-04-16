@@ -100,9 +100,17 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
     return this._width;
   }
 
+  set width(width: number) {
+    this._width = width;
+  }
+
   @computed
   get height(): number {
     return this._height;
+  }
+
+  set height(height: number) {
+    this._height = height;
   }
 
   @computed

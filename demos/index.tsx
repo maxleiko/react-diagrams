@@ -1,0 +1,78 @@
+import * as React from 'react';
+// @ts-ignore
+import { withDocs } from 'storybook-readme';
+// @ts-ignore
+import { WithCode } from '../.storybook/addon-code/react';
+// @ts-ignore
+import { storiesOf, addDecorator } from '@storybook/react';
+// @ts-ignore
+import { setOptions } from '@storybook/addon-options';
+import { host } from 'storybook-host';
+import { Toolkit } from '../src/Toolkit';
+
+// include the SCSS for the demo
+import './styles.scss';
+
+Toolkit.TESTING = true;
+
+addDecorator(
+  host({
+    cropMarks: false,
+    height: '100%',
+    width: '100%',
+    padding: 20
+  })
+);
+
+setOptions({
+  name: 'STORM React Diagrams',
+  url: 'https://github.com/projectstorm/react-diagrams',
+  addonPanelInRight: true
+});
+
+const withCustomDocs = withDocs({
+  PreviewComponent: ({ children }: any) => (
+    <div className="docs-preview-wrapper">{children}</div>
+  )
+});
+
+function makeStory(demoPath: string): () => JSX.Element {
+  let demo: any;
+  let code: any;
+  let docs: any;
+
+  try {
+    demo = require('./' + demoPath).default();
+    docs = require('./' + demoPath + '/readme.md');
+    code = require(`!!raw-loader!./${demoPath}`);
+  } catch (err) {
+    throw new Error(`Unable to load demo "${demoPath}"`);
+  }
+
+  return withCustomDocs(docs, () => <WithCode code={code}>{demo}</WithCode>);
+}
+
+storiesOf('Simple Usage', module)
+  .add('Simple example', makeStory('simple-usage/simple'))
+  .add('Node\'s ports', makeStory('simple-usage/ports'))
+  .add('Simple flow example', makeStory('simple-usage/flow'))
+  .add('Performance test', makeStory('simple-usage/performance'))
+  .add('Lock feature', makeStory('simple-usage/lock-feature'))
+  .add('Canvas grid size', makeStory('simple-usage/grid'))
+  .add('Limiting link points', makeStory('simple-usage/limit-points'))
+  .add('Zoom to fit', makeStory('simple-usage/zoom-to-fit'))
+  .add('Links with labels', makeStory('simple-usage/labelled-links'));
+
+storiesOf('Advanced Techniques', module)
+  .add('Clone Selected', makeStory('advanced-techniques/cloning'))
+  .add('Serializing and de-serializing', makeStory('advanced-techniques/serializing'))
+  .add('Mutate graph', makeStory('advanced-techniques/mutate-graph'))
+  .add('Drag-n-Drop', makeStory('advanced-techniques/drag-n-drop'))
+  .add('Smart routing', makeStory('advanced-techniques/smart-routing'));
+
+storiesOf('Custom Models', module)
+  .add('Custom diamond node', makeStory('custom-models/custom-node'))
+  .add('Custom animated links', makeStory('custom-models/custom-link'));
+
+storiesOf('3rd-party Libraries', module)
+  .add('Auto Distribute (Dagre)', makeStory('3rd-party/auto-distribute'));

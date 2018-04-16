@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   DiagramEngine,
   DiagramModel,
@@ -6,10 +7,9 @@ import {
   DefaultLinkModel,
   DefaultPointFactory
 } from 'storm-react-diagrams';
-import * as React from 'react';
-import { DemoWorkspaceWidget } from '../../utils/DemoWorkspaceWidget';
 // @ts-ignore
 import { action } from '@storybook/addon-actions';
+import { DemoWorkspace } from '../../DemoWorkspace';
 
 export default () => {
   // setup the diagram engine
@@ -58,19 +58,15 @@ export default () => {
   // load model into engine and render
   engine.model = model;
 
+  const Header = () => (
+    <button onClick={() => action('Serialized Graph')(JSON.stringify(model.serializeDiagram(), null, 2))}>
+      Serialize Graph
+    </button>
+  );
+
   return (
-    <DemoWorkspaceWidget
-      buttons={
-        <button
-          onClick={() => {
-            action('Serialized Graph')(JSON.stringify(model.serializeDiagram(), null, 2));
-          }}
-        >
-          Serialize Graph
-        </button>
-      }
-    >
-      <DiagramWidget className="srd-demo-canvas" engine={engine} />
-    </DemoWorkspaceWidget>
+    <DemoWorkspace header={<Header />}>
+      <DiagramWidget engine={engine} />
+    </DemoWorkspace>
   );
 };

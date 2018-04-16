@@ -1,58 +1,62 @@
 // @ts-ignore
 import * as dagre from 'dagre';
-import * as _ from 'lodash';
+import { DiagramModel } from 'storm-react-diagrams';
 
-const size = {
-  width: 60,
-  height: 60
-};
-
-export function distributeElements(model: any) {
-  const clonedModel = _.cloneDeep(model);
-  const nodes = distributeGraph(clonedModel);
-  nodes.forEach((node: any) => {
-    const modelNode = clonedModel.nodes.find((item: any) => item.id === node.id);
-    modelNode.x = node.x;
-    modelNode.y = node.y;
-  });
-  return clonedModel;
-}
-
-function distributeGraph(model: any) {
-  const nodes = mapElements(model);
-  const edges = mapEdges(model);
+export function distributeElements(model: DiagramModel) {
   const graph = new dagre.graphlib.Graph();
   graph.setGraph({});
   graph.setDefaultEdgeLabel(() => ({}));
+
+  // convert model elements to degre format
+  const nodes = mapElements(model);
+  const edges = mapEdges(model);
+
   // add elements to dagre graph
-  nodes.forEach((node: any) => {
+  nodes.forEach((node) => {
     graph.setNode(node.id, node.metadata);
   });
-  edges.forEach((edge: any) => {
+  edges.forEach((edge) => {
     if (edge.from && edge.to) {
       graph.setEdge(edge.from, edge.to);
     }
   });
+
   // auto-distribute
   dagre.layout(graph);
-  return graph.nodes().map((node: any) => graph.node(node));
+
+  // update model
+  graph.nodes().forEach((id: any) => {
+    const { x, y } = graph.node(id);
+    let mNode;
+    mNode = model.getNode(id);
+    if (mNode) {
+      // mNode is an AbstractModel
+      mNode.setPosition(x, y);
+      return;
+    }
+  });
 }
 
-function mapElements(model: any) {
+function mapElements(model: DiagramModel) {
   // dagre compatible format
-  return model.nodes.map((node: any) => ({ id: node.id, metadata: { ...size, id: node.id } }));
+  return Array.from(model.nodes.values()).map((node) => ({
+    id: node.id,
+    metadata: {
+      id: node.id,
+      width: node.width || 60,
+      height: node.height || 60
+    }
+  }));
 }
 
-function mapEdges(model: any) {
+function mapEdges(model: DiagramModel) {
   // returns links which connects nodes
-  // we check are there both from and to nodes in the model. Sometimes links can be detached
-  return model.links
-    .map((link: any) => ({
-      from: link.source,
-      to: link.target
+  // we check that they are both "from" and "to" nodes in the model because sometimes links can be detached
+  const nodes = Array.from(model.nodes.values());
+  return Array.from(model.links.values())
+    .map((link) => ({
+      from: link.sourcePort ? (link.sourcePort.parent ? link.sourcePort.parent.id : null) : null,
+      to: link.targetPort ? (link.targetPort.parent ? link.targetPort.parent.id : null) : null
     }))
-    .filter(
-      (item: any) =>
-        model.nodes.find((node: any) => node.id === item.from) && model.nodes.find((node: any) => node.id === item.to)
-    );
+    .filter((item) => nodes.find((node) => node.id === item.from) && nodes.find((node) => node.id === item.to));
 }

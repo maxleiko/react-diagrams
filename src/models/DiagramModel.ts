@@ -1,36 +1,23 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseEntity, BaseEvent } from '../BaseEntity';
+import { BaseEntity } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from './LinkModel';
 import { NodeModel } from './NodeModel';
 import { BaseModel } from './BaseModel';
-
-export interface NodeEvent<T extends NodeModel = NodeModel> extends BaseEvent<DiagramModel> {
-  node: T;
-  isCreated?: boolean;
-}
-
-export interface LinkEvent<T extends LinkModel = LinkModel> extends BaseEvent<DiagramModel> {
-  link: T;
-  isCreated?: boolean;
-}
-
-export interface OffsetEvent extends BaseEvent<DiagramModel> {
-  offsetX: number;
-  offsetY: number;
-}
-
-export interface ZoomEvent extends BaseEvent<DiagramModel> {
-  zoom: number;
-}
-
-export interface GridEvent extends BaseEvent<DiagramModel> {
-  size: number;
-}
+import { PortModel } from './PortModel';
+import { createTransformer } from 'mobx-utils';
 
 export class DiagramModel extends BaseEntity {
+  getNode = createTransformer((id: string): NodeModel<PortModel> | undefined => {
+    return this._nodes.get(id);
+  });
+
+  getLink = createTransformer((id: string): LinkModel | undefined => {
+    return this._links.get(id);
+  });
+
   // models
   @observable private _links: Map<string, LinkModel> = new Map();
   @observable private _nodes: Map<string, NodeModel> = new Map();
@@ -47,6 +34,109 @@ export class DiagramModel extends BaseEntity {
   @observable private _smartRouting: boolean = false;
   @observable private _deleteKeys: number[] = [46, 8];
   @observable private _maxNumberPointsPerLink: number = Infinity;
+
+  deSerializeDiagram(object: any, engine: DiagramEngine) {
+    this.deSerialize(object, engine);
+
+    this.offsetX = object.offsetX;
+    this.offsetY = object.offsetY;
+    this.zoom = object.zoom;
+    this.gridSize = object.gridSize;
+
+    // deserialize nodes
+    object.nodes = object.nodes || [];
+    object.nodes.forEach((node: any) => {
+      const nodeOb = engine.getNodeFactory(node.type).getNewInstance(node);
+      nodeOb.parent = this;
+      nodeOb.deSerialize(node, engine);
+      this.addNode(nodeOb);
+    });
+
+    // deserialze links
+    object.links = object.links || [];
+    object.links.forEach((link: any) => {
+      const linkOb = engine.getLinkFactory(link.type).getNewInstance();
+      linkOb.parent = this;
+      linkOb.deSerialize(link, engine);
+      this.addLink(linkOb);
+    });
+  }
+
+  serializeDiagram() {
+    return _.merge(this.serialize(), {
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      zoom: this.zoom,
+      gridSize: this.gridSize,
+      links: Array.from(this._links.values()).map((link) => link.serialize()),
+      nodes: Array.from(this._nodes.values()).map((node) => node.serialize())
+    });
+  }
+
+  @action
+  clearSelection(ignore: BaseModel<any> | null = null) {
+    // tslint:disable-next-line
+    console.log('[clearSelection]', this.selectedEntities);
+    this.selectedEntities.forEach((item) => {
+      if (ignore && ignore.id === item.id) {
+        return;
+      }
+      item.selected = false;
+    });
+  }
+
+  @action
+  addAll(...models: BaseModel[]): BaseModel[] {
+    _.forEach(models, (model) => {
+      if (model instanceof LinkModel) {
+        this.addLink(model);
+      } else if (model instanceof NodeModel) {
+        this.addNode(model);
+      }
+    });
+    return models;
+  }
+
+  @action
+  addLink(link: LinkModel): LinkModel {
+    link.parent = this;
+    this._links.set(link.id, link);
+    return link;
+  }
+
+  @action
+  addNode(node: NodeModel): NodeModel {
+    node.parent = this;
+    this._nodes.set(node.id, node);
+    return node;
+  }
+
+  @action
+  removeLink(link: LinkModel | string) {
+    const l = this._links.get(link instanceof LinkModel ? link.id : link);
+    if (l) {
+      this._links.delete(l.id);
+      // tslint:disable-next-line
+      console.log('[diagramModel] remove link', l.id);
+    }
+  }
+
+  @action
+  removeNode(node: NodeModel | string) {
+    const n = this._nodes.get(node instanceof NodeModel ? node.id : node);
+    if (n) {
+      this._nodes.delete(n.id);
+    }
+  }
+
+  @computed
+  get selectedEntities(): Array<BaseModel<any>> {
+    return _.uniqBy(
+      _.flatten(Array.from(this._nodes.values()).map((node) => node.selectedEntities))
+        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities))),
+      (item) => `${item.type}:${item.id}`
+    );
+  }
 
   /**
    * Getter links
@@ -267,116 +357,5 @@ export class DiagramModel extends BaseEntity {
    */
   set deleteKeys(keys: number[]) {
     this._deleteKeys = keys;
-  }
-
-  deSerializeDiagram(object: any, engine: DiagramEngine) {
-    this.deSerialize(object, engine);
-
-    this.offsetX = object.offsetX;
-    this.offsetY = object.offsetY;
-    this.zoom = object.zoom;
-    this.gridSize = object.gridSize;
-
-    // deserialize nodes
-    object.nodes = object.nodes || [];
-    object.nodes.forEach((node: any) => {
-      const nodeOb = engine.getNodeFactory(node.type).getNewInstance(node);
-      nodeOb.parent = this;
-      nodeOb.deSerialize(node, engine);
-      this.addNode(nodeOb);
-    });
-
-    // deserialze links
-    object.links = object.links || [];
-    object.links.forEach((link: any) => {
-      const linkOb = engine.getLinkFactory(link.type).getNewInstance();
-      linkOb.parent = this;
-      linkOb.deSerialize(link, engine);
-      this.addLink(linkOb);
-    });
-  }
-
-  serializeDiagram() {
-    return _.merge(this.serialize(), {
-      offsetX: this.offsetX,
-      offsetY: this.offsetY,
-      zoom: this.zoom,
-      gridSize: this.gridSize,
-      links: Array.from(this._links.values()).map((link) => link.serialize()),
-      nodes: Array.from(this._nodes.values()).map((node) => node.serialize())
-    });
-  }
-
-  @action
-  clearSelection(ignore: BaseModel<any> | null = null) {
-    // tslint:disable-next-line
-    console.log('[clearSelection]', this.selectedEntities);
-    this.selectedEntities.forEach((item) => {
-      if (ignore && ignore.id === item.id) {
-        return;
-      }
-      item.selected = false;
-    });
-  }
-
-  @computed
-  get selectedEntities(): Array<BaseModel<any>> {
-    return _.uniqBy(
-      _.flatten(Array.from(this._nodes.values()).map((node) => node.selectedEntities))
-        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities))),
-      (item) => `${item.type}:${item.id}`
-    );
-  }
-
-  getNode(id: string): NodeModel | undefined {
-    return this._nodes.get(id);
-  }
-
-  getLink(id: string): LinkModel | undefined {
-    return this._links.get(id);
-  }
-
-  @action
-  addAll(...models: BaseModel[]): BaseModel[] {
-    _.forEach(models, (model) => {
-      if (model instanceof LinkModel) {
-        this.addLink(model);
-      } else if (model instanceof NodeModel) {
-        this.addNode(model);
-      }
-    });
-    return models;
-  }
-
-  @action
-  addLink(link: LinkModel): LinkModel {
-    link.parent = this;
-    this._links.set(link.id, link);
-    return link;
-  }
-
-  @action
-  addNode(node: NodeModel): NodeModel {
-    node.parent = this;
-    this._nodes.set(node.id, node);
-    return node;
-  }
-
-  @action
-  removeLink(link: LinkModel | string) {
-    const l = this._links.get(link instanceof LinkModel ? link.id : link);
-    if (l) {
-      this._links.delete(l.id);
-      // tslint:disable-next-line
-      console.log('[diagramModel] remove link', l.id);
-    }
-  }
-
-  @action
-  removeNode(node: NodeModel | string) {
-    const n = this._nodes.get(node instanceof NodeModel ? node.id : node);
-    if (n) {
-      this._nodes.delete(n.id);
-    }
   }
 }

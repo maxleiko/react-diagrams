@@ -18,20 +18,12 @@ interface PortsProps {
 
 const Ports = observer(({ className, ports, engine }: PortsProps) => (
   <div className={className}>
-    {ports.map((port) => (<div key={port.id}>{engine.generateWidgetForPort(port)}</div>))}
+    {ports.map((port) => React.cloneElement(engine.generateWidgetForPort(port), { key: port.id }))}
   </div>
 ));
 
 @observer
 export class DefaultNodeWidget extends React.Component<DefaultNodeProps> {
-  constructor(props: DefaultNodeProps) {
-    super(props);
-    this.renderPort = this.renderPort.bind(this);
-  }
-
-  renderPort(port: DefaultPortModel) {
-    return <div key={port.id}>{this.props.engine.generateWidgetForPort(port)}</div>;
-  }
 
   render() {
     return (

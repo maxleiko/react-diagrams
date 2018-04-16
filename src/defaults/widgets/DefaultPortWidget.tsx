@@ -19,7 +19,7 @@ export class DefaultPortWidget extends React.Component<DefaultPortWidgetProps> {
     const label = <div className="name">{this.props.port.label}</div>;
 
     return (
-      <div className={cx('srd-default-port', this.props.port.in ? 'in' : 'out')}>
+      <div className={cx('srd-default-port')}>
         {this.props.port.in ? port : label}
         {this.props.port.in ? label : port}
       </div>

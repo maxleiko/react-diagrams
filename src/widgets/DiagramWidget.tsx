@@ -37,10 +37,6 @@ export interface DiagramState {
 
 @observer
 export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProps<HTMLDivElement>> {
-  constructor(props: DiagramProps) {
-    super(props);
-  }
-
   componentDidMount() {
     // add a keyboard listener
     window.addEventListener('keyup', this.onKeyUp);
@@ -61,7 +57,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   /**
    * Gets a model and element under the mouse cursor
    */
-  getModelAtPosition(event: MouseEvent): { el: Element, model: BaseModel<BaseEntity> | undefined } {
+  getModelAtPosition(event: MouseEvent): { el: Element; model: BaseModel<BaseEntity> | undefined } {
     const target = event.target as Element;
     const model = this.props.engine.model;
 
@@ -284,29 +280,29 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       const { x, y } = this.props.engine.getRelativeMousePoint(event);
       this.props.engine.action.link.lastPoint.setPosition(x, y);
       this.fireAction();
-
     } else if (this.props.engine.action instanceof MoveItemsAction) {
-      const amountX = event.clientX - this.props.engine.action.mouseX;
-      const amountY = event.clientY - this.props.engine.action.mouseY;
-      const amountZoom = model.zoom / 100;
-      this.props.engine.action.selectionModels.forEach((selModel) => {
+      const xOffset = event.clientX - this.props.engine.action.mouseX;
+      const yOffset = event.clientY - this.props.engine.action.mouseY;
+      const zoomRatio = model.zoom / 100;
+      this.props.engine.action.selectionModels.forEach((selection) => {
         // in this case we need to also work out the relative grid position
         if (
-          selModel.model instanceof NodeModel ||
-          (selModel.model instanceof PointModel && !selModel.model.isConnectedToPort())
+          selection.model instanceof NodeModel ||
+          (selection.model instanceof PointModel && !selection.model.isConnectedToPort())
         ) {
-          const x = model.getGridPosition(selModel.initialX + amountX / amountZoom);
-          const y = model.getGridPosition(selModel.initialY + amountY / amountZoom);
-          selModel.model.setPosition(x, y);
+          selection.model.setPosition(
+            selection.initialX + xOffset / zoomRatio,
+            selection.initialY + yOffset / zoomRatio
+          );
 
           if (this.props.engine.model.smartRouting) {
             this.props.engine.calculateRoutingMatrix();
           }
-        } else if (selModel.model instanceof PointModel) {
+        } else if (selection.model instanceof PointModel) {
           // we want points that are connected to ports, to not necessarily snap to grid
           // this stuff needs to be pixel perfect, dont touch it
-          selModel.model.x = selModel.initialX + model.getGridPosition(amountX / amountZoom);
-          selModel.model.y = selModel.initialY + model.getGridPosition(amountY / amountZoom);
+          selection.model.x = selection.initialX + xOffset / zoomRatio;
+          selection.model.y = selection.initialY + yOffset / zoomRatio;
         }
       });
 
@@ -446,7 +442,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     return (
       <div
         className={cx('srd-diagram', this.props.className)}
-        ref={(ref) => this.props.engine.canvas = ref}
+        style={this.props.style}
+        ref={(ref) => (this.props.engine.canvas = ref)}
         onWheel={this.onWheel}
         onMouseDown={this.onMouseDown}
       >

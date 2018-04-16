@@ -33,5 +33,5 @@ export default () => {
   engine.model = model;
 
   // 6) render the diagram!
-  return <DiagramWidget className="srd-demo-canvas" engine={engine} />;
+  return <DiagramWidget engine={engine} />;
 };
