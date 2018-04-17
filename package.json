@@ -17,7 +17,7 @@
 		"nodes"
 	],
 	"main": "./dist/index.js",
-	"typings": "./dist/@types/src/index",
+	"typings": "./dist/@types/index",
 	"author": "dylanvorster",
 	"scripts": {
 		"clean": "rm -rf dist build",
