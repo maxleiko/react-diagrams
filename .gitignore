@@ -2,8 +2,8 @@ dist
 dist
 /package
 *.tgz
-build/
-@types
+./build/
+./@types
 
 .out
 
