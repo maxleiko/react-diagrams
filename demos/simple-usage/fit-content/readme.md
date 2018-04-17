@@ -1,2 +1,2 @@
-# Zoom to fit
+# Fit content
 <!-- STORY -->

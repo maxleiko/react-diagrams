@@ -3,7 +3,6 @@
  */
 
 export * from './Toolkit';
-export * from './BaseEntity';
 export * from './DiagramEngine';
 
 export * from './defaults/models/DefaultNodeModel';

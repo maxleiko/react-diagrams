@@ -5,7 +5,6 @@ import { BaseModel } from './BaseModel';
 import { PortModel } from './PortModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
-import { BaseEntity } from '../BaseEntity';
 
 export abstract class NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel> {
   @observable private _x: number = 0;
@@ -40,8 +39,8 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity>> {
-    const entities = new Array<BaseModel<BaseEntity>>();
+  get selectedEntities(): BaseModel[] {
+    const entities: BaseModel[] = [];
     if (this.selected) {
       entities.push(this);
     }
@@ -64,16 +63,17 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
   }
 
   toJSON() {
-    return _.merge(super.toJSON(), {
+    return {
+      ...super.toJSON(),
       x: this._x,
       y: this._y,
       ports: Array.from(this._ports.values()).map((port) => port.toJSON())
-    });
+    };
   }
 
   @action
-  remove() {
-    this._ports.forEach((port) => port.remove());
+  delete() {
+    this._ports.forEach((port) => port.delete());
     if (this.parent) {
       this.parent.removeNode(this);
     }

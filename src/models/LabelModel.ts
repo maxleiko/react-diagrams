@@ -30,7 +30,7 @@ export abstract class LabelModel extends BaseModel<LinkModel> {
   }
 
   @action
-  remove() {
+  delete() {
     if (this.parent) {
       this.parent.removeLabel(this);
     }

@@ -1,8 +1,7 @@
 import { BaseModel } from './BaseModel';
-import { BaseEntity } from '../BaseEntity';
 
 export interface SelectionModel {
-  model: BaseModel<BaseEntity>;
+  model: BaseModel;
   initialX: number;
   initialY: number;
 }

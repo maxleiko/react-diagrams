@@ -87,10 +87,10 @@ export default () => {
         checked={model.allowCanvasZoom}
         onChange={(checked) => (model.allowCanvasZoom = checked)}
       />
-      {model.selectedEntities.length > 0 && (
+      {model.selectedEntities.length === 1 && (
         <CheckBox
           id="selection"
-          title="Selected element"
+          title="Lock selected element"
           checked={model.selectedEntities[0].locked}
           onChange={(checked) => (model.selectedEntities[0].locked = checked)}
         />

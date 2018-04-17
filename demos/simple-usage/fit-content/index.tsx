@@ -32,8 +32,8 @@ export default () => {
 
   // 6) render the diagram!
   return (
-    <DemoWorkspace header={<button onClick={() => engine.zoomToFit()}>Zoom to fit</button>}>
-      <DiagramWidget style={{ height: '100%' }} engine={engine} />
+    <DemoWorkspace header={<button onClick={() => engine.fitContent()}>Fit content</button>}>
+      <DiagramWidget engine={engine} style={{ minHeight: 600 }} />
     </DemoWorkspace>
   );
 };

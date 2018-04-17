@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseEntity } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkModel } from './LinkModel';
 import { NodeModel } from './NodeModel';
@@ -9,7 +8,7 @@ import { BaseModel } from './BaseModel';
 import { PortModel } from './PortModel';
 import { createTransformer } from 'mobx-utils';
 
-export class DiagramModel extends BaseEntity {
+export class DiagramModel extends BaseModel {
   getNode = createTransformer((id: string): NodeModel<PortModel> | undefined => {
     return this._nodes.get(id);
   });
@@ -62,15 +61,22 @@ export class DiagramModel extends BaseEntity {
     });
   }
 
-  toJSON(): any {
-    return _.merge(super.toJSON(), {
+  toJSON() {
+    return {
+      ...super.toJSON(),
       offsetX: this.offsetX,
       offsetY: this.offsetY,
       zoom: this.zoom,
       gridSize: this.gridSize,
       links: Array.from(this._links.values()).map((link) => link.toJSON()),
       nodes: Array.from(this._nodes.values()).map((node) => node.toJSON())
-    });
+    };
+  }
+
+  @action
+  delete() {
+    this._nodes.clear();
+    this._links.clear();
   }
 
   @action
@@ -87,7 +93,7 @@ export class DiagramModel extends BaseEntity {
 
   @action
   addAll(...models: BaseModel[]): BaseModel[] {
-    _.forEach(models, (model) => {
+    models.forEach((model) => {
       if (model instanceof LinkModel) {
         this.addLink(model);
       } else if (model instanceof NodeModel) {
@@ -260,7 +266,7 @@ export class DiagramModel extends BaseEntity {
     if (!this._allowLooseLinks) {
       Array.from(this._links.values()).forEach((link) => {
         if (!link.sourcePort || !link.targetPort) {
-          link.remove();
+          link.delete();
         }
       });
     }

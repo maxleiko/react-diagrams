@@ -5,7 +5,6 @@ import { createTransformer } from 'mobx-utils';
 import { BaseModel } from './BaseModel';
 import { PortModel } from './PortModel';
 import { PointModel } from './PointModel';
-import { BaseEntity } from '../BaseEntity';
 import { LabelModel } from './LabelModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
@@ -112,18 +111,19 @@ export abstract class LinkModel extends BaseModel<
   }
 
   toJSON() {
-    return _.merge(super.toJSON(), {
+    return {
+      ...super.toJSON(),
       sourcePort: this._sourcePort ? this._sourcePort.id : null,
       sourcePortParent: this._sourcePort ? (this._sourcePort.parent ? this._sourcePort.parent.id : null) : null,
       targetPort: this._targetPort ? this._targetPort.id : null,
       targetPortParent: this._targetPort ? (this._targetPort.parent ? this._targetPort.parent.id : null) : null,
       points: this._points.map((point) => point.toJSON()),
       labels: this._labels.map((label) => label.toJSON())
-    });
+    };
   }
 
   @action
-  remove() {
+  delete() {
     if (this._sourcePort) {
       this._sourcePort.removeLink(this);
       this._sourcePort = null;
@@ -157,8 +157,8 @@ export abstract class LinkModel extends BaseModel<
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity>> {
-    const entities = new Array<BaseModel<BaseEntity>>();
+  get selectedEntities(): BaseModel[] {
+    const entities: BaseModel[] = [];
     if (this.selected) {
       entities.push(this);
     }

@@ -16,7 +16,6 @@ import { PointModel } from '../models/PointModel';
 import { PortModel } from '../models/PortModel';
 import { LinkModel } from '../models/LinkModel';
 import { BaseModel } from '../models/BaseModel';
-import { BaseEntity } from '../BaseEntity';
 import { CreateLinkAction } from '../actions/CreateLinkAction';
 
 export interface DiagramProps {
@@ -57,12 +56,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   /**
    * Gets a model and element under the mouse cursor
    */
-  getModelAtPosition(event: MouseEvent): { el: Element; model: BaseModel<BaseEntity> | undefined } {
+  getModelAtPosition(event: MouseEvent): { el: Element; model: BaseModel<any> | undefined } {
     const target = event.target as Element;
     const model = this.props.engine.model;
-
-    // tslint:disable-next-line
-    console.log('getModelAtPosition', target);
 
     // look for a port
     let element = Toolkit.closest(target, '.srd-port[srd-id]');
@@ -177,8 +173,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           link.selected = true;
           link.lastPoint.selected = true;
           this.props.engine.model.addLink(link);
-          // tslint:disable-next-line
-          console.log('[mousedown] create link action', link);
           this.startFiringAction(new CreateLinkAction(event.clientX, event.clientY, link));
         }
       } else if (model instanceof LinkModel) {
@@ -209,8 +203,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               // point should be placed at index = segmentIndex + 1
               model.addPoint(point, segmentIndex + 1);
               const a = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
-              // tslint:disable-next-line
-              console.log('[mousedown] new MoveItemsAction()', a.selectionModels.slice());
               this.startFiringAction(a);
             } else {
               // if we cannot create more points, then just select the link
@@ -219,7 +211,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           }
         }
       } else {
-        // mousedown on an element (not a port): probably wants to move it
+        // mousedown on an element (not a port nor a link): probably wants to move it
         if (!event.shiftKey && !model.selected) {
           this.props.engine.model.clearSelection();
         }
@@ -228,8 +220,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           model.selected = true;
         }
         const a = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
-        // tslint:disable-next-line
-        console.log('[mousedown] new MoveItemsAction()', a.selectionModels.slice());
         this.startFiringAction(a);
       }
     } else {
@@ -240,7 +230,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         this.startFiringAction(new SelectingAction(x, y));
       } else {
         // it is a "move the canvas" action
-        this.props.engine.model.clearSelection();
         this.startFiringAction(new MoveCanvasAction(event.clientX, event.clientY, this.props.engine.model));
       }
     }
@@ -287,8 +276,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       this.props.engine.action.selectionModels.forEach((selection) => {
         // in this case we need to also work out the relative grid position
         if (
-          selection.model instanceof NodeModel ||
-          (selection.model instanceof PointModel && !selection.model.isConnectedToPort())
+          (selection.model instanceof NodeModel) ||
+          ((selection.model instanceof PointModel) && !selection.model.isConnectedToPort())
         ) {
           selection.model.setPosition(
             selection.initialX + xOffset / zoomRatio,
@@ -339,35 +328,42 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
                 this.props.engine.model.clearSelection();
               } else {
                 // invalid link connection
-                link.remove();
+                link.delete();
                 this.props.engine.model.clearSelection();
               }
             } else {
               // link.sourcePort === targetPort which is not allowed
-              link.remove();
+              link.delete();
               this.props.engine.model.clearSelection();
             }
           } else {
             // link has been dropped on something that is not a PortModel
             // so it will dangel: verify
             if (!this.props.engine.model.allowLooseLinks) {
-              link.remove();
+              link.delete();
               this.props.engine.model.clearSelection();
             }
           }
         } else {
           // element or model is locked: remove link
-          link.remove();
+          link.delete();
           this.props.engine.model.clearSelection();
         }
       } else {
         // no element where link ended
         if (!this.props.engine.model.allowLooseLinks) {
-          link.remove();
+          link.delete();
           this.props.engine.model.clearSelection();
         }
       }
+    } else if (this.props.engine.action instanceof MoveCanvasAction) {
+      const { mouseX, mouseY } = this.props.engine.action;
+      if (mouseX === event.clientX && mouseY === event.clientY) {
+        // the user just "clicked" the canvas without moving: unselect all
+        this.props.engine.model.clearSelection();
+      }
     }
+
     this.stopFiringAction();
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);
@@ -385,7 +381,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         this.props.engine.model.selectedEntities.forEach((element) => {
           // only delete items which are not locked
           if (!element.locked) {
-            element.remove();
+            element.delete();
           }
         });
       }

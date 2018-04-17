@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
 import { BaseModel } from './BaseModel';
@@ -29,14 +28,15 @@ export abstract class PointModel<P extends LinkModel = LinkModel> extends BaseMo
   }
 
   toJSON() {
-    return _.merge(super.toJSON(), {
+    return {
+      ...super.toJSON(),
       x: this._x,
       y: this._y
-    });
+    };
   }
 
   @action
-  remove() {
+  delete() {
     // clear references
     if (this.parent) {
       this.parent.removePoint(this);

@@ -56,12 +56,11 @@ function makeStory(demoPath: string): () => JSX.Element {
 storiesOf('Simple Usage', module)
   .add('Simple example', makeStory('simple-usage/simple'))
   .add('Node\'s ports', makeStory('simple-usage/ports'))
-  .add('Simple flow example', makeStory('simple-usage/flow'))
   .add('Performance test', makeStory('simple-usage/performance'))
   .add('Lock features', makeStory('simple-usage/lock-features'))
   .add('Canvas grid size', makeStory('simple-usage/grid'))
   .add('Limiting link points', makeStory('simple-usage/limit-points'))
-  .add('Zoom to fit', makeStory('simple-usage/zoom-to-fit'))
+  .add('Fit content', makeStory('simple-usage/fit-content'))
   .add('Links with labels', makeStory('simple-usage/labelled-links'));
 
 storiesOf('Advanced Techniques', module)

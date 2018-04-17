@@ -33,7 +33,7 @@ export default () => {
   engine.model = model;
 
   // 6) render the diagram!
-  return <DiagramWidget className="srd-demo-canvas" engine={engine} />;
+  return <DiagramWidget engine={engine} style={{ minHeight: 600 }} />;
 };
 
 function generateNodes(model: DiagramModel, offsetX: number, offsetY: number) {

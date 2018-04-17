@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseEntity } from './BaseEntity';
 import { DefaultLabelFactory } from './defaults/factories/DefaultLabelFactory';
 import { DefaultLinkFactory } from './defaults/factories/DefaultLinkFactory';
 import { DefaultNodeFactory } from './defaults/factories/DefaultNodeFactory';
@@ -31,7 +30,7 @@ export interface MatrixDimension {
 /**
  * Passed as prop to the DiagramWidget
  */
-export class DiagramEngine extends BaseEntity {
+export class DiagramEngine {
   @observable private _nodeFactories: Map<string, AbstractNodeFactory> = new Map();
   @observable private _linkFactories: Map<string, AbstractLinkFactory> = new Map();
   @observable private _portFactories: Map<string, AbstractPortFactory> = new Map();
@@ -51,7 +50,6 @@ export class DiagramEngine extends BaseEntity {
   @observable private _action: BaseAction | null = null;
 
   constructor() {
-    super();
     if (Toolkit.TESTING) {
       Toolkit.TESTING_UID = 0;
 
@@ -538,14 +536,19 @@ export class DiagramEngine extends BaseEntity {
     }
   }
 
+  /**
+   * Tries to reduce zoom level in order to fit every elements in the canvas view
+   */
   @action
-  zoomToFit() {
-    const xFactor = this._canvas!.clientWidth / this._canvas!.scrollWidth;
-    const yFactor = this._canvas!.clientHeight / this._canvas!.scrollHeight;
-    const zoomFactor = xFactor < yFactor ? xFactor : yFactor;
+  fitContent() {
+    if (this._canvas) {
+      const xFactor = this._canvas.clientWidth / this._canvas.scrollWidth;
+      const yFactor = this._canvas.clientHeight / this._canvas.scrollHeight;
+      const zoomFactor = xFactor < yFactor ? xFactor : yFactor;
 
-    this._model.zoom = this._model.zoom * zoomFactor;
-    this._model.offsetX = 0;
-    this._model.offsetY = 0;
+      this._model.zoom = this._model.zoom * zoomFactor;
+      this._model.offsetX = 0;
+      this._model.offsetY = 0;
+    }
   }
 }

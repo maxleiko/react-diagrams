@@ -1,2 +1,0 @@
-# Simple flow example
-<!-- STORY -->

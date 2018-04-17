@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
 import { DiagramEngine } from '../DiagramEngine';
@@ -8,8 +7,8 @@ import { Toolkit } from '../Toolkit';
  * @author Dylan Vorster
  */
 export abstract class BaseModel<P extends BaseModel = any> {
-  private _type: string;
   @observable private _id: string;
+  @observable private _type: string;
   @observable private _locked: boolean = false;
   @observable private _selected: boolean = false;
   @observable private _parent: P | null = null;
@@ -19,7 +18,7 @@ export abstract class BaseModel<P extends BaseModel = any> {
     this._id = id;
   }
 
-  abstract remove(): void;
+  abstract delete(): void;
 
   /**
    * Getter id
@@ -67,7 +66,7 @@ export abstract class BaseModel<P extends BaseModel = any> {
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel> {
+  get selectedEntities(): BaseModel[] {
     if (this.selected) {
       return [this];
     }
@@ -75,17 +74,21 @@ export abstract class BaseModel<P extends BaseModel = any> {
   }
 
   @action
-  fromJSON(ob: any, engine: DiagramEngine) {
-    super.fromJSON(ob, engine);
+  fromJSON(ob: any, _engine: DiagramEngine) {
+    this._id = ob.id;
+    this._locked = ob.locked;
     this._type = ob.type;
     this._selected = ob.selected;
   }
 
   toJSON() {
-    return _.merge(super.toJSON(), {
+    return {
+      id: this._id,
+      locked: this._locked,
       type: this._type,
-      selected: this._selected
-    });
+      selected: this._selected,
+      parent: this._parent ? this._parent.id : null
+    };
   }
 
   get type(): string {

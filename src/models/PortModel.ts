@@ -5,7 +5,6 @@ import { BaseModel } from './BaseModel';
 import { NodeModel } from './NodeModel';
 import { LinkModel } from './LinkModel';
 import { DiagramEngine } from '../DiagramEngine';
-import { BaseEntity } from '../BaseEntity';
 
 export abstract class PortModel extends BaseModel<NodeModel> {
   @observable private _maximumLinks: number;
@@ -23,8 +22,8 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity>> {
-    const entities = new Array<BaseModel<BaseEntity>>();
+  get selectedEntities(): BaseModel[] {
+    const entities: BaseModel[] = [];
     if (this.selected) {
       entities.push(this);
     }
@@ -37,10 +36,11 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   toJSON() {
-    return _.merge(super.toJSON(), {
+    return {
+      ...super.toJSON(),
       links: Array.from(this._links.keys()),
       maximumLinks: this._maximumLinks
-    });
+    };
   }
 
   canCreateLink(): boolean {
@@ -56,8 +56,8 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   @action
-  remove() {
-    this._links.forEach((link) => link.remove());
+  delete() {
+    this._links.forEach((link) => link.delete());
     this._links.clear();
     if (this.parent) {
       this.parent.removePort(this);
