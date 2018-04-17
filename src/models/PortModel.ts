@@ -31,23 +31,16 @@ export abstract class PortModel extends BaseModel<NodeModel> {
     return entities.concat(_.flatten(Array.from(this._links.values()).map((l) => l.selectedEntities)));
   }
 
-  deSerialize(ob: any, engine: DiagramEngine) {
-    super.deSerialize(ob, engine);
+  fromJSON(ob: any, engine: DiagramEngine) {
+    super.fromJSON(ob, engine);
     this._maximumLinks = ob.maximumLinks;
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       links: Array.from(this._links.keys()),
       maximumLinks: this._maximumLinks
     });
-  }
-
-  doClone(lookupTable: any = {}, clone: any) {
-    clone.links = {};
-    if (this.parent) {
-      clone.parentNode = this.parent.clone(lookupTable);
-    }
   }
 
   canCreateLink(): boolean {
@@ -101,6 +94,11 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   @computed
   get links(): Map<string, LinkModel> {
     return this._links;
+  }
+
+  @computed
+  get connected(): boolean {
+    return this._links.size > 0;
   }
 
   @computed

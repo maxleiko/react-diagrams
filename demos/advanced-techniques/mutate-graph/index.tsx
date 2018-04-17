@@ -51,13 +51,13 @@ class MutateGraphDemo extends React.Component {
   }
 
   updatePositionViaSerialize() {
-    const str = JSON.stringify(this.engine.model.serializeDiagram());
+    const str = JSON.stringify(this.engine.model);
     const model2 = new DiagramModel();
     const obj = JSON.parse(str);
     const node = obj.nodes[0];
     node.x += 30;
     node.y += 30;
-    model2.deSerializeDiagram(obj, this.engine);
+    model2.fromJSON(obj, this.engine);
     this.engine.model = model2;
   }
 

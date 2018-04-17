@@ -48,34 +48,27 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
     return entities.concat(_.flatten(Array.from(this._ports.values()).map((port) => port.selectedEntities)));
   }
 
-  deSerialize(ob: any, engine: DiagramEngine) {
-    super.deSerialize(ob, engine);
+  fromJSON(ob: any, engine: DiagramEngine) {
+    super.fromJSON(ob, engine);
     this._x = ob.x;
     this._y = ob.y;
 
-    // deserialize ports
+    // fromJSON ports
     if (ob.ports) {
       ob.ports.forEach((port: any) => {
         const portOb = engine.getPortFactory(port.type).getNewInstance() as P;
-        portOb.deSerialize(port, engine);
+        portOb.fromJSON(port, engine);
         this.addPort(portOb);
       });
     }
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       x: this._x,
       y: this._y,
-      ports: Array.from(this._ports.values()).map((port) => port.serialize())
+      ports: Array.from(this._ports.values()).map((port) => port.toJSON())
     });
-  }
-
-  doClone(lookupTable: any = {}, clone: any) {
-    // also clone the ports
-    clone.ports = {};
-    Array.from(this._ports.values())
-      .forEach((port) => clone.addPort(port.clone(lookupTable)));
   }
 
   @action

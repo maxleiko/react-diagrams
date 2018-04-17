@@ -31,8 +31,8 @@ export default () => {
   const model = new DiagramModel();
 
   // 3) create a default nodes
-  const nodesFrom: any[] = [];
-  const nodesTo: any[] = [];
+  const nodesFrom: DefaultNodeModel[] = [];
+  const nodesTo: DefaultNodeModel[] = [];
 
   nodesFrom.push(createNode('from-1'));
   nodesFrom.push(createNode('from-2'));
@@ -52,13 +52,14 @@ export default () => {
 
   // initial random position
   nodesFrom.forEach((node, index) => {
-    node.x = index * 70;
+    node.x = (index * 70) + 20;
+    node.y = 20;
     model.addNode(node);
   });
 
   nodesTo.forEach((node, index) => {
-    node.x = index * 70;
-    node.y = 100;
+    node.x = (index * 70) + 20;
+    node.y = 120;
     model.addNode(node);
   });
 
@@ -69,11 +70,8 @@ export default () => {
   // 5) load model into engine
   engine.model = model;
 
-  // 6) initial distribute
-  distributeElements(model);
-
   return (
-    <DemoWorkspace header={<button onClick={() => distributeElements(model)}>Re-distribute</button>}>
+    <DemoWorkspace header={<button onClick={() => distributeElements(model)}>Auto distribute</button>}>
       <DiagramWidget style={{ minHeight: 500 }} engine={engine} />
     </DemoWorkspace>
   );

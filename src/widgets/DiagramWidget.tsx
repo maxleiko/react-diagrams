@@ -437,8 +437,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   }
 
   render() {
-    const diagramEngine = this.props.engine;
-
     return (
       <div
         className={cx('srd-diagram', this.props.className)}
@@ -447,8 +445,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
         onWheel={this.onWheel}
         onMouseDown={this.onMouseDown}
       >
-        <NodeLayerWidget engine={diagramEngine} />
-        <LinkLayerWidget engine={diagramEngine} />
+        <NodeLayerWidget engine={this.props.engine} />
+        <LinkLayerWidget engine={this.props.engine} />
         {this.props.engine.action instanceof SelectingAction && (
           <div className="selection-box" style={this.props.engine.action.styles} />
         )}

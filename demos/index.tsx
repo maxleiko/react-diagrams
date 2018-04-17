@@ -46,6 +46,7 @@ function makeStory(demoPath: string): () => JSX.Element {
     docs = require('./' + demoPath + '/readme.md');
     code = require(`!!raw-loader!./${demoPath}`);
   } catch (err) {
+    console.error(err.stack);
     throw new Error(`Unable to load demo "${demoPath}"`);
   }
 
@@ -57,15 +58,14 @@ storiesOf('Simple Usage', module)
   .add('Node\'s ports', makeStory('simple-usage/ports'))
   .add('Simple flow example', makeStory('simple-usage/flow'))
   .add('Performance test', makeStory('simple-usage/performance'))
-  .add('Lock feature', makeStory('simple-usage/lock-feature'))
+  .add('Lock features', makeStory('simple-usage/lock-features'))
   .add('Canvas grid size', makeStory('simple-usage/grid'))
   .add('Limiting link points', makeStory('simple-usage/limit-points'))
   .add('Zoom to fit', makeStory('simple-usage/zoom-to-fit'))
   .add('Links with labels', makeStory('simple-usage/labelled-links'));
 
 storiesOf('Advanced Techniques', module)
-  .add('Clone Selected', makeStory('advanced-techniques/cloning'))
-  .add('Serializing and de-serializing', makeStory('advanced-techniques/serializing'))
+  .add('(De-)Serializing', makeStory('advanced-techniques/serializing'))
   .add('Mutate graph', makeStory('advanced-techniques/mutate-graph'))
   .add('Drag-n-Drop', makeStory('advanced-techniques/drag-n-drop'))
   .add('Smart routing', makeStory('advanced-techniques/smart-routing'));

@@ -35,20 +35,20 @@ export class DiagramModel extends BaseEntity {
   @observable private _deleteKeys: number[] = [46, 8];
   @observable private _maxNumberPointsPerLink: number = Infinity;
 
-  deSerializeDiagram(object: any, engine: DiagramEngine) {
-    this.deSerialize(object, engine);
+  fromJSON(object: any, engine: DiagramEngine) {
+    super.fromJSON(object, engine);
 
     this.offsetX = object.offsetX;
     this.offsetY = object.offsetY;
     this.zoom = object.zoom;
     this.gridSize = object.gridSize;
 
-    // deserialize nodes
+    // fromJSON nodes
     object.nodes = object.nodes || [];
     object.nodes.forEach((node: any) => {
       const nodeOb = engine.getNodeFactory(node.type).getNewInstance(node);
       nodeOb.parent = this;
-      nodeOb.deSerialize(node, engine);
+      nodeOb.fromJSON(node, engine);
       this.addNode(nodeOb);
     });
 
@@ -57,19 +57,19 @@ export class DiagramModel extends BaseEntity {
     object.links.forEach((link: any) => {
       const linkOb = engine.getLinkFactory(link.type).getNewInstance();
       linkOb.parent = this;
-      linkOb.deSerialize(link, engine);
+      linkOb.fromJSON(link, engine);
       this.addLink(linkOb);
     });
   }
 
-  serializeDiagram() {
-    return _.merge(this.serialize(), {
+  toJSON(): any {
+    return _.merge(super.toJSON(), {
       offsetX: this.offsetX,
       offsetY: this.offsetY,
       zoom: this.zoom,
       gridSize: this.gridSize,
-      links: Array.from(this._links.values()).map((link) => link.serialize()),
-      nodes: Array.from(this._nodes.values()).map((node) => node.serialize())
+      links: Array.from(this._links.values()).map((link) => link.toJSON()),
+      nodes: Array.from(this._nodes.values()).map((node) => node.toJSON())
     });
   }
 
@@ -255,6 +255,15 @@ export class DiagramModel extends BaseEntity {
    */
   set allowLooseLinks(value: boolean) {
     this._allowLooseLinks = value;
+
+    // remove loose links if we disallow them
+    if (!this._allowLooseLinks) {
+      Array.from(this._links.values()).forEach((link) => {
+        if (!link.sourcePort || !link.targetPort) {
+          link.remove();
+        }
+      });
+    }
   }
 
   /**

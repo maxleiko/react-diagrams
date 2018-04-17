@@ -25,10 +25,10 @@ export class PortWidgetContainer extends React.Component<PortProps> {
   }
 
   render() {
-    const { id, selected } = this.props.port;
+    const { id, selected, connected } = this.props.port;
 
     return (
-      <div ref={(elem) => (this._elem = elem)} srd-id={id} className={cx('srd-port', { selected })}>
+      <div ref={(elem) => (this._elem = elem)} srd-id={id} className={cx('srd-port', { selected, connected })}>
         {this.props.children}
       </div>
     );

@@ -16,14 +16,14 @@ export class DiamondPortModel extends PortModel {
     this.position = pos;
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       position: this.position
     });
   }
 
-  deSerialize(data: any, engine: DiagramEngine) {
-    super.deSerialize(data, engine);
+  fromJSON(data: any, engine: DiagramEngine) {
+    super.fromJSON(data, engine);
     this.position = data.position;
   }
 

@@ -59,7 +59,7 @@ export default () => {
   engine.model = model;
 
   const Header = () => (
-    <button onClick={() => action('Serialized Graph')(JSON.stringify(model.serializeDiagram(), null, 2))}>
+    <button onClick={() => action('Serialized Graph')(JSON.stringify(model, null, 2))}>
       Serialize Graph
     </button>
   );

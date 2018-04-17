@@ -21,6 +21,13 @@ import { Toolkit } from './Toolkit';
 import { PointModel } from './models/PointModel';
 import { AbstractPointFactory } from './factories/AbstractPointFactory';
 
+export interface MatrixDimension {
+  width: number;
+  hAdjustmentFactor: number;
+  height: number;
+  vAdjustmentFactor: number;
+}
+
 /**
  * Passed as prop to the DiagramWidget
  */
@@ -348,11 +355,8 @@ export class DiagramEngine extends BaseEntity {
    * In which all walkable points are marked by zeros.
    * It uses @link{#ROUTING_SCALING_FACTOR} to reduce the matrix dimensions and improve performance.
    */
-  getCanvasMatrix(): number[][] {
-    if (this._canvasMatrix.length === 0) {
-      this.calculateCanvasMatrix();
-    }
-
+  @computed
+  get canvasMatrix(): number[][] {
     return this._canvasMatrix;
   }
 
@@ -363,7 +367,7 @@ export class DiagramEngine extends BaseEntity {
       hAdjustmentFactor,
       height: canvasHeight,
       vAdjustmentFactor
-    } = this.calculateMatrixDimensions();
+    } = this.matrixDimensions;
 
     this._hAdjustmentFactor = hAdjustmentFactor;
     this._vAdjustmentFactor = vAdjustmentFactor;
@@ -390,17 +394,17 @@ export class DiagramEngine extends BaseEntity {
    * In which all points blocked by a node (and its ports) are
    * marked as 1; points were there is nothing (ie, free) receive 0.
    */
-  getRoutingMatrix(): number[][] {
-    if (this._routingMatrix.length === 0) {
-      this.calculateRoutingMatrix();
-    }
-
+  @computed
+  get routingMatrix(): number[][] {
     return this._routingMatrix;
   }
 
   @action
   calculateRoutingMatrix(): void {
-    const matrix = _.cloneDeep(this.getCanvasMatrix());
+    if (this._canvasMatrix.length === 0) {
+      this.calculateCanvasMatrix();
+    }
+    const matrix = _.cloneDeep(this.canvasMatrix);
 
     // nodes need to be marked as blocked points
     this.markNodes(matrix);
@@ -427,12 +431,8 @@ export class DiagramEngine extends BaseEntity {
    * Despite being a long method, we simply iterate over all three collections (nodes, ports and points)
    * to find the highest X and Y dimensions, so we can build the matrix large enough to contain all elements.
    */
-  calculateMatrixDimensions = (): {
-    width: number;
-    hAdjustmentFactor: number;
-    height: number;
-    vAdjustmentFactor: number;
-  } => {
+  @computed
+  get matrixDimensions(): MatrixDimension {
     const allNodesCoords = Array.from(this._model.nodes.values()).map((item) => ({
       x: item.x,
       width: item.width,

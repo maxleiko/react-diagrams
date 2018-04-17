@@ -26,16 +26,16 @@ export class DefaultLinkModel extends LinkModel {
     this._curvyness = curvyness;
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       width: this.width,
       color: this.color,
       curvyness: this.curvyness
     });
   }
 
-  deSerialize(ob: any, engine: DiagramEngine) {
-    super.deSerialize(ob, engine);
+  fromJSON(ob: any, engine: DiagramEngine) {
+    super.fromJSON(ob, engine);
     this.color = ob.color;
     this.width = ob.width;
     this.curvyness = ob.curvyness;

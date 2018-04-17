@@ -15,14 +15,14 @@ export class DefaultPortModel extends PortModel {
     this._label = label || name;
   }
 
-  deSerialize(object: any, engine: DiagramEngine) {
-    super.deSerialize(object, engine);
+  fromJSON(object: any, engine: DiagramEngine) {
+    super.fromJSON(object, engine);
     this._in = object.in;
     this._label = object.label;
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       in: this._in,
       label: this._label
     });

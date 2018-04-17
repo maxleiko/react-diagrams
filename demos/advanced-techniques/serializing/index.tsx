@@ -4,8 +4,6 @@ import { DemoWorkspace } from '../../DemoWorkspace';
 
 // @ts-ignore
 import { action } from '@storybook/addon-actions';
-// @ts-ignore
-import * as beautify from 'json-beautify';
 
 export default () => {
   // 1) setup the diagram engine
@@ -34,18 +32,8 @@ export default () => {
   // 5) load model into engine
   engine.model = model;
 
-  // !------------- SERIALIZING ------------------
-
-  const str = JSON.stringify(model.serializeDiagram(), null, 2);
-
-  // !------------- DESERIALIZING ----------------
-
-  const model2 = new DiagramModel();
-  model2.deSerializeDiagram(JSON.parse(str), engine);
-  engine.model = model2;
-
   const Header = () => (
-    <button onClick={() => action('Serialized Graph')(beautify(model2.serializeDiagram(), null, 2, 80))}>
+    <button onClick={() => action('Serialized Graph')(JSON.stringify(model, null, 2))}>
       Serialize Graph
     </button>
   );

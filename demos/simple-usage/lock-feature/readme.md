@@ -1,2 +1,0 @@
-# Lock feature
-<!-- STORY -->

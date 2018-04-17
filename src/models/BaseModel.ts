@@ -1,33 +1,60 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
 
-import { BaseEntity } from '../BaseEntity';
 import { DiagramEngine } from '../DiagramEngine';
+import { Toolkit } from '../Toolkit';
 
 /**
  * @author Dylan Vorster
  */
-export abstract class BaseModel<P extends BaseEntity = BaseEntity> extends BaseEntity {
+export abstract class BaseModel<P extends BaseModel = any> {
   private _type: string;
+  @observable private _id: string;
+  @observable private _locked: boolean = false;
   @observable private _selected: boolean = false;
   @observable private _parent: P | null = null;
 
-  constructor(type: string = 'srd-base', id?: string) {
-    super(id);
+  constructor(type: string = 'srd-base', id: string = Toolkit.UID()) {
     this._type = type;
+    this._id = id;
   }
 
   abstract remove(): void;
 
+  /**
+   * Getter id
+   * @return {string}
+   */
+  @computed
+  get id(): string {
+    return this._id;
+  }
+
+  /**
+   * Setter id
+   * @param {string} value
+   */
+  set id(value: string) {
+    this._id = value;
+  }
+
   @computed
   get locked(): boolean {
     if (this._parent) {
-      if (this._parent.locked) {
+      if (this._parent._locked) {
         // check if parent is locked first
         return true;
       }
     }
     return this._locked;
+  }
+
+  /**
+   * Setter locked
+   * @param {boolean } value
+   */
+  set locked(value: boolean) {
+    this._locked = value;
   }
 
   @computed
@@ -40,7 +67,7 @@ export abstract class BaseModel<P extends BaseEntity = BaseEntity> extends BaseE
   }
 
   @computed
-  get selectedEntities(): Array<BaseModel<BaseEntity>> {
+  get selectedEntities(): Array<BaseModel> {
     if (this.selected) {
       return [this];
     }
@@ -48,14 +75,14 @@ export abstract class BaseModel<P extends BaseEntity = BaseEntity> extends BaseE
   }
 
   @action
-  deSerialize(ob: any, engine: DiagramEngine) {
-    super.deSerialize(ob, engine);
+  fromJSON(ob: any, engine: DiagramEngine) {
+    super.fromJSON(ob, engine);
     this._type = ob.type;
     this._selected = ob.selected;
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       type: this._type,
       selected: this._selected
     });
@@ -72,10 +99,5 @@ export abstract class BaseModel<P extends BaseEntity = BaseEntity> extends BaseE
 
   set selected(selected: boolean) {
     this._selected = selected;
-    // this.iterateListeners((listener, event) => {
-    //   if (listener.selectionChanged) {
-    //     listener.selectionChanged({ ...event, isSelected: selected });
-    //   }
-    // });
   }
 }

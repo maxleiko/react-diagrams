@@ -65,8 +65,8 @@ export abstract class LinkModel extends BaseModel<
     this._points.push(lastPoint);
   }
 
-  deSerialize(ob: any, engine: DiagramEngine) {
-    super.deSerialize(ob, engine);
+  fromJSON(ob: any, engine: DiagramEngine) {
+    super.fromJSON(ob, engine);
 
     if (ob.sourcePort) {
       if (this.parent) {
@@ -92,50 +92,46 @@ export abstract class LinkModel extends BaseModel<
       }
     }
 
-    // deserialize points
+    // fromJSON points
     const points: any[] = ob.points || [];
     points.forEach((point) => {
       const p = engine.getLinkFactory(this.type).getPointFactory().getNewInstance();
       p.parent = this;
-      p.deSerialize(point, engine);
+      p.fromJSON(point, engine);
       this.addPoint(p);
     });
 
-    // deserialize labels
+    // fromJSON labels
     const labels: any[] = ob.labels || [];
     labels.forEach((label) => {
       const l = engine.getLabelFactory(label.type).getNewInstance();
       l.parent = this;
-      l.deSerialize(label, engine);
+      l.fromJSON(label, engine);
       this.addLabel(l);
     });
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       sourcePort: this._sourcePort ? this._sourcePort.id : null,
       sourcePortParent: this._sourcePort ? (this._sourcePort.parent ? this._sourcePort.parent.id : null) : null,
       targetPort: this._targetPort ? this._targetPort.id : null,
       targetPortParent: this._targetPort ? (this._targetPort.parent ? this._targetPort.parent.id : null) : null,
-      points: this._points.map((point) => point.serialize()),
-      labels: this._labels.map((label) => label.serialize())
+      points: this._points.map((point) => point.toJSON()),
+      labels: this._labels.map((label) => label.toJSON())
     });
-  }
-
-  doClone(lookupTable: any = {}, clone: any) {
-    clone.points = this._points.map((point) => point.clone(lookupTable));
-    if (this._sourcePort) {
-      clone.setSourcePort(this._sourcePort.clone(lookupTable));
-    }
-    if (this._targetPort) {
-      clone.setTargetPort(this._targetPort.clone(lookupTable));
-    }
   }
 
   @action
   remove() {
-    this._sourcePort = null;
-    this._targetPort = null;
+    if (this._sourcePort) {
+      this._sourcePort.removeLink(this);
+      this._sourcePort = null;
+    }
+    if (this._targetPort) {
+      this._targetPort.removeLink(this);
+      this._targetPort = null;
+    }
     (this._points as IObservableArray<PointModel>).clear();
     (this._labels as IObservableArray<LabelModel>).clear();
     if (this.parent) {

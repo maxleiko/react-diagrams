@@ -151,7 +151,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
       return false;
     }
 
-    if (link.points.length !== 2) {
+    if (link.points.length > 2) {
       return false;
     }
 
@@ -173,17 +173,21 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
         // first step: calculate a direct path between the points being linked
         const directPathCoords = this._pathFinding.calculateDirectPath(link.firstPoint, link.lastPoint);
 
-        const routingMatrix = engine.getRoutingMatrix();
+        // initialize routing matrix if necessary
+        if (engine.routingMatrix.length === 0) {
+          engine.calculateRoutingMatrix();
+        }
+
         // now we need to extract, from the routing matrix, the very first walkable points
         // so they can be used as origin and destination of the link to be created
-        const smartLink = this._pathFinding.calculateLinkStartEndCoords(routingMatrix, directPathCoords);
+        const smartLink = this._pathFinding.calculateLinkStartEndCoords(engine.routingMatrix, directPathCoords);
 
         if (smartLink) {
           const { start, end, pathToStart, pathToEnd } = smartLink;
 
           // second step: calculate a path avoiding hitting other elements
           const simplifiedPath = this._pathFinding.calculateDynamicPath(
-            routingMatrix,
+            engine.routingMatrix,
             start,
             end,
             pathToStart,

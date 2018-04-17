@@ -39,8 +39,10 @@ export class PathFinding {
    * finds a direct path from point A to B.
    */
   calculateDirectPath(from: Point, to: Point): Path {
-    const matrix = this.engine.getCanvasMatrix();
-    const grid = new PF.Grid(matrix);
+    if (this.engine.canvasMatrix.length === 0) {
+      this.engine.calculateCanvasMatrix();
+    }
+    const grid = new PF.Grid(this.engine.canvasMatrix);
 
     return pathFinderInstance.findPath(
       this.engine.translateRoutingX(Math.floor(from.x / ROUTING_SCALING_FACTOR)),
@@ -57,7 +59,7 @@ export class PathFinding {
    * blocked paths.
    */
   calculateLinkStartEndCoords(matrix: Path, path: Path): Link | undefined {
-    const startIndex = path.findIndex((point) => matrix[point[1]][point[0]] === 0);
+    const startIndex = path.findIndex((points) => matrix[points[1]][points[0]] === 0);
     const endIndex =
       path.length -
       1 -

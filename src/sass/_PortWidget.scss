@@ -7,7 +7,8 @@
     background: rgba(0.1, 0.1, 0.1, 0.1);
   }
 
-  &.selected {
-    background: rgba(0.1, 0.1, 0.1, 0.4);
+  &.selected,
+  &.connected {
+    background: rgba(0.1, 0.1, 0.1, 0.1);
   }
 }

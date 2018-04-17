@@ -22,14 +22,14 @@ export abstract class PointModel<P extends LinkModel = LinkModel> extends BaseMo
     return false;
   }
 
-  deSerialize(ob: any, engine: DiagramEngine) {
-    super.deSerialize(ob, engine);
+  fromJSON(ob: any, engine: DiagramEngine) {
+    super.fromJSON(ob, engine);
     this._x = ob.x;
     this._y = ob.y;
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       x: this._x,
       y: this._y
     });

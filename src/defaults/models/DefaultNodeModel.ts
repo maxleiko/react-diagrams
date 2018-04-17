@@ -63,14 +63,14 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
     return this.addPort(new DefaultPortModel(false, Toolkit.UID(), label));
   }
 
-  deSerialize(object: any, engine: DiagramEngine) {
-    super.deSerialize(object, engine);
+  fromJSON(object: any, engine: DiagramEngine) {
+    super.fromJSON(object, engine);
     this.name = object.name;
     this.color = object.color;
   }
 
-  serialize() {
-    return _.merge(super.serialize(), {
+  toJSON() {
+    return _.merge(super.toJSON(), {
       name: this.name,
       color: this.color
     });
