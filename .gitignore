@@ -1,5 +1,3 @@
-dist
-dist
 /package
 *.tgz
 ./build/
