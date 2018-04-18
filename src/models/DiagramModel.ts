@@ -153,6 +153,11 @@ export class DiagramModel extends BaseModel {
     return Array.from(this._links.values());
   }
 
+  @computed
+  get linksMap(): Map<string, LinkModel> {
+    return this._links;
+  }
+
   /**
    * Getter nodes
    * @return {NodeModel[]}
@@ -160,6 +165,11 @@ export class DiagramModel extends BaseModel {
   @computed
   get nodes(): NodeModel[] {
     return Array.from(this._nodes.values());
+  }
+
+  @computed
+  get nodesMap(): Map<string, NodeModel> {
+    return this._nodes;
   }
 
   /**

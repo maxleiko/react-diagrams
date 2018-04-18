@@ -100,6 +100,11 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   @computed
+  get linksMap(): Map<string, LinkModel> {
+    return this._links;
+  }
+
+  @computed
   get connected(): boolean {
     return this._links.size > 0;
   }

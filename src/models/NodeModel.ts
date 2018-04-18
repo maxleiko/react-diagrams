@@ -93,6 +93,11 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
   }
 
   @computed
+  get portsMap(): Map<string, P> {
+    return this._ports;
+  }
+
+  @computed
   get width(): number {
     return this._width;
   }

@@ -36,7 +36,7 @@ export default () => {
           className="diagram-layer"
           onDrop={(event) => {
             const data = event.dataTransfer.getData(DATA_TRANSFER);
-            const nodesCount = engine.model.nodes.size;
+            const nodesCount = engine.model.nodes.length;
 
             let node = null;
             if (data === 'in') {
