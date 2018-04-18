@@ -48,7 +48,7 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
     if (this.selected) {
       entities.push(this);
     }
-    return entities.concat(_.flatten(Array.from(this._ports.values()).map((port) => port.selectedEntities)));
+    return entities.concat(_.flatten(this.ports.map((port) => port.selectedEntities)));
   }
 
   fromJSON(ob: any, engine: DiagramEngine) {
@@ -71,7 +71,7 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
       ...super.toJSON(),
       x: this._x,
       y: this._y,
-      ports: Array.from(this._ports.values()).map((port) => port.toJSON())
+      ports: this.ports.map((port) => port.toJSON())
     };
   }
 

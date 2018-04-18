@@ -68,8 +68,8 @@ export class DiagramModel extends BaseModel {
       offsetY: this.offsetY,
       zoom: this.zoom,
       gridSize: this.gridSize,
-      links: Array.from(this._links.values()).map((link) => link.toJSON()),
-      nodes: Array.from(this._nodes.values()).map((node) => node.toJSON())
+      links: this.links.map((link) => link.toJSON()),
+      nodes: this.nodes.map((node) => node.toJSON())
     };
   }
 
@@ -138,8 +138,8 @@ export class DiagramModel extends BaseModel {
   @computed
   get selectedEntities(): Array<BaseModel<any>> {
     return _.uniqBy(
-      _.flatten(Array.from(this._nodes.values()).map((node) => node.selectedEntities))
-        .concat(_.flatten(Array.from(this._links.values()).map((link) => link.selectedEntities))),
+      _.flatten(this.nodes.map((node) => node.selectedEntities))
+        .concat(_.flatten(this.links.map((link) => link.selectedEntities))),
       (item) => `${item.type}:${item.id}`
     );
   }
@@ -248,7 +248,7 @@ export class DiagramModel extends BaseModel {
 
     // remove loose links if we disallow them
     if (!this._allowLooseLinks) {
-      Array.from(this._links.values()).forEach((link) => {
+      this.links.forEach((link) => {
         if (!link.sourcePort || !link.targetPort) {
           link.delete();
         }

@@ -78,11 +78,11 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
 
   @computed
   get inputs(): DefaultPortModel[] {
-    return Array.from(this.ports.values()).filter((p) => p.in);
+    return this.ports.filter((p) => p.in);
   }
 
   @computed
   get outputs(): DefaultPortModel[] {
-    return Array.from(this.ports.values()).filter((p) => !p.in);
+    return this.ports.filter((p) => !p.in);
   }
 }

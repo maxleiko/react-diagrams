@@ -9,7 +9,7 @@ export interface NodeLayerProps {
 
 const NodesLayer = observer(({ engine }: { engine: DiagramEngine }) => (
   <>
-    {Array.from(engine.model.nodes.values()).map((node) => (
+    {engine.model.nodes.map((node) => (
       <NodeWidgetContainer key={node.id} node={node}>
         {engine.generateWidgetForNode(node)}
       </NodeWidgetContainer>
@@ -21,7 +21,7 @@ const NodesLayer = observer(({ engine }: { engine: DiagramEngine }) => (
 export class NodeLayerWidget extends React.Component<NodeLayerProps> {
 
   componentDidUpdate() {
-    Array.from(this.props.engine.model.nodes.values()).map((node) => {
+    this.props.engine.model.nodes.map((node) => {
       node.updateDimensions(this.props.engine.getNodeDimensions(node));
     });
   }

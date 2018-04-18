@@ -30,7 +30,7 @@ export abstract class PortModel extends BaseModel<NodeModel> {
     if (this.selected) {
       entities.push(this);
     }
-    return entities.concat(_.flatten(Array.from(this._links.values()).map((l) => l.selectedEntities)));
+    return entities.concat(_.flatten(this.links.map((l) => l.selectedEntities)));
   }
 
   fromJSON(ob: any, engine: DiagramEngine) {

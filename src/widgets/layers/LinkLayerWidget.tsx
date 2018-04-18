@@ -10,7 +10,7 @@ export interface LinkLayerProps {
 const LinksLayer = observer(({ engine }: { engine: DiagramEngine }) => {
   return (
     <>
-      {Array.from(engine.model.links.values()).map((link) => (
+      {engine.model.links.map((link) => (
         <LinkWidgetContainer key={link.id} link={link}>
           {engine.generateWidgetForLink(link)}
         </LinkWidgetContainer>

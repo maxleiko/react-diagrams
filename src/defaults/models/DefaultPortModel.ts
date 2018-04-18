@@ -39,7 +39,7 @@ export class DefaultPortModel extends PortModel {
     if (this.id !== port.id) {
       if (port instanceof DefaultPortModel) {
         if (this._in !== port._in) {
-          const duplicate = Array.from(this.links.values()).find((link) => {
+          const duplicate = this.links.find((link) => {
             if (link.sourcePort && link.sourcePort.id === port.id) {
               return true;
             }

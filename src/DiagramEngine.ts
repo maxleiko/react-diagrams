@@ -431,14 +431,14 @@ export class DiagramEngine {
    */
   @computed
   get matrixDimensions(): MatrixDimension {
-    const allNodesCoords = Array.from(this._model.nodes.values()).map((item) => ({
+    const allNodesCoords = this._model.nodes.map((item) => ({
       x: item.x,
       width: item.width,
       y: item.y,
       height: item.height
     }));
 
-    const allLinks = Array.from(this._model.links.values());
+    const allLinks = this._model.links;
     const allPortsCoords = _.flatMap(allLinks.map((link) => [link.sourcePort, link.targetPort]))
       .filter(function filter(item: PortModel | null): item is PortModel {
         return item !== null;
