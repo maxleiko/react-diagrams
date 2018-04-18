@@ -45,6 +45,18 @@ module.exports =
 				commonjs2: "lodash",
 				amd: "_",
 				root: "_"
+			},
+			mobx: {
+				commonjs: "mobx",
+				commonjs2: "mobx",
+				amd: "MobX",
+				root: "MobX"
+			},
+			"mobx-utils": {
+				commonjs: "mobx-utils",
+				commonjs2: "mobx-utils",
+				amd: "MobXUtils",
+				root: "MobXUtils"
 			}
 		},
 		plugins: plugins,
