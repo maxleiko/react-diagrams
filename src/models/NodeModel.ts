@@ -5,8 +5,12 @@ import { BaseModel } from './BaseModel';
 import { PortModel } from './PortModel';
 import { DiagramEngine } from '../DiagramEngine';
 import { DiagramModel } from './DiagramModel';
+import { createTransformer } from 'mobx-utils';
 
 export abstract class NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel> {
+
+  getPort = createTransformer((id: string): P | undefined => this._ports.get(id));
+
   @observable private _x: number = 0;
   @observable private _y: number = 0;
   @observable private _ports: Map<string, P> = new Map();
@@ -134,12 +138,14 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
     }
   }
 
+  @action
   addPort(port: P): P {
     port.parent = this;
     this._ports.set(port.id, port);
     return port;
   }
 
+  @action
   updateDimensions({ width, height }: { width: number; height: number }) {
     this._width = width;
     this._height = height;

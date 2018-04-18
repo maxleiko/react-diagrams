@@ -5,8 +5,11 @@ import { BaseModel } from './BaseModel';
 import { NodeModel } from './NodeModel';
 import { LinkModel } from './LinkModel';
 import { DiagramEngine } from '../DiagramEngine';
+import { createTransformer } from 'mobx-utils';
 
 export abstract class PortModel extends BaseModel<NodeModel> {
+  getLink = createTransformer((id: string): LinkModel | undefined => this._links.get(id));
+
   @observable private _maximumLinks: number;
   @observable private _links: Map<string, LinkModel> = new Map();
 
