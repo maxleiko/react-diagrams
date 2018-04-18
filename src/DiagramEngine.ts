@@ -102,18 +102,18 @@ export class DiagramEngine {
   // !-------------- FACTORIES ------------
 
   @computed
-  get nodeFactories(): Map<string, AbstractNodeFactory> {
-    return this._nodeFactories;
+  get nodeFactories(): AbstractNodeFactory[] {
+    return Array.from(this._nodeFactories.values());
   }
 
   @computed
-  get linkFactories(): Map<string, AbstractLinkFactory> {
-    return this._linkFactories;
+  get linkFactories(): AbstractLinkFactory[] {
+    return Array.from(this._linkFactories.values());
   }
 
   @computed
-  get labelFactories(): Map<string, AbstractLabelFactory> {
-    return this._labelFactories;
+  get labelFactories(): AbstractLabelFactory[] {
+    return Array.from(this._labelFactories.values());
   }
 
   @computed

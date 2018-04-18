@@ -92,8 +92,8 @@ export abstract class PortModel extends BaseModel<NodeModel> {
   }
 
   @computed
-  get links(): Map<string, LinkModel> {
-    return this._links;
+  get links(): LinkModel[] {
+    return Array.from(this._links.values());
   }
 
   @computed

@@ -146,36 +146,20 @@ export class DiagramModel extends BaseModel {
 
   /**
    * Getter links
-   * @return {Map<string, LinkModel> }
+   * @return {LinkModel[]}
    */
   @computed
-  get links(): Map<string, LinkModel> {
-    return this._links;
-  }
-
-  /**
-   * Setter links
-   * @param {Map<string, LinkModel> } value
-   */
-  set links(value: Map<string, LinkModel>) {
-    this._links = value;
+  get links(): LinkModel[] {
+    return Array.from(this._links.values());
   }
 
   /**
    * Getter nodes
-   * @return {Map<string, NodeModel> }
+   * @return {NodeModel[]}
    */
   @computed
-  get nodes(): Map<string, NodeModel> {
-    return this._nodes;
-  }
-
-  /**
-   * Setter nodes
-   * @param {Map<string, NodeModel> } value
-   */
-  set nodes(value: Map<string, NodeModel>) {
-    this._nodes = value;
+  get nodes(): NodeModel[] {
+    return Array.from(this._nodes.values());
   }
 
   /**

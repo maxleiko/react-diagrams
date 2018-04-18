@@ -84,8 +84,8 @@ export abstract class NodeModel<P extends PortModel = PortModel> extends BaseMod
   }
 
   @computed
-  get ports(): Map<string, P> {
-    return this._ports;
+  get ports(): P[] {
+    return Array.from(this._ports.values());
   }
 
   @computed
