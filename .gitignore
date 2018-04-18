@@ -1,9 +1,6 @@
 dist
-dist
-/package
 *.tgz
-./build/
-./@types
+@types
 
 .out
 
