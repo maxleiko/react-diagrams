@@ -1,9 +1,9 @@
 {
-	"name": "storm-react-diagrams",
-	"version": "5.1.1",
+	"name": "@maxleiko/react-diagrams",
+	"version": "0.0.1-alpha",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/projectstorm/react-diagrams.git"
+		"url": "https://github.com/maxleiko/react-diagrams.git"
 	},
 	"keywords": [
 		"web",
@@ -18,7 +18,7 @@
 	],
 	"main": "./dist/index.js",
 	"typings": "./dist/@types/index",
-	"author": "dylanvorster",
+	"author": "Maxime Tricoire <max.tricoire@gmail.com>",
 	"scripts": {
 		"clean": "rm -rf dist build",
 		"build": "yarn run build:ts:prod && yarn run build:sass:prod",

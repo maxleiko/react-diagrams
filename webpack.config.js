@@ -25,7 +25,7 @@ module.exports =
 			filename: 'index.js',
 			path: path.join(__dirname, 'dist'),
 			libraryTarget: "umd",
-			library: "storm-react-diagrams"
+			library: "react-diagrams"
 		},
 		externals: {
 			react: {
