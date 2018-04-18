@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { AbstractPortFactory, DiagramEngine, PortWidgetContainer, DefaultLinkFactory } from 'storm-react-diagrams';
+import { AbstractPortFactory, DiagramEngine, PortWidgetContainer, DefaultLinkFactory } from '@leiko/react-diagrams';
 import { DiamondPortModel } from './DiamondPortModel';
 
 export class DiamondPortFactory extends AbstractPortFactory<DiamondPortModel> {

@@ -6,7 +6,7 @@ import {
   DiagramWidget,
   DefaultLinkModel,
   DefaultPointFactory
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 // @ts-ignore
 import { action } from '@storybook/addon-actions';
 import { DemoWorkspace } from '../../DemoWorkspace';

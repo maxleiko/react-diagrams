@@ -1,4 +1,4 @@
-import { DiagramEngine, AbstractNodeFactory } from 'storm-react-diagrams';
+import { DiagramEngine, AbstractNodeFactory } from '@leiko/react-diagrams';
 import { DiamonNodeWidget } from './DiamondNodeWidget';
 import { DiamondNodeModel } from './DiamondNodeModel';
 import * as React from 'react';

@@ -5,7 +5,7 @@ import {
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 
 export default () => {
   // setup the diagram engine

@@ -4,7 +4,7 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
 /**

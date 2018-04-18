@@ -1,5 +1,5 @@
 {
-  "name": "storm-react-diagrams",
+  "name": "@leiko/react-diagrams",
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": ".",
@@ -18,7 +18,7 @@
     "jsx": "react",
     "lib": ["dom", "es2015"],
     "paths": {
-      "storm-react-diagrams": ["src/index"]
+      "@leiko/react-diagrams": ["src/index"]
     }
   },
   "include": [

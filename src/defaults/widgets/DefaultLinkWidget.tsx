@@ -8,7 +8,7 @@ import { DefaultLinkModel } from '../models/DefaultLinkModel';
 import { PathFinding } from '../../routing/PathFinding';
 import * as _ from 'lodash';
 import { LabelModel } from '../../models/LabelModel';
-import { DefaultPortModel } from 'storm-react-diagrams';
+import { DefaultPortModel } from '../models/DefaultPortModel';
 
 export interface DefaultLinkProps {
   color?: string;

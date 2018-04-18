@@ -7,7 +7,7 @@ import {
   DiagramWidget,
   DefaultLinkModel,
   DefaultPointFactory
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 
 export default () => {
   // 1) setup the diagram engine

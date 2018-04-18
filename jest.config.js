@@ -9,7 +9,7 @@ module.exports = {
   },
   moduleNameMapper: {
     '\\.(scss|css|png)$': path.join(__dirname, 'tests', 'helpers', 'css-mock.js'),
-    'storm-react-diagrams': path.join(__dirname, 'src', 'index')
+    '@leiko/react-diagrams': path.join(__dirname, 'src', 'index')
   },
   roots: [__dirname + '/tests'],
   testMatch: ['**/*.test.ts?(x)']

@@ -4,7 +4,7 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 
 /**
  * Shows that a limit of points can be set for links

@@ -7,7 +7,7 @@ import {
   DefaultLinkModel,
   DefaultLinkFactory,
   DefaultPointFactory
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 import * as React from 'react';
 
 export class AdvancedLinkModel extends DefaultLinkModel {

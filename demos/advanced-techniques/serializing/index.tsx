@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget } from 'storm-react-diagrams';
+import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
 // @ts-ignore

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DiamondNodeModel } from './DiamondNodeModel';
-import { DiagramEngine } from 'storm-react-diagrams';
+import { DiagramEngine } from '@leiko/react-diagrams';
 
 export interface DiamonNodeWidgetProps {
   node: DiamondNodeModel;

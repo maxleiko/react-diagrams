@@ -32,7 +32,7 @@ glob.glob(__dirname + "/../../demos/demo-*/index.tsx", {}, (err, files) => {
 		resolve: {
 			...config.resolve,
 			alias: {
-				'storm-react-diagrams': path.join(__dirname, "..", "..", "src", "index")
+				'@leiko/react-diagrams': path.join(__dirname, "..", "..", "src", "index")
 			}
 		},
 	};

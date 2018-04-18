@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { DiagramEngine, DiagramWidget, DiagramModel, DefaultNodeModel } from 'storm-react-diagrams';
+import { DiagramEngine, DiagramWidget, DiagramModel, DefaultNodeModel } from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
 export default () => {

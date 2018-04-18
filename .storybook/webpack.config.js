@@ -30,7 +30,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      'storm-react-diagrams': path.join(__dirname, '..', 'src')
+      '@leiko/react-diagrams': path.join(__dirname, '..', 'src')
     },
     extensions: ['.tsx', '.ts', '.js']
   }

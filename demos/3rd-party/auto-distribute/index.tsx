@@ -5,7 +5,7 @@ import {
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 import { distributeElements } from './dagre-utils';
 import { DemoWorkspace } from '../../DemoWorkspace';
 

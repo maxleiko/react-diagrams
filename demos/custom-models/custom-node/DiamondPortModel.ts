@@ -4,7 +4,7 @@ import {
   PortModel,
   DefaultLinkModel,
   DefaultPointFactory
-} from 'storm-react-diagrams';
+} from '@leiko/react-diagrams';
 
 type Position = 'top' | 'bottom' | 'left' | 'right';
 
