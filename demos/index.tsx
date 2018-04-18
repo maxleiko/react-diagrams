@@ -67,7 +67,8 @@ storiesOf('Advanced Techniques', module)
   .add('(De-)Serializing', makeStory('advanced-techniques/serializing'))
   .add('Mutate graph', makeStory('advanced-techniques/mutate-graph'))
   .add('Drag-n-Drop', makeStory('advanced-techniques/drag-n-drop'))
-  .add('Smart routing', makeStory('advanced-techniques/smart-routing'));
+  .add('Smart routing', makeStory('advanced-techniques/smart-routing'))
+  .add('Change model', makeStory('advanced-techniques/change-model'));
 
 storiesOf('Custom Models', module)
   .add('Custom diamond node', makeStory('custom-models/custom-node'))
