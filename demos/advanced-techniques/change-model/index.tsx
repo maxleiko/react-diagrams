@@ -34,9 +34,17 @@ export default () => {
 function createModelA() {
   const model = new DefaultDiagramModel();
 
-  const node = new DefaultNodeModel('Node from A', 'rgba(162, 255, 0)');
-  node.setPosition(100, 50);
-  model.addNode(node);
+  const node1 = new DefaultNodeModel('Node1 from A', 'rgba(162, 255, 0)');
+  const p1 = node1.addOutPort('out');
+  node1.setPosition(100, 50);
+  model.addNode(node1);
+
+  const node2 = new DefaultNodeModel('Node2 from A', 'rgba(255, 255, 0)');
+  const p2 = node2.addInPort('in');
+  node2.setPosition(220, 50);
+  model.addNode(node2);
+
+  model.addLink(p1.link(p2));
 
   return model;
 }

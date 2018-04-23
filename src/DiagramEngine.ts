@@ -245,6 +245,8 @@ export class DiagramEngine {
       const point = this.getRelativePoint(rect.left, rect.top);
       const x = ref.offsetWidth / 2 + point.x;
       const y = ref.offsetHeight / 2 + point.y;
+      // tslint:disable-next-line
+      console.log('updatePortRefPosition', port.id, x, y, ref);
 
       if (port.x !== x || port.y !== y) {
         // update port position for points only if necessary

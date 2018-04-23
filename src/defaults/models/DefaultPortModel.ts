@@ -1,8 +1,8 @@
-import * as _ from 'lodash';
+import { observable, computed, action } from 'mobx';
+
 import { PortModel } from '../../models/PortModel';
 import { APortModel } from '../../models/abstract/APortModel';
 import { DiagramEngine } from '../../DiagramEngine';
-import { observable, computed, action } from 'mobx';
 import { DefaultLinkModel } from './DefaultLinkModel';
 import { DefaultPointFactory } from '../factories/DefaultPointFactory';
 
@@ -11,7 +11,7 @@ export class DefaultPortModel extends APortModel {
   @observable private _label: string;
 
   constructor(isInput: boolean, name: string, label: string | null = null) {
-    super(name, 'srd-default-port', -1);
+    super(name, 'srd-default-port');
     this._in = isInput;
     this._label = label || name;
   }
@@ -24,10 +24,11 @@ export class DefaultPortModel extends APortModel {
   }
 
   toJSON() {
-    return _.merge(super.toJSON(), {
+    return {
+      ...super.toJSON(),
       in: this._in,
       label: this._label
-    });
+    };
   }
 
   @action

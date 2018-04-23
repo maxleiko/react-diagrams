@@ -1,21 +1,11 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import { DiagramEngine } from '../../DiagramEngine';
-import { NodeWidgetContainer } from '../NodeWidgetContainer';
+import { NodesLayer } from './NodesLayer';
 
 export interface NodeLayerProps {
   engine: DiagramEngine;
 }
-
-const NodesLayer = observer(({ engine }: { engine: DiagramEngine }) => (
-  <>
-    {engine.model.nodes.map((node) => (
-      <NodeWidgetContainer key={node.id} node={node}>
-        {engine.generateWidgetForNode(node)}
-      </NodeWidgetContainer>
-    ))}
-  </>
-));
 
 @observer
 export class NodeLayerWidget extends React.Component<NodeLayerProps> {

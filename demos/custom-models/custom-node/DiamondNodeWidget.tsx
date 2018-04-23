@@ -42,7 +42,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             left: -8
           }}
         >
-          {engine.generateWidgetForPort(this.props.node.getPortFromID('left')!)}
+          {engine.generateWidgetForPort(this.props.node.getPort('left')!)}
         </div>
         <div
           style={{
@@ -52,7 +52,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             top: -8
           }}
         >
-          {engine.generateWidgetForPort(this.props.node.getPortFromID('top')!)}
+          {engine.generateWidgetForPort(this.props.node.getPort('top')!)}
         </div>
         <div
           style={{
@@ -62,7 +62,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             top: size / 2 - 8
           }}
         >
-          {engine.generateWidgetForPort(this.props.node.getPortFromID('right')!)}
+          {engine.generateWidgetForPort(this.props.node.getPort('right')!)}
         </div>
         <div
           style={{
@@ -72,7 +72,7 @@ export class DiamonNodeWidget extends React.Component<DiamonNodeWidgetProps> {
             top: size - 8
           }}
         >
-          {engine.generateWidgetForPort(this.props.node.getPortFromID('bottom')!)}
+          {engine.generateWidgetForPort(this.props.node.getPort('bottom')!)}
         </div>
       </div>
     );

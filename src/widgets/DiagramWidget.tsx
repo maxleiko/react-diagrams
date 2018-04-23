@@ -412,6 +412,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   }
 
   render() {
+    // tslint:disable-next-line
+    console.log('re-render DiagramWidget');
     return (
       <div
         className={cx('srd-diagram', this.props.className)}

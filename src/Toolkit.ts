@@ -45,13 +45,12 @@ export class Toolkit {
     return `M${firstPoint.x},${firstPoint.y} L ${lastPoint.x},${lastPoint.y}`;
   }
 
-  static generateCurvePath(firstPoint: PointModel, lastPoint: PointModel, curvy: number = 0): string {
-    const isHorizontal = Math.abs(firstPoint.x - lastPoint.x) > Math.abs(firstPoint.y - lastPoint.y);
-    const curvyX = isHorizontal ? curvy : 0;
-    const curvyY = isHorizontal ? 0 : curvy;
+  static generateCurvePath(fp: PointModel, lp: PointModel, curvy: number = 0): string {
+    const isHorizontal = Math.abs(fp.x - lp.x) > Math.abs(fp.y - lp.y);
+    const cX = isHorizontal ? curvy : 0;
+    const cY = isHorizontal ? 0 : curvy;
 
-    return `M${firstPoint.x},${firstPoint.y} C ${firstPoint.x + curvyX},${firstPoint.y + curvyY}
-    ${lastPoint.x - curvyX},${lastPoint.y - curvyY} ${lastPoint.x},${lastPoint.y}`;
+    return `M${fp.x},${fp.y} C ${fp.x + cX},${fp.y + cY} ${lp.x - cX},${lp.y - cY} ${lp.x},${lp.y}`;
   }
 
   static generateDynamicPath(pathCoords: Path): string {

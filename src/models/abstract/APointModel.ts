@@ -1,7 +1,6 @@
 import { observable, computed, action } from 'mobx';
 
 import { LinkModel } from '../LinkModel';
-import { DiagramEngine } from '../../DiagramEngine';
 import { ABaseModel } from './ABaseModel';
 import { PointModel } from '../PointModel';
 
@@ -20,21 +19,6 @@ export abstract class APointModel<P extends LinkModel = LinkModel> extends ABase
       return this.parent.getPortForPoint(this) !== null;
     }
     return false;
-  }
-
-  @action
-  fromJSON(ob: any, engine: DiagramEngine) {
-    super.fromJSON(ob, engine);
-    this._x = ob.x;
-    this._y = ob.y;
-  }
-
-  toJSON() {
-    return {
-      ...super.toJSON(),
-      x: this._x,
-      y: this._y
-    };
   }
 
   @action

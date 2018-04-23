@@ -67,20 +67,16 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
   @action
   fromJSON(ob: any, engine: DiagramEngine) {
     super.fromJSON(ob, engine);
-    // tslint:disable-next-line
-    console.log('ALinkModel.fromJSON', ob);
+
+    // clear points array before loading (because it is initialized by default)
+    (this._points as IObservableArray<PointModel>).clear();
+
     if (ob.sourcePort) {
-      // tslint:disable-next-line
-      console.log(' - parent', this.parent);
       if (this.parent) {
         const node = this.parent.getNode(ob.sourcePortParent);
         if (node) {
-          // tslint:disable-next-line
-          console.log(' - node', this.parent);
           const port = node.getPort(ob.sourcePort);
           if (port) {
-            // tslint:disable-next-line
-            console.log(' - port', port);
             this._sourcePort = port;
             this._sourcePort.addLink(this);
           }

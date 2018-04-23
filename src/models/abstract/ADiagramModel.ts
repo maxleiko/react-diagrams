@@ -43,17 +43,21 @@ export class ADiagramModel extends ABaseModel implements DiagramModel {
     super.fromJSON(object, engine);
 
     // load properties
-    this.offsetX = object.offsetX;
-    this.offsetY = object.offsetY;
-    this.zoom = object.zoom;
-    this.gridSize = object.gridSize;
-    this.allowCanvasTranslation = object.allowCanvasTranslation;
-    this.allowCanvasZoom = object.allowCanvasZoom;
-    this.allowLooseLinks = object.allowLooseLinks;
-    this.inverseZoom = object.inverseZoom;
-    this.smartRouting = object.smartRouting;
-    this.deleteKeys = object.deleteKeys;
-    this.maxNumberPointsPerLink = object.maxNumberPointsPerLink;
+    this._offsetX = object.offsetX;
+    this._offsetY = object.offsetY;
+    this._zoom = object.zoom;
+    this._gridSize = object.gridSize;
+    this._allowCanvasTranslation = object.allowCanvasTranslation;
+    this._allowCanvasZoom = object.allowCanvasZoom;
+    this._allowLooseLinks = object.allowLooseLinks;
+    this._inverseZoom = object.inverseZoom;
+    this._smartRouting = object.smartRouting;
+    this._deleteKeys = object.deleteKeys;
+    if (this.maxNumberPointsPerLink === null) {
+      this._maxNumberPointsPerLink = Infinity;
+    } else {
+      this._maxNumberPointsPerLink = object.maxNumberPointsPerLink;
+    }
 
     // load nodes
     object.nodes = object.nodes || [];
@@ -77,10 +81,17 @@ export class ADiagramModel extends ABaseModel implements DiagramModel {
   toJSON() {
     return {
       ...super.toJSON(),
-      offsetX: this.offsetX,
-      offsetY: this.offsetY,
-      zoom: this.zoom,
-      gridSize: this.gridSize,
+      offsetX: this._offsetX,
+      offsetY: this._offsetY,
+      zoom: this._zoom,
+      gridSize: this._gridSize,
+      allowCanvasTranslation: this._allowCanvasTranslation,
+      allowCanvasZoom: this._allowCanvasZoom,
+      allowLooseLinks: this._allowLooseLinks,
+      inverseZoom: this._inverseZoom,
+      smartRouting: this._smartRouting,
+      deleteKeys: this._deleteKeys.map((k) => k),
+      maxNumberPointsPerLink: this._maxNumberPointsPerLink,
       links: this.links.map((link) => link.toJSON()),
       nodes: this.nodes.map((node) => node.toJSON())
     };

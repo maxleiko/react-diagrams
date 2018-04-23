@@ -21,7 +21,7 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
   @observable private _width: number = -1;
   @observable private _height: number = -1;
 
-  constructor(name: string, type: string = 'srd-port', maximumLinks: number = -1) {
+  constructor(name: string, type: string = 'srd-port', maximumLinks: number = Infinity) {
     super(type, name);
     this._maximumLinks = maximumLinks;
   }
@@ -42,7 +42,11 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
     this._y = ob.y;
     this._width = ob.width;
     this._height = ob.height;
-    this._maximumLinks = ob.maximumLinks;
+    if (ob.maximumLinks === null) {
+      this._maximumLinks = Infinity;
+    } else {
+      this._maximumLinks = ob.maximumLinks;
+    }
 
     // TODO should I load links?
   }
@@ -50,8 +54,12 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
   toJSON() {
     return {
       ...super.toJSON(),
+      x: this._x,
+      y: this._y,
+      width: this._width,
+      height: this._height,
+      maximumLinks: this._maximumLinks,
       links: Array.from(this._links.keys()),
-      maximumLinks: this._maximumLinks
     };
   }
 
@@ -79,7 +87,11 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
 
   @action
   addLink(link: LinkModel) {
-    this._links.set(link.id, link);
+    if (this.maximumLinks >= this._links.size + 1) {
+      this._links.set(link.id, link);
+    } else {
+      throw new Error(`Port "${this.id}" cannot have more links (maximum: ${this._maximumLinks})`);
+    }
   }
 
   @action
