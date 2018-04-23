@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   DiagramEngine,
-  DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
   DefaultLinkModel,
@@ -15,9 +14,6 @@ export default () => {
   // setup the diagram engine
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
-
-  // setup the diagram model
-  const model = new DiagramModel();
 
   // create four nodes
   const node1 = new DefaultNodeModel('Node A', 'rgb(0,192,255)');
@@ -53,13 +49,10 @@ export default () => {
   link3.connect(port1, port4);
 
   // add all to the main model
-  model.addAll(node1, node2, node3, node4, link1, link2, link3);
-
-  // load model into engine and render
-  engine.model = model;
+  engine.model.addAll(node1, node2, node3, node4, link1, link2, link3);
 
   const Header = () => (
-    <button onClick={() => action('Serialized Graph')(JSON.stringify(model, null, 2))}>
+    <button onClick={() => action('Serialized Graph')(JSON.stringify(engine.model, null, 2))}>
       Serialize Graph
     </button>
   );

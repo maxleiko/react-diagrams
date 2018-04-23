@@ -1,15 +1,12 @@
-/**
- * @author Dylan Vorster
- */
-import { LinkModel } from '../../models/LinkModel';
-import * as _ from 'lodash';
+import { computed, action, observable } from 'mobx';
+
+import { ALinkModel } from '../../models/abstract/ALinkModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultLabelModel } from './DefaultLabelModel';
 import { LabelModel } from '../../models/LabelModel';
 import { AbstractPointFactory } from '../../factories/AbstractPointFactory';
-import { computed, action, observable } from 'mobx';
 
-export class DefaultLinkModel extends LinkModel {
+export class DefaultLinkModel extends ALinkModel {
   @observable private _color: string;
   @observable private _width: number = -1;
   @observable private _curvyness: number = -1;
@@ -27,13 +24,15 @@ export class DefaultLinkModel extends LinkModel {
   }
 
   toJSON() {
-    return _.merge(super.toJSON(), {
+    return {
+      ...super.toJSON(),
       width: this.width,
       color: this.color,
       curvyness: this.curvyness
-    });
+    };
   }
 
+  @action
   fromJSON(ob: any, engine: DiagramEngine) {
     super.fromJSON(ob, engine);
     this.color = ob.color;
@@ -43,12 +42,13 @@ export class DefaultLinkModel extends LinkModel {
 
   @action
   addLabel(label: LabelModel | string) {
-    if (label instanceof LabelModel) {
-      return super.addLabel(label);
+    let l: LabelModel;
+    if (typeof label === 'string') {
+      l = new DefaultLabelModel(label);
+    } else {
+      l = label;
     }
-    const labelOb = new DefaultLabelModel();
-    labelOb.title = label;
-    return super.addLabel(labelOb);
+    return super.addLabel(l);
   }
 
   @computed

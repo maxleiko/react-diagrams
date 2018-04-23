@@ -1,106 +1,14 @@
-import { observable, computed, action } from 'mobx';
-
 import { DiagramEngine } from '../DiagramEngine';
-import { Toolkit } from '../Toolkit';
 
-/**
- * @author Dylan Vorster
- */
-export abstract class BaseModel<P extends BaseModel = any> {
-  @observable private _id: string;
-  @observable private _type: string;
-  @observable private _locked: boolean = false;
-  @observable private _selected: boolean = false;
-  @observable private _parent: P | null = null;
+export interface BaseModel<P extends BaseModel = any> {
+  id: string;
+  type: string;
+  locked: boolean;
+  selected: boolean;
+  parent: P | null;
+  selectedEntities: BaseModel[];
 
-  constructor(type: string = 'srd-base', id: string = Toolkit.UID()) {
-    this._type = type;
-    this._id = id;
-  }
-
-  abstract delete(): void;
-
-  /**
-   * Getter id
-   * @return {string}
-   */
-  @computed
-  get id(): string {
-    return this._id;
-  }
-
-  /**
-   * Setter id
-   * @param {string} value
-   */
-  set id(value: string) {
-    this._id = value;
-  }
-
-  @computed
-  get locked(): boolean {
-    if (this._parent) {
-      if (this._parent._locked) {
-        // check if parent is locked first
-        return true;
-      }
-    }
-    return this._locked;
-  }
-
-  /**
-   * Setter locked
-   * @param {boolean } value
-   */
-  set locked(value: boolean) {
-    this._locked = value;
-  }
-
-  @computed
-  get parent(): P | null {
-    return this._parent;
-  }
-
-  set parent(p: P | null) {
-    this._parent = p;
-  }
-
-  @computed
-  get selectedEntities(): BaseModel[] {
-    if (this.selected) {
-      return [this];
-    }
-    return [];
-  }
-
-  @action
-  fromJSON(ob: any, _engine: DiagramEngine) {
-    this._id = ob.id;
-    this._locked = ob.locked;
-    this._type = ob.type;
-    this._selected = ob.selected;
-  }
-
-  toJSON() {
-    return {
-      id: this._id,
-      locked: this._locked,
-      type: this._type,
-      selected: this._selected,
-      parent: this._parent ? this._parent.id : null
-    };
-  }
-
-  get type(): string {
-    return this._type;
-  }
-
-  @computed
-  get selected(): boolean {
-    return this._selected;
-  }
-
-  set selected(selected: boolean) {
-    this._selected = selected;
-  }
+  delete(): void;
+  fromJSON(data: any, engine: DiagramEngine): void;
+  toJSON(): any;
 }

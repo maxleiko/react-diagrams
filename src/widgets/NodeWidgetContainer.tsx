@@ -17,8 +17,6 @@ export class NodeWidgetContainer extends React.Component<NodeProps> {
     if (this._elem) {
       this.props.node.width = this._elem.offsetWidth;
       this.props.node.height = this._elem.offsetHeight;
-      // tslint:disable-next-line
-      console.log('update node', this.props.node.id, 'width=' + this.props.node.width, 'height=' + this.props.node.height);
     }
   }
 

@@ -1,82 +1,60 @@
 import * as React from 'react';
-import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
+import { DiagramEngine, DefaultNodeModel, DiagramWidget, DefaultDiagramModel } from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
-/**
- * Tests the grid size
- */
-class MutateGraphDemo extends React.Component {
+export default () => {
+  // 1) setup the diagram engine
+  const engine = new DiagramEngine();
+  engine.installDefaultFactories();
 
-  private engine: DiagramEngine = new DiagramEngine();
+  // 3-A) create a default node
+  const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
+  const port1 = node1.addOutPort('Out');
+  node1.setPosition(100, 100);
 
-  constructor(props: {}) {
-    super(props);
+  // 3-B) create another default node
+  const node2 = new DefaultNodeModel('Node 2', 'rgb(192,255,0)');
+  const port2 = node2.addInPort('In');
+  node2.setPosition(400, 100);
 
-    this.updatePosition = this.updatePosition.bind(this);
-    this.updatePositionViaSerialize = this.updatePositionViaSerialize.bind(this);
-  }
+  // 3-C) link the 2 nodes together
+  const link1 = port1.link(port2)!;
 
-  componentWillMount() {
-    // 1) setup the diagram engine
-    this.engine.installDefaultFactories();
+  // 4) add the models to the root graph
+  engine.model.addAll(node1, node2, link1);
 
-    // 2) setup the diagram model
-    const model = new DiagramModel();
+  const updatePosition = () => {
+    const firstNode = engine.model.nodes[0];
+    firstNode.setPosition(firstNode.x + 30, firstNode.y + 30);
+  };
 
-    // 3-A) create a default node
-    const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
-    const port1 = node1.addOutPort('Out');
-    node1.setPosition(100, 100);
+  const updatePositionViaSerialize = () => {
+    const modelStr = JSON.stringify(engine.model, null, 2);
+    console.log('==== SERIAL before ====');
+    console.log(engine.model.toJSON());
+    const newModel = new DefaultDiagramModel();
+    const currentModel = JSON.parse(modelStr);
+    const firstNode = currentModel.nodes[0];
+    firstNode.x += 30;
+    firstNode.y += 30;
+    newModel.fromJSON(currentModel, engine);
+    engine.model = newModel;
+    console.log('==== SERIAL after ====');
+    console.log(engine.model.toJSON());
+  };
 
-    // 3-B) create another default node
-    const node2 = new DefaultNodeModel('Node 2', 'rgb(192,255,0)');
-    const port2 = node2.addInPort('In');
-    node2.setPosition(400, 100);
-
-    // 3-C) link the 2 nodes together
-    const link1 = port1.link(port2)!;
-
-    // 4) add the models to the root graph
-    model.addAll(node1, node2, link1);
-
-    // 5) load model into engine
-    this.engine.model = model;
-  }
-
-  updatePosition() {
-    const nodes = this.engine.model.nodes;
-    const node = nodes.values().next().value;
-    node.setPosition(node.x + 30, node.y + 30);
-    this.forceUpdate();
-  }
-
-  updatePositionViaSerialize() {
-    const str = JSON.stringify(this.engine.model);
-    const model2 = new DiagramModel();
-    const obj = JSON.parse(str);
-    const node = obj.nodes[0];
-    node.x += 30;
-    node.y += 30;
-    model2.fromJSON(obj, this.engine);
-    this.engine.model = model2;
-  }
-
-  render() {
-    return (
-      <DemoWorkspace
-        header={[
-          <button key={1} onClick={this.updatePosition}>
-            Update position
-          </button>,
-          <button key={2} onClick={this.updatePositionViaSerialize}>
-            Update position via serialize
-          </button>
-        ]}
-      >
-        <DiagramWidget engine={this.engine} />
-      </DemoWorkspace>
-    );
-  }
-}
-
-export default () => <MutateGraphDemo />;
+  return (
+    <DemoWorkspace
+      header={[
+        <button key={1} onClick={updatePosition}>
+          Update position
+        </button>,
+        <button key={2} onClick={updatePositionViaSerialize}>
+          Update position via serialize
+        </button>
+      ]}
+    >
+      <DiagramWidget engine={engine} />
+    </DemoWorkspace>
+  );
+};

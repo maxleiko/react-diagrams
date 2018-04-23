@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   DiagramEngine,
-  DiagramModel,
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget
@@ -27,9 +26,6 @@ export default () => {
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
 
-  // 2) setup the diagram model
-  const model = new DiagramModel();
-
   // 3) create a default nodes
   const nodesFrom: DefaultNodeModel[] = [];
   const nodesTo: DefaultNodeModel[] = [];
@@ -54,24 +50,19 @@ export default () => {
   nodesFrom.forEach((node, index) => {
     node.x = (index * 70) + 20;
     node.y = 20;
-    model.addNode(node);
+    engine.model.addNode(node);
   });
 
   nodesTo.forEach((node, index) => {
     node.x = (index * 70) + 20;
     node.y = 120;
-    model.addNode(node);
+    engine.model.addNode(node);
   });
 
-  links.forEach((link) => {
-    model.addLink(link);
-  });
-
-  // 5) load model into engine
-  engine.model = model;
+  links.forEach((link) => engine.model.addLink(link));
 
   return (
-    <DemoWorkspace header={<button onClick={() => distributeElements(model)}>Auto distribute</button>}>
+    <DemoWorkspace header={<button onClick={() => distributeElements(engine.model)}>Auto distribute</button>}>
       <DiagramWidget style={{ minHeight: 500 }} engine={engine} />
     </DemoWorkspace>
   );

@@ -1,6 +1,5 @@
 import {
   DiagramEngine,
-  DiagramModel,
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget,
@@ -136,15 +135,10 @@ export default () => {
   node4.addPort(new DefaultPortModel(true, 'in-2', 'In default'));
   node4.setPosition(300, 200);
 
-  const model = new DiagramModel();
-
-  model.addAll(port1.link(port3)!, port2.link(port4)!);
+  engine.model.addAll(port1.link(port3)!, port2.link(port4)!);
 
   // add everything else
-  model.addAll(node1, node2, node3, node4);
-
-  // load model into engine
-  engine.model = model;
+  engine.model.addAll(node1, node2, node3, node4);
 
   // render the diagram!
   return <DiagramWidget className="srd-demo-canvas" engine={engine} />;

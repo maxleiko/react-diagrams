@@ -1,14 +1,14 @@
 import * as _ from 'lodash';
 import {
   DiagramEngine,
-  PortModel,
   DefaultLinkModel,
-  DefaultPointFactory
+  DefaultPointFactory,
+  APortModel
 } from '@leiko/react-diagrams';
 
 type Position = 'top' | 'bottom' | 'left' | 'right';
 
-export class DiamondPortModel extends PortModel {
+export class DiamondPortModel extends APortModel {
   position: Position;
 
   constructor(pos: Position = 'top') {

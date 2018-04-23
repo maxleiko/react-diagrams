@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
+import { DiagramEngine, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
 import './styles.scss';
@@ -9,9 +9,6 @@ const DATA_TRANSFER = 'srd-dnd';
 export default () => {
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
-
-  const model = new DiagramModel();
-  engine.model = model;
 
   const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
   const port0 = node1.addOutPort('Out');
@@ -23,7 +20,7 @@ export default () => {
 
   const link = port0.link(port1);
 
-  model.addAll(node1, node2, link);
+  engine.model.addAll(node1, node2, link);
 
   return (
     <DemoWorkspace>

@@ -11,10 +11,8 @@ import { BaseAction } from '../actions/BaseAction';
 import { MoveCanvasAction } from '../actions/MoveCanvasAction';
 import { MoveItemsAction } from '../actions/MoveItemsAction';
 import { SelectingAction } from '../actions/SelectingAction';
-import { NodeModel } from '../models/NodeModel';
-import { PointModel } from '../models/PointModel';
-import { PortModel } from '../models/PortModel';
-import { LinkModel } from '../models/LinkModel';
+import { APortModel } from '../models/abstract/APortModel';
+import { ALinkModel } from '../models/abstract/ALinkModel';
 import { BaseModel } from '../models/BaseModel';
 import { CreateLinkAction } from '../actions/CreateLinkAction';
 
@@ -69,7 +67,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       if (nodeId && portId) {
         const node = model.getNode(nodeId);
         if (node) {
-          const port = node.getPortFromID(portId);
+          const port = node.getPort(portId);
           if (port) {
             return { el: target, model: port };
           }
@@ -150,11 +148,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   onMouseDown(event: React.MouseEvent<HTMLDivElement>) {
     event.preventDefault();
     const { el, model } = this.getModelAtPosition(event.nativeEvent);
-
-    // tslint:disable-next-line
-    console.log('[mousedown] model at position', model);
     if (model) {
-      if (model instanceof PortModel) {
+      if (model instanceof APortModel) {
         // its a port element, we want to create a link
         if (!this.props.engine.model.locked && !model.locked) {
           const link = this.props.engine
@@ -175,7 +170,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           this.props.engine.model.addLink(link);
           this.startFiringAction(new CreateLinkAction(event.clientX, event.clientY, link));
         }
-      } else if (model instanceof LinkModel) {
+      } else if (model instanceof ALinkModel) {
         // we want to create a point
         if (!this.props.engine.model.locked && !model.locked) {
           if (event.shiftKey) {
@@ -205,7 +200,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               const a = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
               this.startFiringAction(a);
             } else {
-              // if we cannot create more points, then just select the link
+              // if we cannot create more modelpoints, then just select the link
               model.selected = true;
             }
           }
@@ -275,24 +270,10 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       const zoomRatio = model.zoom / 100;
       this.props.engine.action.selectionModels.forEach((selection) => {
         // in this case we need to also work out the relative grid position
-        if (
-          (selection.model instanceof NodeModel) ||
-          ((selection.model instanceof PointModel) && !selection.model.isConnectedToPort())
-        ) {
-          selection.model.setPosition(
-            selection.initialX + xOffset / zoomRatio,
-            selection.initialY + yOffset / zoomRatio
-          );
-
-          if (this.props.engine.model.smartRouting) {
-            this.props.engine.calculateRoutingMatrix();
-          }
-        } else if (selection.model instanceof PointModel) {
-          // we want points that are connected to ports, to not necessarily snap to grid
-          // this stuff needs to be pixel perfect, dont touch it
-          selection.model.x = selection.initialX + xOffset / zoomRatio;
-          selection.model.y = selection.initialY + yOffset / zoomRatio;
-        }
+        selection.model.setPosition(
+          selection.initialX + xOffset / zoomRatio,
+          selection.initialY + yOffset / zoomRatio
+        );
       });
 
       if (this.props.engine.model.smartRouting) {
@@ -318,7 +299,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       const { model } = this.getModelAtPosition(event);
       if (model) {
         if (!model.locked && !this.props.engine.model.locked) {
-          if (model instanceof PortModel) {
+          if (model instanceof APortModel) {
             // prevent sourcePort === targetPort
             if (link.sourcePort !== model) {
               // check if link can connect to that port
@@ -376,8 +357,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     if (this.props.engine.model.deleteKeys.indexOf(event.keyCode) !== -1) {
       // only delete items if model is not locked
       if (!this.props.engine.model.locked) {
-        // tslint:disable-next-line
-        console.log('[keyup] delete', this.props.engine.model.selectedEntities);
         this.props.engine.model.selectedEntities.forEach((element) => {
           // only delete items which are not locked
           if (!element.locked) {

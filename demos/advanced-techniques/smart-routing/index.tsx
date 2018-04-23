@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   DiagramEngine,
-  DiagramModel,
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget
@@ -13,8 +12,7 @@ export default () => {
   engine.installDefaultFactories();
 
   // setup the diagram model
-  const model = new DiagramModel();
-  // enable smartRouting
+  const model = engine.model;
   model.smartRouting = true;
   model.maxNumberPointsPerLink = 0;
 
@@ -40,9 +38,6 @@ export default () => {
 
   // add all to the main model
   model.addAll(node1, node2, node3, node4, node5, link0, link1);
-
-  // load model into engine and render
-  engine.model = model;
 
   return <DiagramWidget engine={engine} />;
 };

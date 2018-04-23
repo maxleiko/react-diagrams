@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { DiagramEngine, DiagramWidget, DiagramModel, DefaultNodeModel } from '@leiko/react-diagrams';
+import { DiagramEngine, DiagramWidget, DefaultNodeModel, DefaultDiagramModel } from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
 export default () => {
@@ -32,7 +32,7 @@ export default () => {
 };
 
 function createModelA() {
-  const model = new DiagramModel();
+  const model = new DefaultDiagramModel();
 
   const node = new DefaultNodeModel('Node from A', 'rgba(162, 255, 0)');
   node.setPosition(100, 50);
@@ -42,7 +42,7 @@ function createModelA() {
 }
 
 function createModelB() {
-  const model = new DiagramModel();
+  const model = new DefaultDiagramModel();
   model.zoom = 200;
 
   const node = new DefaultNodeModel('Node from B', 'rgba(162, 198, 255)');

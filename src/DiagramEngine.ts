@@ -19,6 +19,7 @@ import { ROUTING_SCALING_FACTOR } from './routing/PathFinding';
 import { Toolkit } from './Toolkit';
 import { PointModel } from './models/PointModel';
 import { AbstractPointFactory } from './factories/AbstractPointFactory';
+import { DefaultDiagramModel } from './defaults/models/DefaultDiagramModel';
 
 export interface MatrixDimension {
   width: number;
@@ -36,7 +37,7 @@ export class DiagramEngine {
   @observable private _portFactories: Map<string, AbstractPortFactory> = new Map();
   @observable private _labelFactories: Map<string, AbstractLabelFactory> = new Map();
 
-  @observable private _model: DiagramModel = new DiagramModel();
+  @observable private _model: DiagramModel;
   @observable private _canvas: HTMLDivElement | null = null;
   @observable private _portRefs: Map<string, { port: PortModel, ref: HTMLElement }> = new Map();
 
@@ -49,7 +50,9 @@ export class DiagramEngine {
 
   @observable private _action: BaseAction | null = null;
 
-  constructor() {
+  constructor(model: DiagramModel = new DefaultDiagramModel()) {
+    this._model = model;
+
     if (Toolkit.TESTING) {
       Toolkit.TESTING_UID = 0;
 

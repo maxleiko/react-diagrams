@@ -20,12 +20,6 @@ const NodesLayer = observer(({ engine }: { engine: DiagramEngine }) => (
 @observer
 export class NodeLayerWidget extends React.Component<NodeLayerProps> {
 
-  componentDidUpdate() {
-    this.props.engine.model.nodes.map((node) => {
-      node.updateDimensions(this.props.engine.getNodeDimensions(node));
-    });
-  }
-
   render() {
     const { offsetX, offsetY, zoom } = this.props.engine.model;
     return (

@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {
   DiagramEngine,
-  DiagramModel,
   DefaultNodeModel,
-  DiagramWidget
+  DiagramWidget,
+  DiagramModel
 } from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
@@ -18,17 +18,11 @@ export default () => {
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
 
-  // 2) setup the diagram model
-  const model = new DiagramModel();
-
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
-      generateNodes(model, i * 200, j * 100);
+      generateNodes(engine.model, i * 200, j * 100);
     }
   }
-
-  // 5) load model into engine
-  engine.model = model;
 
   // 6) render the diagram!
   return (

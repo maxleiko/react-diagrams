@@ -1,7 +1,7 @@
 import { DefaultPortModel } from './DefaultPortModel';
 import * as _ from 'lodash';
 
-import { NodeModel } from '../../models/NodeModel';
+import { ANodeModel } from '../../models/abstract/ANodeModel';
 import { Toolkit } from '../../Toolkit';
 import { DiagramEngine } from '../../DiagramEngine';
 import { action, computed, observable } from 'mobx';
@@ -9,7 +9,7 @@ import { action, computed, observable } from 'mobx';
 /**
  * @author Dylan Vorster
  */
-export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
+export class DefaultNodeModel extends ANodeModel<DefaultPortModel> {
   @observable private _name: string;
   @observable private _color: string;
 
@@ -63,6 +63,7 @@ export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
     return this.addPort(new DefaultPortModel(false, Toolkit.UID(), label));
   }
 
+  @action
   fromJSON(object: any, engine: DiagramEngine) {
     super.fromJSON(object, engine);
     this.name = object.name;

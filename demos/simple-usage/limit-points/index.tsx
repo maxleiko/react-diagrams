@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {
   DiagramEngine,
-  DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
 } from '@leiko/react-diagrams';
@@ -14,8 +13,8 @@ export default () => {
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
 
-  const model = new DiagramModel();
-  model.maxNumberPointsPerLink = 5;
+  // limits points count per link
+  engine.model.maxNumberPointsPerLink = 5;
 
   // 3-A) create a default node
   const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
@@ -30,9 +29,7 @@ export default () => {
   // link the ports
   const link = port.link(port2);
 
-  model.addAll(node1, node2, link);
-
-  engine.model = model;
+  engine.model.addAll(node1, node2, link);
 
   return <DiagramWidget engine={engine} />;
 };

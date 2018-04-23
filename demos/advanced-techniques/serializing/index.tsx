@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
+import { DiagramEngine, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
 import { DemoWorkspace } from '../../DemoWorkspace';
 
 // @ts-ignore
@@ -9,9 +9,6 @@ export default () => {
   // 1) setup the diagram engine
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
-
-  // 2) setup the diagram model
-  const model = new DiagramModel();
 
   // 3-A) create a default node
   const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
@@ -27,13 +24,10 @@ export default () => {
   const link1 = port1.link(port2)!;
 
   // 4) add the models to the root graph
-  model.addAll(node1, node2, link1);
-
-  // 5) load model into engine
-  engine.model = model;
+  engine.model.addAll(node1, node2, link1);
 
   const Header = () => (
-    <button onClick={() => action('Serialized Graph')(JSON.stringify(model, null, 2))}>
+    <button onClick={() => action('Serialized Graph')(JSON.stringify(engine.model, null, 2))}>
       Serialize Graph
     </button>
   );

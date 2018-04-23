@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget, DefaultPointModel } from '@leiko/react-diagrams';
+import { DiagramEngine, DefaultNodeModel, DiagramWidget, DefaultPointModel } from '@leiko/react-diagrams';
 
 import { DemoWorkspace } from '../../DemoWorkspace';
 
@@ -16,8 +16,8 @@ export default () => {
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
 
-  const model = new DiagramModel();
   // lock model by default
+  const model = engine.model;
   model.locked = true;
 
   // sample for link with simple line (no additional points)

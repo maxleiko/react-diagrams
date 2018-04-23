@@ -1,12 +1,15 @@
 import { computed, observable } from 'mobx';
-import { LabelModel } from '../../models/LabelModel';
+import { ALabelModel } from '../../models/abstract/ALabelModel';
 
-export class DefaultLabelModel extends LabelModel {
+export class DefaultLabelModel extends ALabelModel {
   @observable private _title: string | null = null;
 
-  constructor() {
+  constructor(title?: string) {
     super('srd-default-label');
     this.offsetY = -23;
+    if (title) {
+      this._title = title;
+    }
   }
 
   @computed

@@ -1,6 +1,7 @@
 export * from './Toolkit';
 export * from './DiagramEngine';
 
+export * from './defaults/models/DefaultDiagramModel';
 export * from './defaults/models/DefaultNodeModel';
 export * from './defaults/models/DefaultPortModel';
 export * from './defaults/models/DefaultLinkModel';
@@ -33,7 +34,6 @@ export * from './actions/MoveCanvasAction';
 export * from './actions/MoveItemsAction';
 export * from './actions/SelectingAction';
 
-export * from './models/SelectionModel';
 export * from './models/BaseModel';
 export * from './models/DiagramModel';
 export * from './models/LinkModel';
@@ -41,6 +41,14 @@ export * from './models/NodeModel';
 export * from './models/PointModel';
 export * from './models/PortModel';
 export * from './models/LabelModel';
+
+export * from './models/abstract/ABaseModel';
+export * from './models/abstract/ADiagramModel';
+export * from './models/abstract/ALinkModel';
+export * from './models/abstract/ANodeModel';
+export * from './models/abstract/APointModel';
+export * from './models/abstract/APortModel';
+export * from './models/abstract/ALabelModel';
 
 export * from './widgets/DiagramWidget';
 export * from './widgets/LinkWidgetContainer';

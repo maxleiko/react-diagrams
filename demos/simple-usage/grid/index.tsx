@@ -1,4 +1,4 @@
-import { DiagramEngine, DiagramModel, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
+import { DiagramEngine, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
 import * as React from 'react';
 
 /**
@@ -9,9 +9,8 @@ export default () => {
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
 
-  // 2) setup the diagram model
-  const model = new DiagramModel();
-  model.gridSize = 50;
+  // 2) change model grid size
+  engine.model.gridSize = 50;
 
   // 3-A) create a default node
   const node1 = new DefaultNodeModel('Node 1', 'rgb(0,192,255)');
@@ -27,10 +26,7 @@ export default () => {
   const link1 = port.link(port2)!;
 
   // 4) add the models to the root graph
-  model.addAll(node1, node2, link1);
-
-  // 5) load model into engine
-  engine.model = model;
+  engine.model.addAll(node1, node2, link1);
 
   // 6) render the diagram!
   return <DiagramWidget engine={engine} />;

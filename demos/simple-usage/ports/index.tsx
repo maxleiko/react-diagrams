@@ -1,6 +1,5 @@
 import {
   DiagramEngine,
-  DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
 } from '@leiko/react-diagrams';
@@ -10,9 +9,6 @@ export default () => {
   // 1) setup the diagram engine
   const engine = new DiagramEngine();
   engine.installDefaultFactories();
-
-  // 2) setup the diagram model
-  const model = new DiagramModel();
 
   // 3-A) create a default node
   const emitter = new DefaultNodeModel('Emitter', 'rgb(168,192,255)');
@@ -37,10 +33,7 @@ export default () => {
   const link1 = proxyOut.link(receiverJson);
 
   // 4) add the models to the root graph
-  model.addAll(emitter, receiver, proxy, link0, link1);
-
-  // 5) load model into engine
-  engine.model = model;
+  engine.model.addAll(emitter, receiver, proxy, link0, link1);
 
   // 6) render the diagram!
   return <DiagramWidget className="srd-demo-canvas" engine={engine} />;

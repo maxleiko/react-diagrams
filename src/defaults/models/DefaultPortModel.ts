@@ -1,11 +1,12 @@
 import * as _ from 'lodash';
 import { PortModel } from '../../models/PortModel';
+import { APortModel } from '../../models/abstract/APortModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { observable, computed, action } from 'mobx';
 import { DefaultLinkModel } from './DefaultLinkModel';
 import { DefaultPointFactory } from '../factories/DefaultPointFactory';
 
-export class DefaultPortModel extends PortModel {
+export class DefaultPortModel extends APortModel {
   @observable private _in: boolean;
   @observable private _label: string;
 
@@ -15,6 +16,7 @@ export class DefaultPortModel extends PortModel {
     this._label = label || name;
   }
 
+  @action
   fromJSON(object: any, engine: DiagramEngine) {
     super.fromJSON(object, engine);
     this._in = object.in;
