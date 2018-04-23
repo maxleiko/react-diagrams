@@ -60,13 +60,7 @@ export class PathFinding {
    */
   calculateLinkStartEndCoords(matrix: Path, path: Path): Link | undefined {
     const startIndex = path.findIndex((points) => matrix[points[1]][points[0]] === 0);
-    const endIndex =
-      path.length -
-      1 -
-      path
-        .slice()
-        .reverse()
-        .findIndex((point) => matrix[point[1]][point[0]] === 0);
+    const endIndex = path.length - 1 - path.slice().reverse().findIndex((point) => matrix[point[1]][point[0]] === 0);
 
     // are we trying to create a path exclusively through blocked areas?
     // if so, let's fallback to the linear routing

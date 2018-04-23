@@ -276,74 +276,6 @@ export class DiagramEngine {
     return { x, y };
   }
 
-  getNodeElement(node: NodeModel): Element {
-    const selector = this._canvas!.querySelector(`.srd-node[srd-id="${node.id}"]`);
-    if (selector === null) {
-      throw new Error('Cannot find Node element with nodeID: [' + node.id + ']');
-    }
-    return selector;
-  }
-
-  getNodePortElement(port: PortModel): HTMLElement | null {
-    if (port.parent) {
-      const selector = this._canvas!.querySelector<HTMLElement>(
-        `.srd-node[srd-id="${port.parent.id}"] .srd-port[srd-id="${port.id}"]`
-      );
-      if (selector === null) {
-        throw new Error(`Cannot find Node Port element with nodeID: [${port.parent.id}] and name: [${port.id}]`);
-      }
-      return selector;
-    }
-    return null;
-  }
-
-  /**
-   * Calculate rectangular coordinates of the port passed in.
-   */
-  getPortCoords(
-    port: PortModel
-  ): {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null {
-    const sourceElement = this.getNodePortElement(port);
-    if (sourceElement) {
-      const sourceRect = sourceElement.getBoundingClientRect() as DOMRect;
-      const canvasRect = this._canvas!.getBoundingClientRect() as ClientRect;
-
-      return {
-        x: (sourceRect.x - this._model.offsetX) / (this._model.zoom / 100.0) - canvasRect.left,
-        y: (sourceRect.y - this._model.offsetY) / (this._model.zoom / 100.0) - canvasRect.top,
-        width: sourceRect.width,
-        height: sourceRect.height
-      };
-    }
-    return null;
-  }
-
-  /**
-   * Determine the width and height of the node passed in.
-   * It currently assumes nodes have a rectangular shape, can be overriden for customised shapes.
-   */
-  getNodeDimensions(node: NodeModel): { width: number; height: number } {
-    if (!this._canvas) {
-      return {
-        width: 0,
-        height: 0
-      };
-    }
-
-    const nodeElement = this.getNodeElement(node);
-    const nodeRect = nodeElement.getBoundingClientRect();
-
-    return {
-      width: nodeRect.width,
-      height: nodeRect.height
-    };
-  }
-
   /**
    * A representation of the canvas in the following format:
    *
@@ -355,7 +287,7 @@ export class DiagramEngine {
    * | 0 0 0 0 0 0 0 0 |
    * +-----------------+
    *
-   * In which all walkable points are marked by zeros.
+   * In which all walkable cells are marked by zeros.
    * It uses @link{#ROUTING_SCALING_FACTOR} to reduce the matrix dimensions and improve performance.
    */
   @computed
@@ -365,22 +297,15 @@ export class DiagramEngine {
 
   @action
   calculateCanvasMatrix() {
-    const {
-      width: canvasWidth,
-      hAdjustmentFactor,
-      height: canvasHeight,
-      vAdjustmentFactor
-    } = this.matrixDimensions;
+    const { width, hAdjustmentFactor, height, vAdjustmentFactor } = this.matrixDimensions;
 
     this._hAdjustmentFactor = hAdjustmentFactor;
     this._vAdjustmentFactor = vAdjustmentFactor;
 
-    const matrixWidth = Math.ceil(canvasWidth / ROUTING_SCALING_FACTOR);
-    const matrixHeight = Math.ceil(canvasHeight / ROUTING_SCALING_FACTOR);
+    const matrixWidth = Math.ceil(width / ROUTING_SCALING_FACTOR);
+    const matrixHeight = Math.ceil(height / ROUTING_SCALING_FACTOR);
 
-    this._canvasMatrix = _.range(0, matrixHeight).map(() => {
-      return new Array(matrixWidth).fill(0);
-    });
+    this._canvasMatrix = new Array(matrixHeight).fill(new Array(matrixWidth).fill(0));
   }
 
   /**
@@ -394,8 +319,8 @@ export class DiagramEngine {
    * | 1 1 0 0 0 0 0 0 |
    * +-----------------+
    *
-   * In which all points blocked by a node (and its ports) are
-   * marked as 1; points were there is nothing (ie, free) receive 0.
+   * In which all cells blocked by a node (and its ports) are
+   * marked as 1; cells where there is nothing (ie, free) receive 0.
    */
   @computed
   get routingMatrix(): number[][] {
@@ -404,17 +329,20 @@ export class DiagramEngine {
 
   @action
   calculateRoutingMatrix(): void {
-    if (this._canvasMatrix.length === 0) {
-      this.calculateCanvasMatrix();
-    }
-    const matrix = _.cloneDeep(this.canvasMatrix);
+    const { width, hAdjustmentFactor, height, vAdjustmentFactor } = this.matrixDimensions;
+
+    this._hAdjustmentFactor = hAdjustmentFactor;
+    this._vAdjustmentFactor = vAdjustmentFactor;
+
+    const matrixWidth = Math.ceil(width / ROUTING_SCALING_FACTOR);
+    const matrixHeight = Math.ceil(height / ROUTING_SCALING_FACTOR);
+
+    this._routingMatrix = new Array(matrixHeight).fill(new Array(matrixWidth).fill(0));
 
     // nodes need to be marked as blocked points
-    this.markNodes(matrix);
+    this.markNodes(this._routingMatrix);
     // same thing for ports
-    this.markPorts(matrix);
-
-    this._routingMatrix = matrix;
+    this.markPorts(this._routingMatrix);
   }
 
   /**
@@ -436,58 +364,32 @@ export class DiagramEngine {
    */
   @computed
   get matrixDimensions(): MatrixDimension {
-    const allNodesCoords = this._model.nodes.map((item) => ({
-      x: item.x,
-      width: item.width,
-      y: item.y,
-      height: item.height
-    }));
-
-    const allLinks = this._model.links;
-    const allPortsCoords = _.flatMap(allLinks.map((link) => [link.sourcePort, link.targetPort]))
-      .filter(function filter(item: PortModel | null): item is PortModel {
-        return item !== null;
-      })
-      .map((item) => ({
-        x: item.x,
-        width: item.width,
-        y: item.y,
-        height: item.height
-      }));
-    const allPointsCoords = _.flatMap(allLinks.map((link) => link.points)).map((item) => ({
-      // points don't have width/height, so let's just use 0
-      x: item.x,
-      width: 0,
-      y: item.y,
-      height: 0
-    }));
-
+    const allNodesCoords = this._model.nodes.map(({ x, y, width, height }) => ({ x, y, width, height }));
+    const allPortsCoords = _.flatMap(this._model.links.map((link) => [link.sourcePort, link.targetPort]))
+      .filter((item: PortModel | null): item is PortModel => item !== null)
+      .map(({ x, y, width, height }) => ({ x, y, width, height }));
+    const allPointsCoords = _.flatMap(this._model.links.map((link) => link.points))
+      .map(({ x, y }) => ({ x, y, width: 0, height: 0 }));
+    const all = allNodesCoords.concat(allPortsCoords).concat(allPointsCoords);
     const minX =
       Math.floor(
-        Math.min(_.minBy(_.concat(allNodesCoords, allPortsCoords, allPointsCoords), (item) => item.x)!.x, 0) /
+        Math.min(_.minBy(all, (item) => item.x)!.x, 0) /
           ROUTING_SCALING_FACTOR
       ) * ROUTING_SCALING_FACTOR;
-    const maxXElement = _.maxBy(
-      _.concat(allNodesCoords, allPortsCoords, allPointsCoords),
-      (item) => item.x + item.width
-    )!;
+    const maxXElement = _.maxBy(all, (item) => item.x + item.width)!;
     const maxX = Math.max(maxXElement.x + maxXElement.width, this._canvas!.offsetWidth);
-
     const minY =
       Math.floor(
-        Math.min(_.minBy(_.concat(allNodesCoords, allPortsCoords, allPointsCoords), (item) => item.y)!.y, 0) /
+        Math.min(_.minBy(all, (item) => item.y)!.y, 0) /
           ROUTING_SCALING_FACTOR
       ) * ROUTING_SCALING_FACTOR;
-    const maxYElement = _.maxBy(
-      _.concat(allNodesCoords, allPortsCoords, allPointsCoords),
-      (item) => item.y + item.height
-    )!;
+    const maxYElement = _.maxBy(all, (item) => item.y + item.height)!;
     const maxY = Math.max(maxYElement.y + maxYElement.height, this._canvas!.offsetHeight);
 
     return {
       width: Math.ceil(Math.abs(minX) + maxX),
-      hAdjustmentFactor: Math.abs(minX) / ROUTING_SCALING_FACTOR + 1,
       height: Math.ceil(Math.abs(minY) + maxY),
+      hAdjustmentFactor: Math.abs(minX) / ROUTING_SCALING_FACTOR + 1,
       vAdjustmentFactor: Math.abs(minY) / ROUTING_SCALING_FACTOR + 1
     };
   }
@@ -495,7 +397,8 @@ export class DiagramEngine {
   /**
    * Updates (by reference) where nodes will be drawn on the matrix passed in.
    */
-  markNodes = (matrix: number[][]): void => {
+  @action
+  markNodes(matrix: number[][]) {
     this._model.nodes.forEach((node) => {
       const startX = Math.floor(node.x / ROUTING_SCALING_FACTOR);
       const endX = Math.ceil((node.x + node.width) / ROUTING_SCALING_FACTOR);
@@ -513,14 +416,10 @@ export class DiagramEngine {
   /**
    * Updates (by reference) where ports will be drawn on the matrix passed in.
    */
-  markPorts = (matrix: number[][]): void => {
-    const allElements = _.flatMap(
-      Array.from(this._model.links.values()).map((link) => [link.sourcePort, link.targetPort])
-    );
-    allElements
-      .filter(function filter(port: PortModel | null): port is PortModel {
-        return port !== null;
-      })
+  @action
+  markPorts(matrix: number[][]) {
+    _.flatMap(this._model.links.map((link) => [link.sourcePort, link.targetPort]))
+      .filter((port: PortModel | null): port is PortModel => port !== null)
       .forEach((port) => {
         const startX = Math.floor(port.x / ROUTING_SCALING_FACTOR);
         const endX = Math.ceil((port.x + port.width) / ROUTING_SCALING_FACTOR);
@@ -535,8 +434,9 @@ export class DiagramEngine {
       });
   }
 
-  markMatrixPoint = (matrix: number[][], x: number, y: number) => {
-    if (matrix[y] !== undefined && matrix[y][x] !== undefined) {
+  @action
+  markMatrixPoint(matrix: number[][], x: number, y: number) {
+    if (matrix.length > y && matrix[y].length > x) {
       matrix[y][x] = 1;
     }
   }
