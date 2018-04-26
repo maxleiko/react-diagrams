@@ -15,7 +15,7 @@ import { LinkModel } from './models/LinkModel';
 import { NodeModel } from './models/NodeModel';
 import { BaseAction } from './actions/BaseAction';
 import { PortModel } from './models/PortModel';
-import { ROUTING_SCALING_FACTOR } from './routing/PathFinding';
+import { ROUTING_SCALING_FACTOR, PathFinding } from './routing/PathFinding';
 import { Toolkit } from './Toolkit';
 import { PointModel } from './models/PointModel';
 import { AbstractPointFactory } from './factories/AbstractPointFactory';
@@ -79,9 +79,6 @@ export class DiagramEngine {
 
   set canvas(canvas: HTMLDivElement | null) {
     this._canvas = canvas;
-    if (this._canvas) {
-      this.updatePortRefPositions();
-    }
   }
 
   @computed
@@ -117,22 +114,6 @@ export class DiagramEngine {
   @computed
   get labelFactories(): AbstractLabelFactory[] {
     return Array.from(this._labelFactories.values());
-  }
-
-  @computed
-  get canvasLeft(): number {
-    if (this._canvas) {
-      return this._canvas.getBoundingClientRect().left;
-    }
-    return 0;
-  }
-
-  @computed
-  get canvasTop(): number {
-    if (this._canvas) {
-      return this._canvas.getBoundingClientRect().top;
-    }
-    return 0;
   }
 
   @action
@@ -238,21 +219,17 @@ export class DiagramEngine {
     this._portRefs.delete(port.id);
   }
 
-  @action
-  updatePortRefPositions() {
-    this._portRefs.forEach(({ port, ref }) => {
-      const rect = ref.getBoundingClientRect();
-      const point = this.getRelativePoint(rect.left, rect.top);
-      const x = ref.offsetWidth / 2 + point.x;
-      const y = ref.offsetHeight / 2 + point.y;
-      // tslint:disable-next-line
-      console.log('updatePortRefPosition', port.id, x, y, ref);
+  @computed
+  get portRefs(): Map<string, { port: PortModel, ref: HTMLElement }> {
+    return this._portRefs;
+  }
 
-      if (port.x !== x || port.y !== y) {
-        // update port position for points only if necessary
-        port.setPosition(x, y);
-      }
-    });
+  @computed
+  get pathFinding(): PathFinding | null {
+    if (this._model.smartRouting) {
+      return new PathFinding(this);
+    }
+    return null;
   }
 
   getRelativePoint(x: number, y: number) {

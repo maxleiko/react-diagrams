@@ -10,6 +10,7 @@ export interface LinkProps {
 
 @observer
 export class LinkWidgetContainer extends React.Component<LinkProps> {
+
   render() {
     const { id, selected } = this.props.link;
     return (

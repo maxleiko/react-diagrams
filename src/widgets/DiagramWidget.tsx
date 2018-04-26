@@ -6,6 +6,7 @@ import { observer } from 'mobx-react';
 import { DiagramEngine } from '../DiagramEngine';
 import { LinkLayerWidget } from './layers/LinkLayerWidget';
 import { NodeLayerWidget } from './layers/NodeLayerWidget';
+import { SelectionBox } from './SelectionBox';
 import { Toolkit } from '../Toolkit';
 import { BaseAction } from '../actions/BaseAction';
 import { MoveCanvasAction } from '../actions/MoveCanvasAction';
@@ -24,16 +25,9 @@ export interface DiagramProps {
   actionStoppedFiring?: (action: BaseAction) => void;
 }
 
-export interface DiagramState {
-  action: BaseAction | null;
-  wasMoved: boolean;
-  windowListener: any;
-  diagramEngineListener: any;
-  document: any;
-}
-
 @observer
 export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProps<HTMLDivElement>> {
+
   componentDidMount() {
     // add a keyboard listener
     window.addEventListener('keyup', this.onKeyUp);
@@ -65,9 +59,9 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       const nodeId = nodeElement.getAttribute('srd-id');
       const portId = element.getAttribute('srd-id');
       if (nodeId && portId) {
-        const node = model.getNode(nodeId);
+        const node = model.nodesMap.get(nodeId);
         if (node) {
-          const port = node.getPort(portId);
+          const port = node.portsMap.get(portId);
           if (port) {
             return { el: target, model: port };
           }
@@ -81,7 +75,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       const pointId = element.getAttribute('srd-id');
       const linkId = element.getAttribute('srd-link-id');
       if (pointId && linkId) {
-        const link = model.getLink(linkId);
+        const link = model.linksMap.get(linkId);
         if (link) {
           const point = link.getPointModel(pointId);
           if (point) {
@@ -96,7 +90,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     if (element) {
       const linkId = element.getAttribute('srd-id');
       if (linkId) {
-        const link = model.getLink(linkId);
+        const link = model.linksMap.get(linkId);
         if (link) {
           return { el: target, model: link };
         }
@@ -108,7 +102,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     if (element) {
       const nodeId = element.getAttribute('srd-id');
       if (nodeId) {
-        const node = model.getNode(nodeId);
+        const node = model.nodesMap.get(nodeId);
         if (node) {
           return { el: target, model: node };
         }
@@ -158,15 +152,17 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
             .getNewInstance();
           // define link source to be the current clicked port
           link.sourcePort = model;
-          // update auto-generated link's firstPoint to mouse position
-          link.firstPoint.setPosition(model.x, model.y);
-          // update auto-generated link's lastPoint to mouse position
-          link.lastPoint.setPosition(model.x, model.y);
+          // create a point on the link to track mouse position
+          const lastPoint = this.props.engine
+            .getLinkFactory(link.type)
+            .getPointFactory()
+            .getNewInstance({ x: model.x, y: model.y });
+          link.addPoint(lastPoint);
           // unselect all
           this.props.engine.model.clearSelection();
           // select link & last point
           link.selected = true;
-          link.lastPoint.selected = true;
+          lastPoint.selected = true;
           this.props.engine.model.addLink(link);
           this.startFiringAction(new CreateLinkAction(event.clientX, event.clientY, link));
         }
@@ -262,7 +258,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       this.fireAction();
     } else if (this.props.engine.action instanceof CreateLinkAction) {
       const { x, y } = this.props.engine.getRelativeMousePoint(event);
-      this.props.engine.action.link.lastPoint.setPosition(x, y);
+      // update point to track mouse position
+      this.props.engine.action.link.points[0].setPosition(x, y);
       this.fireAction();
     } else if (this.props.engine.action instanceof MoveItemsAction) {
       const xOffset = event.clientX - this.props.engine.action.mouseX;
@@ -306,6 +303,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
               if (link.sourcePort!.canLinkToPort(model)) {
                 // link is now connected from end-to-end
                 link.targetPort = model;
+                link.removeAllPoints();
                 this.props.engine.model.clearSelection();
               } else {
                 // invalid link connection
@@ -412,8 +410,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
   }
 
   render() {
-    // tslint:disable-next-line
-    console.log('re-render DiagramWidget');
     return (
       <div
         className={cx('srd-diagram', this.props.className)}
@@ -424,9 +420,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       >
         <NodeLayerWidget engine={this.props.engine} />
         <LinkLayerWidget engine={this.props.engine} />
-        {this.props.engine.action instanceof SelectingAction && (
-          <div className="selection-box" style={this.props.engine.action.styles} />
-        )}
+        <SelectionBox engine={this.props.engine} />
       </div>
     );
   }

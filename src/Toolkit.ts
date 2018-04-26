@@ -1,7 +1,6 @@
 // tslint:disable no-bitwise
 // @ts-ignore
 import closest from 'closest';
-import { PointModel } from './models/PointModel';
 import { ROUTING_SCALING_FACTOR, Path } from './routing/PathFinding';
 // @ts-ignore
 import * as SVGPath from 'paths-js/path';
@@ -41,11 +40,11 @@ export class Toolkit {
     return closest(element, selector);
   }
 
-  static generateLinePath(firstPoint: PointModel, lastPoint: PointModel): string {
-    return `M${firstPoint.x},${firstPoint.y} L ${lastPoint.x},${lastPoint.y}`;
+  static generateLinePath(fp: { x: number, y: number }, lp: { x: number, y: number }): string {
+    return `M${fp.x},${fp.y} L ${lp.x},${lp.y}`;
   }
 
-  static generateCurvePath(fp: PointModel, lp: PointModel, curvy: number = 0): string {
+  static generateCurvePath(fp: { x: number, y: number }, lp: { x: number, y: number }, curvy: number = 0): string {
     const isHorizontal = Math.abs(fp.x - lp.x) > Math.abs(fp.y - lp.y);
     const cX = isHorizontal ? curvy : 0;
     const cY = isHorizontal ? 0 : curvy;

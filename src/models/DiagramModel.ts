@@ -1,7 +1,7 @@
 import { LinkModel } from './LinkModel';
 import { NodeModel } from './NodeModel';
 import { BaseModel } from './BaseModel';
-import { PortModel } from './PortModel';
+// import { PortModel } from './PortModel';
 
 export interface DiagramModel extends BaseModel {
   links: LinkModel[];
@@ -20,8 +20,6 @@ export interface DiagramModel extends BaseModel {
   deleteKeys: number[];
   maxNumberPointsPerLink: number;
 
-  getNode(id: string): NodeModel<PortModel> | undefined;
-  getLink(id: string): LinkModel | undefined;
   clearSelection(ignore?: BaseModel<any>): void;
   addAll(...models: BaseModel[]): BaseModel[];
   addLink(link: LinkModel): LinkModel;

@@ -5,6 +5,7 @@ import { ABaseModel } from './ABaseModel';
 import { PointModel } from '../PointModel';
 
 export abstract class APointModel<P extends LinkModel = LinkModel> extends ABaseModel<P> implements PointModel {
+  // calculated post-rendering so routing can be done correctly
   @observable private _x: number;
   @observable private _y: number;
 
@@ -14,12 +15,12 @@ export abstract class APointModel<P extends LinkModel = LinkModel> extends ABase
     this._y = y;
   }
 
-  isConnectedToPort(): boolean {
-    if (this.parent) {
-      return this.parent.getPortForPoint(this) !== null;
-    }
-    return false;
-  }
+  // isConnectedToPort(): boolean {
+  //   if (this.parent) {
+  //     return this.parent.getPortForPoint(this) !== null;
+  //   }
+  //   return false;
+  // }
 
   @action
   delete() {

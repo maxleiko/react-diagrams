@@ -12,10 +12,13 @@ export interface PortModel extends BaseModel<NodeModel> {
   height: number;
   connected: boolean;
 
-  getLink(id: string): LinkModel | undefined;
+  readonly absoluteX: number;
+  readonly absoluteY: number;
+
   addLink(link: LinkModel): void;
   canCreateLink(): boolean;
   removeLink(link: LinkModel): void;
   setPosition(x: number, y: number): void;
+  setSize(width: number, height: number): void;
   canLinkToPort(_port: PortModel): boolean;
 }

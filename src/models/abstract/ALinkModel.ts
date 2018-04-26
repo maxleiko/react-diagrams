@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 import { observable, computed, action, IObservableArray } from 'mobx';
-import { createTransformer } from 'mobx-utils';
 
 import { BaseModel } from '../BaseModel';
 import { PortModel } from '../PortModel';
@@ -13,69 +12,25 @@ import { ABaseModel } from './ABaseModel';
 import { LinkModel } from '../LinkModel';
 
 export abstract class ALinkModel extends ABaseModel<DiagramModel> implements LinkModel {
-  getPointForPort = createTransformer((port: PortModel): PointModel | null => {
-    if (this.sourcePort && this.sourcePort.id === port.id) {
-      return this.firstPoint;
-    }
-    if (this.targetPort && this.targetPort.id === port.id) {
-      return this.lastPoint;
-    }
-    return null;
-  });
-
-  getPortForPoint = createTransformer((point: PointModel): PortModel | null => {
-    if (this.sourcePort && this.firstPoint.id === point.id) {
-      return this.sourcePort;
-    }
-    if (this.targetPort && this.lastPoint.id === point.id) {
-      return this.targetPort;
-    }
-    return null;
-  });
-
-  isLastPoint = createTransformer((point: PointModel): boolean => {
-    return this.getPointIndex(point) === this._points.length - 1;
-  });
-
-  getPointModel = createTransformer((id: string): PointModel | undefined => {
-    return this._points.find((pt) => pt.id === id);
-  });
-
-  getLabel = createTransformer((id: string): LabelModel | undefined => {
-    return this._labels.find((l) => l.id === id);
-  });
-
-  getPointIndex = createTransformer((point: PointModel): number => {
-    return this._points.findIndex((pt) => pt === point);
-  });
-
   @observable private _sourcePort: PortModel | null = null;
   @observable private _targetPort: PortModel | null = null;
   @observable private _points: PointModel[] = [];
   @observable private _labels: LabelModel[] = [];
 
-  constructor(pointFactory: AbstractPointFactory, linkType: string = 'srd-link', id?: string) {
+  constructor(_pointFactory: AbstractPointFactory, linkType: string = 'srd-link', id?: string) {
     super(linkType, id);
-    const firstPoint = pointFactory.getNewInstance({ x: 0, y: 0 });
-    firstPoint.parent = this;
-    const lastPoint = pointFactory.getNewInstance({ x: 0, y: 0 });
-    lastPoint.parent = this;
-    this._points.push(firstPoint);
-    this._points.push(lastPoint);
   }
 
   @action
   fromJSON(ob: any, engine: DiagramEngine) {
     super.fromJSON(ob, engine);
-
-    // clear points array before loading (because it is initialized by default)
-    (this._points as IObservableArray<PointModel>).clear();
+    (this._points as IObservableArray).clear();
 
     if (ob.sourcePort) {
       if (this.parent) {
-        const node = this.parent.getNode(ob.sourcePortParent);
+        const node = this.parent.nodesMap.get(ob.sourcePortParent);
         if (node) {
-          const port = node.getPort(ob.sourcePort);
+          const port = node.portsMap.get(ob.sourcePort);
           if (port) {
             this._sourcePort = port;
             this._sourcePort.addLink(this);
@@ -86,9 +41,9 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
 
     if (ob.targetPort) {
       if (this.parent) {
-        const node = this.parent.getNode(ob.targetPortParent);
+        const node = this.parent.nodesMap.get(ob.targetPortParent);
         if (node) {
-          const port = node.getPort(ob.targetPort);
+          const port = node.portsMap.get(ob.targetPort);
           if (port) {
             this._targetPort = port;
             this._targetPort.addLink(this);
@@ -99,11 +54,14 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
 
     // fromJSON points
     const points: any[] = ob.points || [];
-    points.forEach((point) => {
-      const p = engine.getLinkFactory(this.type).getPointFactory().getNewInstance();
+    points.forEach((point, i) => {
+      const p = engine
+        .getLinkFactory(this.type)
+        .getPointFactory()
+        .getNewInstance();
       p.parent = this;
       p.fromJSON(point, engine);
-      this._points.push(p);
+      this._points.splice(i, 1, p);
     });
 
     // fromJSON labels
@@ -150,16 +108,6 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
   connect(source: PortModel, target: PortModel) {
     this.sourcePort = source;
     this.targetPort = target;
-  }
-
-  @computed
-  get firstPoint(): PointModel {
-    return this._points[0];
-  }
-
-  @computed
-  get lastPoint(): PointModel {
-    return this._points[this._points.length - 1];
   }
 
   @computed
@@ -212,6 +160,11 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
   }
 
   @action
+  removeAllPoints(): void {
+    (this._points as IObservableArray).clear();
+  }
+
+  @action
   removePoint(point: PointModel) {
     this._points.splice(this.getPointIndex(point), 1);
   }
@@ -239,12 +192,28 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
   }
 
   @action
-  addPoint(point: PointModel, index: number = 1): PointModel {
-    if (index > 0 && index < this._points.length) {
-      point.parent = this;
-      this._points.splice(index, 0, point);
-      return point;
-    }
-    throw new Error(`Link's first and last points are not mutable (tried to modified point at index ${index})`);
+  addPoint(point: PointModel, index: number = 0): PointModel {
+    // if (index > 0 && index < this._points.length) {
+    point.parent = this;
+    this._points.splice(index, 0, point);
+    return point;
+    // }
+    // throw new Error(`Link's first and last points are not mutable (tried to modified point at index ${index})`);
+  }
+
+  getPointIndex(pt: PointModel): number {
+    return this._points.findIndex((point) => point.id === pt.id);
+  }
+
+  isLastPoint(point: PointModel): boolean {
+    return this.getPointIndex(point) === this._points.length - 1;
+  }
+
+  getPointModel(id: string): PointModel | undefined {
+    return this._points.find((pt) => pt.id === id);
+  }
+
+  getLabel(id: string): LabelModel | undefined {
+    return this._labels.find((l) => l.id === id);
   }
 }

@@ -16,12 +16,9 @@ export class PortWidgetContainer extends React.Component<PortProps> {
 
   componentDidMount() {
     if (this._elem) {
-      this.props.engine.registerPortRef(this.props.port, this._elem);
+      this.props.port.setPosition(this._elem.offsetLeft, this._elem.offsetTop);
+      this.props.port.setSize(this._elem.offsetWidth, this._elem.offsetHeight);
     }
-  }
-
-  componentWillUnmount() {
-    this.props.engine.unregisterPortRef(this.props.port);
   }
 
   render() {

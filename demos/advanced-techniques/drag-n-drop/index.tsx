@@ -48,8 +48,7 @@ export default () => {
 
             if (node) {
               const { x, y } = engine.getRelativeMousePoint(event);
-              node.x = x;
-              node.y = y;
+              node.setPosition(x, y);
               engine.model.addNode(node);
             }
           }}

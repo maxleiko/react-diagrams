@@ -39,5 +39,5 @@ export default () => {
   // add all to the main model
   model.addAll(node1, node2, node3, node4, node5, link0, link1);
 
-  return <DiagramWidget engine={engine} />;
+  return <DiagramWidget engine={engine} style={{ minHeight: 500 }} />;
 };

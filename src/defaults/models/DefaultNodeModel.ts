@@ -1,10 +1,10 @@
-import { DefaultPortModel } from './DefaultPortModel';
 import * as _ from 'lodash';
+import { action, computed, observable } from 'mobx';
 
+import { DefaultPortModel } from './DefaultPortModel';
 import { ANodeModel } from '../../models/abstract/ANodeModel';
 import { Toolkit } from '../../Toolkit';
 import { DiagramEngine } from '../../DiagramEngine';
-import { action, computed, observable } from 'mobx';
 
 /**
  * @author Dylan Vorster

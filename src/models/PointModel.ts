@@ -5,6 +5,6 @@ export interface PointModel<P extends LinkModel = LinkModel> extends BaseModel<P
   x: number;
   y: number;
 
-  isConnectedToPort(): boolean;
+  // isConnectedToPort(): boolean;
   setPosition(x: number, y: number): void;
 }

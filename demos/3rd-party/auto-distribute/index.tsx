@@ -48,14 +48,12 @@ export default () => {
 
   // initial random position
   nodesFrom.forEach((node, index) => {
-    node.x = (index * 70) + 20;
-    node.y = 20;
+    node.setPosition(index * 70 + 20, 20);
     engine.model.addNode(node);
   });
 
   nodesTo.forEach((node, index) => {
-    node.x = (index * 70) + 20;
-    node.y = 120;
+    node.setPosition(index * 70 + 20, 120);
     engine.model.addNode(node);
   });
 

@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 import { observable, computed, action } from 'mobx';
-import { createTransformer } from 'mobx-utils';
 
 import { ABaseModel } from './ABaseModel';
 import { DiagramModel } from '../DiagramModel';
@@ -8,19 +7,10 @@ import { DiagramEngine } from '../../DiagramEngine';
 import { LinkModel } from '../LinkModel';
 import { NodeModel } from '../NodeModel';
 import { BaseModel } from '../BaseModel';
-import { PortModel } from '../PortModel';
 import { ALinkModel } from './ALinkModel';
 import { ANodeModel } from './ANodeModel';
 
 export class ADiagramModel extends ABaseModel implements DiagramModel {
-  getNode = createTransformer((id: string): NodeModel<PortModel> | undefined => {
-    return this._nodes.get(id);
-  });
-
-  getLink = createTransformer((id: string): LinkModel | undefined => {
-    return this._links.get(id);
-  });
-
   // models
   @observable private _links: Map<string, LinkModel> = new Map();
   @observable private _nodes: Map<string, NodeModel> = new Map();

@@ -3,9 +3,9 @@ import * as cx from 'classnames';
 import { observer } from 'mobx-react';
 import { DiagramEngine } from '../../DiagramEngine';
 import { PointModel } from '../../models/PointModel';
+import { PortModel } from '../../models/PortModel';
 import { Toolkit } from '../../Toolkit';
 import { DefaultLinkModel } from '../models/DefaultLinkModel';
-import { PathFinding } from '../../routing/PathFinding';
 import * as _ from 'lodash';
 import { LabelModel } from '../../models/LabelModel';
 import { DefaultPortModel } from '../models/DefaultPortModel';
@@ -30,14 +30,9 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   // DOM references to the label and paths (if label is given), used to calculate dynamic positioning
   private _elem: SVGGElement | null = null;
   private _labelElems: { [id: string]: HTMLDivElement | null } = {};
-  private _pathFinding: PathFinding | null = null; // only set when smart routing is active
 
   constructor(props: DefaultLinkProps) {
     super(props);
-    if (props.engine.model.smartRouting) {
-      this._pathFinding = new PathFinding(this.props.engine);
-    }
-
     this.calculateLabelPosition = this.calculateLabelPosition.bind(this);
     this.calculateAllLabelPosition = this.calculateAllLabelPosition.bind(this);
     this.findPathAndRelativePositionToRenderLabel = this.findPathAndRelativePositionToRenderLabel.bind(this);
@@ -162,77 +157,87 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
     return true;
   }
 
+  computePortPosition(port: PortModel | null): { x: number, y: number } {
+    if (port) {
+      return {
+        x: port.width / 2 + port.absoluteX,
+        y: port.height / 2 + port.absoluteY
+      };
+    }
+    return { x: 0, y: 0 };
+  }
+
+  renderSmartRouting(fp: { x: number, y: number }, lp: { x: number, y: number }) {
+    const { link, engine } = this.props;
+
+    // first step: calculate a direct path between the points being linked
+    const directPathCoords = engine.pathFinding!.calculateDirectPath(fp, lp);
+
+    // initialize routing matrix if necessary
+    if (engine.routingMatrix.length === 0) {
+      engine.calculateRoutingMatrix();
+    }
+
+    // now we need to extract, from the routing matrix, the very first walkable points
+    // so they can be used as origin and destination of the link to be created
+    const smartLink = engine.pathFinding!.calculateLinkStartEndCoords(engine.routingMatrix, directPathCoords);
+
+    if (smartLink) {
+      const { start, end, pathToStart, pathToEnd } = smartLink;
+
+      // second step: calculate a path avoiding hitting other elements
+      const simplifiedPath = engine.pathFinding!.calculateDynamicPath(
+        engine.routingMatrix,
+        start,
+        end,
+        pathToStart,
+        pathToEnd
+      );
+
+      return this.generateSegment(engine, link, 0, Toolkit.generateDynamicPath(simplifiedPath));
+    }
+
+    return null;
+  }
+
   render() {
     const { link, engine } = this.props;
+    const fp = this.computePortPosition(link.sourcePort);
+    const lp = this.computePortPosition(link.targetPort);
 
     // ensure id is present for all points on the path
     const paths: JSX.Element[] = [];
 
     if (this.isSmartRoutingApplicable()) {
-      if (this._pathFinding) {
-        // first step: calculate a direct path between the points being linked
-        const directPathCoords = this._pathFinding.calculateDirectPath(link.firstPoint, link.lastPoint);
-
-        // initialize routing matrix if necessary
-        if (engine.routingMatrix.length === 0) {
-          engine.calculateRoutingMatrix();
-        }
-
-        // now we need to extract, from the routing matrix, the very first walkable points
-        // so they can be used as origin and destination of the link to be created
-        const smartLink = this._pathFinding.calculateLinkStartEndCoords(engine.routingMatrix, directPathCoords);
-
-        if (smartLink) {
-          const { start, end, pathToStart, pathToEnd } = smartLink;
-
-          // second step: calculate a path avoiding hitting other elements
-          const simplifiedPath = this._pathFinding.calculateDynamicPath(
-            engine.routingMatrix,
-            start,
-            end,
-            pathToStart,
-            pathToEnd
-          );
-
-          paths.push(this.generateSegment(engine, link, 0, Toolkit.generateDynamicPath(simplifiedPath)));
-        }
+      const smartRouting = this.renderSmartRouting(fp, lp);
+      if (smartRouting) {
+        paths.push(smartRouting);
       }
     }
 
-    // true when smart routing was skipped or not enabled.
-    // See @link{#isSmartRoutingApplicable()}.
+    // true when smart routing was skipped or not enabled
     if (paths.length === 0) {
-      if (link.points.length === 2) {
-        paths.push(
-          this.generateSegment(
-            engine,
-            link,
-            0,
-            Toolkit.generateCurvePath(link.firstPoint, link.lastPoint, link.curvyness)
-          )
-        );
+      if (link.points.length > 0) {
+        // segment between sourcePort and first point
+        paths.push(this.generateSegment(engine, link, 0, Toolkit.generateLinePath(fp, link.points[0])));
 
-        // draw the link as dangeling
-        if (link.targetPort === null) {
-          paths.push(this.generatePoint(engine, link.lastPoint));
+        // if link is fully created
+        if (link.targetPort !== null) {
+          // middle segments
+          for (let i = 0; i < link.points.length - 1; i++) {
+              const midPath = Toolkit.generateLinePath(link.points[i], link.points[i + 1]);
+              paths.push(this.generateSegment(engine, link, i + 1, midPath));
+          }
+
+          // segment between last point and target port
+          const lastPath = Toolkit.generateLinePath(link.points[link.points.length - 1], lp);
+          paths.push(this.generateSegment(engine, link, link.points.length, lastPath));
+        } else {
+          // draw the dangeling point if link is not connected to a targetPort
+          paths.push(this.generatePoint(engine, link.points[0]));
         }
       } else {
-        // draw the multiple anchors and complex line instead
-        for (let j = 0; j < link.points.length - 1; j++) {
-          paths.push(
-            this.generateSegment(engine, link, j, Toolkit.generateLinePath(link.points[j], link.points[j + 1]))
-          );
-        }
-
-        // render only the middle points (not firstPoint and lastPoint)
-        for (let i = 1; i < link.points.length - 1; i++) {
-          paths.push(this.generatePoint(engine, link.points[i]));
-        }
-
-        // draw the dangeling point if link is not connected to a targetPort
-        if (link.targetPort === null) {
-          paths.push(this.generatePoint(engine, link.lastPoint));
-        }
+        paths.push(this.generateSegment(engine, link, 0, Toolkit.generateCurvePath(fp, lp, link.curvyness)));
       }
     }
 
@@ -240,6 +245,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
     return (
       <g ref={(elem) => (this._elem = elem)} className={cx('srd-default-link', { reverse })}>
         {paths}
+        {link.points.map((pt) => this.generatePoint(engine, pt))}
         {link.labels.map((labelModel) => this.generateLabel(labelModel))}
       </g>
     );

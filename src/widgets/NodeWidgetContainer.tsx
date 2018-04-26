@@ -15,8 +15,7 @@ export class NodeWidgetContainer extends React.Component<NodeProps> {
 
   componentDidMount() {
     if (this._elem) {
-      this.props.node.width = this._elem.offsetWidth;
-      this.props.node.height = this._elem.offsetHeight;
+      this.props.node.setSize(this._elem.offsetWidth, this._elem.offsetHeight);
     }
   }
 

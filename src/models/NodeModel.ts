@@ -3,14 +3,14 @@ import { PortModel } from './PortModel';
 import { DiagramModel } from './DiagramModel';
 
 export interface NodeModel<P extends PortModel = PortModel> extends BaseModel<DiagramModel> {
+  readonly x: number;
+  readonly y: number;
+
   ports: P[];
   portsMap: Map<string, P>;
-  x: number;
-  y: number;
   width: number;
   height: number;
 
-  getPort(id: string): P | undefined;
   addPort(port: P): P;
   removePort(port: PortModel): void;
   setPosition(x: number, y: number): void;

@@ -29,12 +29,6 @@ export class MoveItemsAction extends BaseAction {
       .filter(function ensureTyping(item: BaseModel): item is PointModel | NodeModel {
         return (item instanceof APointModel) || item instanceof ANodeModel;
       })
-      .filter((item) => {
-        if (item instanceof APointModel) {
-          return !item.isConnectedToPort();
-        }
-        return true;
-      })
       .map((model) => ({ model, initialX: model.x, initialY: model.y }));
     }
   }
