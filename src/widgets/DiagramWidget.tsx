@@ -174,7 +174,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
             model.selected = true;
           } else {
             // we want to add a point to a link: be sure we can still add point
-            if (this.props.engine.model.maxNumberPointsPerLink > model.points.length - 2) {
+            if (this.props.engine.model.maxNumberPointsPerLink > model.points.length) {
               const { x, y } = this.props.engine.getRelativeMousePoint(event);
               const point = this.props.engine
                 .getLinkFactory(model.type)
