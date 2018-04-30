@@ -140,7 +140,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
 
   @action.bound
   onMouseDown(event: React.MouseEvent<HTMLDivElement>) {
-    event.preventDefault();
     const { el, model } = this.getModelAtPosition(event.nativeEvent);
     if (model) {
       if (model instanceof APortModel) {
