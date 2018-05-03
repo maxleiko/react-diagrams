@@ -2,7 +2,6 @@ import * as _ from 'lodash';
 import {
   DiagramEngine,
   DefaultLinkModel,
-  DefaultPointFactory,
   APortModel
 } from '@leiko/react-diagrams';
 
@@ -28,7 +27,7 @@ export class DiamondPortModel extends APortModel {
   }
 
   link(port: DiamondPortModel): DefaultLinkModel {
-    const link = new DefaultLinkModel(new DefaultPointFactory());
+    const link = new DefaultLinkModel();
     link.connect(this, port);
     return link;
   }

@@ -5,7 +5,6 @@ import {
   DefaultNodeModel,
   DiagramWidget,
   DefaultLinkModel,
-  DefaultPointFactory
 } from '@leiko/react-diagrams';
 
 export default () => {
@@ -24,8 +23,7 @@ export default () => {
   node2.setPosition(400, 100);
 
   // link the ports
-  const ptFactory = new DefaultPointFactory();
-  const link1 = new DefaultLinkModel(ptFactory);
+  const link1 = new DefaultLinkModel();
   link1.connect(port1, port2);
   link1.addLabel('Hello World!');
 

@@ -4,7 +4,6 @@ import {
   DefaultNodeModel,
   DiagramWidget,
   DefaultLinkModel,
-  DefaultPointFactory
 } from '@leiko/react-diagrams';
 // @ts-ignore
 import { action } from '@storybook/addon-actions';
@@ -32,19 +31,17 @@ export default () => {
   const port4 = node4.addInPort('In');
   node4.setPosition(300, 250);
 
-  const ptFactory = new DefaultPointFactory();
-
   // link node A and B together and give it a label
-  const link1 = new DefaultLinkModel(ptFactory);
+  const link1 = new DefaultLinkModel();
   link1.addLabel('Custom label 2');
   link1.connect(port1, port2);
 
   // no label for A and C, just a link
-  const link2 = new DefaultLinkModel(ptFactory);
+  const link2 = new DefaultLinkModel();
   link2.connect(port1, port3);
 
   // also a label for A and D
-  const link3 = new DefaultLinkModel(ptFactory);
+  const link3 = new DefaultLinkModel();
   link3.addLabel('Emoji label: 🎉');
   link3.connect(port1, port4);
 

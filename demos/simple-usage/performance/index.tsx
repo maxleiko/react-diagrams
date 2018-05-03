@@ -3,7 +3,6 @@ import {
   DiagramModel,
   DefaultNodeModel,
   DiagramWidget,
-  DefaultPointFactory,
   DefaultLinkModel
 } from '@leiko/react-diagrams';
 import * as React from 'react';
@@ -42,8 +41,7 @@ function generateNodes(model: DiagramModel, offsetX: number, offsetY: number) {
   node2.setPosition(200 + offsetX, 100 + offsetY);
 
   // 3-C) link the 2 nodes together
-  const ptFactory = new DefaultPointFactory();
-  const link1 = new DefaultLinkModel(ptFactory);
+  const link1 = new DefaultLinkModel();
   link1.connect(port1, port2);
 
   // 4) add the models to the root graph

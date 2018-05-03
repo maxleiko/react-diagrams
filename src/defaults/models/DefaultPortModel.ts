@@ -4,7 +4,6 @@ import { PortModel } from '../../models/PortModel';
 import { APortModel } from '../../models/abstract/APortModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultLinkModel } from './DefaultLinkModel';
-import { DefaultPointFactory } from '../factories/DefaultPointFactory';
 
 export class DefaultPortModel extends APortModel {
   @observable private _in: boolean;
@@ -33,7 +32,7 @@ export class DefaultPortModel extends APortModel {
 
   @action
   link(port: DefaultPortModel): DefaultLinkModel {
-    const link = new DefaultLinkModel(new DefaultPointFactory());
+    const link = new DefaultLinkModel();
     link.connect(this, port);
     return link;
   }

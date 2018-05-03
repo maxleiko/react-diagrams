@@ -7,7 +7,6 @@ import { PointModel } from '../PointModel';
 import { LabelModel } from '../LabelModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DiagramModel } from '../DiagramModel';
-import { AbstractPointFactory } from '../../factories/AbstractPointFactory';
 import { ABaseModel } from './ABaseModel';
 import { LinkModel } from '../LinkModel';
 
@@ -17,7 +16,7 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
   @observable private _points: PointModel[] = [];
   @observable private _labels: LabelModel[] = [];
 
-  constructor(_pointFactory: AbstractPointFactory, linkType: string = 'srd-link', id?: string) {
+  constructor(linkType: string = 'srd-link', id?: string) {
     super(linkType, id);
   }
 

@@ -37,7 +37,7 @@ export class DefaultLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
   }
 
   getNewInstance(_initialConfig?: any): DefaultLinkModel {
-    return new DefaultLinkModel(this.getPointFactory());
+    return new DefaultLinkModel();
   }
 
   getPointFactory(): DefaultPointFactory {

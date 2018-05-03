@@ -5,13 +5,12 @@ import {
   DiagramWidget,
   DefaultLinkModel,
   DefaultLinkFactory,
-  DefaultPointFactory
 } from '@leiko/react-diagrams';
 import * as React from 'react';
 
 export class AdvancedLinkModel extends DefaultLinkModel {
   constructor() {
-    super(new DefaultPointFactory(), undefined, 10);
+    super(undefined, 10);
   }
 }
 

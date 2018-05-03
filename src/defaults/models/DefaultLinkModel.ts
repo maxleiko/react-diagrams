@@ -4,20 +4,14 @@ import { ALinkModel } from '../../models/abstract/ALinkModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { DefaultLabelModel } from './DefaultLabelModel';
 import { LabelModel } from '../../models/LabelModel';
-import { AbstractPointFactory } from '../../factories/AbstractPointFactory';
 
 export class DefaultLinkModel extends ALinkModel {
   @observable private _color: string;
   @observable private _width: number = -1;
   @observable private _curvyness: number = -1;
 
-  constructor(
-    ptFactory: AbstractPointFactory,
-    color: string = 'rgb(255, 255, 255, 0.6)',
-    width: number = 3,
-    curvyness: number = 50
-  ) {
-    super(ptFactory, 'srd-default-link');
+  constructor(color: string = 'rgb(255, 255, 255, 0.6)', width: number = 3, curvyness: number = 50) {
+    super('srd-default-link');
     this._color = color;
     this._width = width;
     this._curvyness = curvyness;
