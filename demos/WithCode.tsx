@@ -1,7 +1,11 @@
-import React from 'react';
+import * as React from 'react';
 import addons from '@storybook/addons';
 
-export class WithCode extends React.Component {
+export interface WithCodeProps {
+  code: string;
+}
+
+export class WithCode extends React.Component<WithCodeProps> {
   render() {
     const { children, code } = this.props;
     const channel = addons.getChannel();

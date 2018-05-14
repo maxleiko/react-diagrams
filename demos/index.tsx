@@ -1,13 +1,10 @@
 import * as React from 'react';
-// @ts-ignore
 import { withDocs } from 'storybook-readme';
-// @ts-ignore
-import { WithCode } from '../.storybook/addon-code/react';
-// @ts-ignore
 import { storiesOf, addDecorator } from '@storybook/react';
-// @ts-ignore
 import { setOptions } from '@storybook/addon-options';
 import { host } from 'storybook-host';
+
+import { WithCode } from './WithCode';
 import { Toolkit } from '../src/Toolkit';
 
 // include the SCSS for the demo
@@ -27,7 +24,6 @@ addDecorator(
 setOptions({
   name: 'STORM React Diagrams',
   url: 'https://github.com/projectstorm/react-diagrams',
-  addonPanelInRight: true
 });
 
 const withCustomDocs = withDocs({

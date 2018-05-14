@@ -1,4 +1,5 @@
 const path = require('path');
+
 module.exports = {
   module: {
     rules: [
@@ -20,7 +21,7 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        loader: 'awesome-typescript-loader'
+        loader: 'ts-loader'
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf|svg)$/,
@@ -33,5 +34,5 @@ module.exports = {
       '@leiko/react-diagrams': path.join(__dirname, '..', 'src')
     },
     extensions: ['.tsx', '.ts', '.js']
-  }
+  },
 };

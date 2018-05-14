@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DefaultNodeWidget with defaults 1`] = `
+<g
+  className="srd-default-link"
+>
+  <g
+    className="srd-segment"
+    srd-index={0}
+  >
+    <path
+      className="halo"
+      d="M0,0 C 0,50 0,-50 0,0"
+      stroke="rgb(255, 255, 255, 0.6)"
+      strokeWidth={20}
+    />
+    <path
+      className="path"
+      d="M0,0 C 0,50 0,-50 0,0"
+      stroke="rgb(255, 255, 255, 0.6)"
+      strokeWidth={3}
+    />
+  </g>
+</g>
+`;

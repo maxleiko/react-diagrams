@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DiagramWidget renders correctly 1`] = `
+<div
+  className="srd-diagram"
+  onMouseDown={[Function]}
+  onWheel={[Function]}
+  style={undefined}
+>
+  <div
+    className="srd-node-layer"
+    style={
+      Object {
+        "transform": "translate(0px, 0px) scale(1)",
+      }
+    }
+  />
+  <svg
+    className="srd-link-layer"
+    style={
+      Object {
+        "transform": "translate(0px, 0px) scale(1)",
+      }
+    }
+  />
+</div>
+`;

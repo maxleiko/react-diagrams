@@ -2,15 +2,10 @@ const path = require('path');
 // jest.config.js
 module.exports = {
   verbose: true,
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transform: {
-    '.*test_loader.*': path.join(__dirname, 'tests', 'helpers', 'storybook-loader.js'),
-    '^.+\\.tsx?$': 'ts-jest'
+    '.(ts|tsx)': 'ts-jest'
   },
-  moduleNameMapper: {
-    '\\.(scss|css|png)$': path.join(__dirname, 'tests', 'helpers', 'css-mock.js'),
-    '@leiko/react-diagrams': path.join(__dirname, 'src', 'index')
-  },
-  roots: [__dirname + '/tests'],
-  testMatch: ['**/*.test.ts?(x)']
+  testPathIgnorePatterns: ['/node_modules/'],
+  testRegex: '(/test/.*|\\.(test|spec))\\.(ts|tsx|js)$',
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'json']
 };

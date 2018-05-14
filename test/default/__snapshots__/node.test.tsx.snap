@@ -1,0 +1,470 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DefaultNodeWidget with 2 input ports 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      Untitled
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="srd-port"
+          srd-id="12"
+        />
+        <div
+          className="name"
+        >
+          in0
+        </div>
+      </div>
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="srd-port"
+          srd-id="13"
+        />
+        <div
+          className="name"
+        >
+          in1
+        </div>
+      </div>
+    </div>
+    <div
+      className="out"
+    />
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with 2 inputs and 4 outputs ports 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      Untitled
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="srd-port"
+          srd-id="18"
+        />
+        <div
+          className="name"
+        >
+          in0
+        </div>
+      </div>
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="srd-port"
+          srd-id="19"
+        />
+        <div
+          className="name"
+        >
+          in1
+        </div>
+      </div>
+    </div>
+    <div
+      className="out"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          out0
+        </div>
+        <div
+          className="srd-port"
+          srd-id="20"
+        />
+      </div>
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          out1
+        </div>
+        <div
+          className="srd-port"
+          srd-id="21"
+        />
+      </div>
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          out2
+        </div>
+        <div
+          className="srd-port"
+          srd-id="22"
+        />
+      </div>
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          out3
+        </div>
+        <div
+          className="srd-port"
+          srd-id="23"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with 2 output ports 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      Untitled
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    />
+    <div
+      className="out"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          out0
+        </div>
+        <div
+          className="srd-port"
+          srd-id="15"
+        />
+      </div>
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          out1
+        </div>
+        <div
+          className="srd-port"
+          srd-id="16"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with a name 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      foo
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    />
+    <div
+      className="out"
+    />
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with a name and color 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "#012",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      foo
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    />
+    <div
+      className="out"
+    />
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with an input and an output port 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      Untitled
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="srd-port"
+          srd-id="9"
+        />
+        <div
+          className="name"
+        >
+          input
+        </div>
+      </div>
+    </div>
+    <div
+      className="out"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          output
+        </div>
+        <div
+          className="srd-port"
+          srd-id="10"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with an input port 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      Untitled
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="srd-port"
+          srd-id="5"
+        />
+        <div
+          className="name"
+        >
+          input
+        </div>
+      </div>
+    </div>
+    <div
+      className="out"
+    />
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with an output port 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      Untitled
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    />
+    <div
+      className="out"
+    >
+      <div
+        className="srd-default-port"
+      >
+        <div
+          className="name"
+        >
+          output
+        </div>
+        <div
+          className="srd-port"
+          srd-id="7"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`DefaultNodeWidget with defaults 1`] = `
+<div
+  className="srd-default-node"
+  style={
+    Object {
+      "background": "rgb(0,192,255)",
+    }
+  }
+>
+  <div
+    className="title"
+  >
+    <div
+      className="name"
+    >
+      Untitled
+    </div>
+  </div>
+  <div
+    className="ports"
+  >
+    <div
+      className="in"
+    />
+    <div
+      className="out"
+    />
+  </div>
+</div>
+`;
