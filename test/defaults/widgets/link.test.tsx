@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
 
-import { Toolkit, DefaultLinkWidget, DiagramEngine, DefaultLinkModel } from '../../src/index';
+import { Toolkit, DefaultLinkWidget, DiagramEngine, DefaultLinkModel } from '../../../src/index';
 
 Toolkit.TESTING = true;
 

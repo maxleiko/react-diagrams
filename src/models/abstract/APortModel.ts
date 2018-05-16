@@ -80,11 +80,10 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
 
   @action
   addLink(link: LinkModel) {
-    if (this.maximumLinks >= this._links.size + 1) {
-      this._links.set(link.id, link);
-    } else {
-      throw new Error(`Port "${this.id}" cannot have more links (maximum: ${this._maximumLinks})`);
+    if (this._links.size >= this._maximumLinks) {
+      throw new Error(`Port "${this.id}" cannot have more links (max: ${this._maximumLinks})`);
     }
+    this._links.set(link.id, link);
   }
 
   @action

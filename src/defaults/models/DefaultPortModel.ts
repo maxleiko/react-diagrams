@@ -9,8 +9,8 @@ export class DefaultPortModel extends APortModel {
   @observable private _in: boolean;
   @observable private _label: string;
 
-  constructor(isInput: boolean, name: string, label: string | null = null) {
-    super(name, 'srd-default-port');
+  constructor(isInput: boolean, name: string, label: string | null = null, maximumLinks: number = Infinity) {
+    super(name, 'srd-default-port', maximumLinks);
     this._in = isInput;
     this._label = label || name;
   }
