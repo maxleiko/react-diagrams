@@ -7,26 +7,22 @@ import { DefaultLinkModel } from './DefaultLinkModel';
 
 export class DefaultPortModel extends APortModel {
   @observable private _in: boolean;
-  @observable private _label: string;
 
-  constructor(isInput: boolean, name: string, label: string | null = null, maximumLinks: number = Infinity) {
+  constructor(isInput: boolean, name: string, maximumLinks: number = Infinity) {
     super(name, 'srd-default-port', maximumLinks);
     this._in = isInput;
-    this._label = label || name;
   }
 
   @action
   fromJSON(object: any, engine: DiagramEngine) {
     super.fromJSON(object, engine);
     this._in = object.in;
-    this._label = object.label;
   }
 
   toJSON() {
     return {
       ...super.toJSON(),
       in: this._in,
-      label: this._label
     };
   }
 
@@ -61,10 +57,5 @@ export class DefaultPortModel extends APortModel {
   @computed
   get in(): boolean {
     return this._in;
-  }
-
-  @computed
-  get label(): string {
-    return this._label;
   }
 }

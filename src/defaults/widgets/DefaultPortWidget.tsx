@@ -16,12 +16,12 @@ export class DefaultPortWidget extends React.Component<DefaultPortWidgetProps> {
 
   render() {
     const port = <PortWidgetContainer port={this.props.port} engine={this.props.engine} />;
-    const label = <div className="name">{this.props.port.label}</div>;
+    const name = <div className="name">{this.props.port.name}</div>;
 
     return (
       <div className={cx('srd-default-port')}>
-        {this.props.port.in ? port : label}
-        {this.props.port.in ? label : port}
+        {this.props.port.in ? port : name}
+        {this.props.port.in ? name : port}
       </div>
     );
   }

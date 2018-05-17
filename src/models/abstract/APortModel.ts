@@ -9,6 +9,7 @@ import { DiagramEngine } from '../../DiagramEngine';
 import { ABaseModel } from './ABaseModel';
 
 export abstract class APortModel extends ABaseModel<NodeModel> implements PortModel {
+  @observable private _name: string;
   @observable private _maximumLinks: number;
   @observable private _links: Map<string, LinkModel> = new Map();
 
@@ -19,8 +20,18 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
   @observable private _height: number = 0;
 
   constructor(name: string, type: string = 'srd-port', maximumLinks: number = Infinity) {
-    super(type, name);
+    super(type);
+    this._name = name;
     this._maximumLinks = maximumLinks;
+  }
+
+  @computed
+  get name(): string {
+    return this._name;
+  }
+
+  set name(name: string) {
+    this._name = name;
   }
 
   @computed
@@ -70,18 +81,17 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
 
   @action
   delete() {
-    this._links.forEach((link) => link.delete());
+    this.links.forEach((link) => link.delete());
     this._links.clear();
     if (this.parent) {
       this.parent.removePort(this);
-      this.parent = null;
     }
   }
 
   @action
   addLink(link: LinkModel) {
     if (this._links.size >= this._maximumLinks) {
-      throw new Error(`Port "${this.id}" cannot have more links (max: ${this._maximumLinks})`);
+      throw new Error(`Port "${this._name}" cannot have more links (max: ${this._maximumLinks})`);
     }
     this._links.set(link.id, link);
   }

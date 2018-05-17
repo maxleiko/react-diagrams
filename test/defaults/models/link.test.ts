@@ -17,7 +17,7 @@ describe('DefaultLinkModel', () => {
 
     it('throws error when port.maximumLinks is reached', () => {
       const sender = new DefaultNodeModel();
-      const output = new DefaultPortModel(false, 'out', undefined, 1);
+      const output = new DefaultPortModel(false, 'out', 1);
       sender.addPort(output);
 
       const receiver = new DefaultNodeModel();
@@ -35,7 +35,7 @@ describe('DefaultLinkModel', () => {
       const output = sender.addInPort('in');
 
       const receiver = new DefaultNodeModel();
-      const input = new DefaultPortModel(true, 'in', undefined, 1);
+      const input = new DefaultPortModel(true, 'in', 1);
       receiver.addPort(input);
 
       const link0 = output.link(input);
@@ -62,7 +62,7 @@ describe('DefaultLinkModel', () => {
   describe('', () => {
     it('throws error when port.maximumLinks is reached', () => {
       const sender = new DefaultNodeModel();
-      const output = new DefaultPortModel(false, 'out', undefined, 1);
+      const output = new DefaultPortModel(false, 'out', 1);
       sender.addPort(output);
 
       const receiver = new DefaultNodeModel();

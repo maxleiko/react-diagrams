@@ -3,7 +3,6 @@ import { action, computed, observable } from 'mobx';
 
 import { DefaultPortModel } from './DefaultPortModel';
 import { ANodeModel } from '../../models/abstract/ANodeModel';
-import { Toolkit } from '../../Toolkit';
 import { DiagramEngine } from '../../DiagramEngine';
 
 /**
@@ -54,13 +53,13 @@ export class DefaultNodeModel extends ANodeModel<DefaultPortModel> {
   }
 
   @action
-  addInPort(label: string): DefaultPortModel {
-    return this.addPort(new DefaultPortModel(true, Toolkit.UID(), label));
+  addInPort(name: string): DefaultPortModel {
+    return this.addPort(new DefaultPortModel(true, name));
   }
 
   @action
-  addOutPort(label: string): DefaultPortModel {
-    return this.addPort(new DefaultPortModel(false, Toolkit.UID(), label));
+  addOutPort(name: string): DefaultPortModel {
+    return this.addPort(new DefaultPortModel(false, name));
   }
 
   @action

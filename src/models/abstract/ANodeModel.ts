@@ -65,7 +65,7 @@ export abstract class ANodeModel<P extends PortModel = PortModel> extends ABaseM
 
   @action
   delete() {
-    this._ports.forEach((port) => port.delete());
+    this.ports.forEach((port) => port.delete());
     if (this.parent) {
       this.parent.removeNode(this);
     }
@@ -114,8 +114,8 @@ export abstract class ANodeModel<P extends PortModel = PortModel> extends ABaseM
     // clear the parent node reference
     const p = this._ports.get(port.id);
     if (p) {
-      p.parent = null;
       this._ports.delete(p.id);
+      p.parent = null;
     }
   }
 
