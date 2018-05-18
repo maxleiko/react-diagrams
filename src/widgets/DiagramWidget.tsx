@@ -155,7 +155,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           const lastPoint = this.props.engine
             .getLinkFactory(link.type)
             .getPointFactory()
-            .getNewInstance({ x: model.x, y: model.y });
+            .getNewInstance({ x: event.clientX, y: event.clientY });
           link.addPoint(lastPoint);
           // unselect all
           this.props.engine.model.clearSelection();

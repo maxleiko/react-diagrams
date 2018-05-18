@@ -12,7 +12,7 @@ module.exports = {
     libraryTarget: 'umd',
     library: 'react-diagrams'
   },
-  devtool: production ? 'source-map' : 'cheap-module-source-map',
+  devtool: production ? 'source-map' : 'cheap-module-eval-source-map',
   mode: production ? 'production' : 'development',
   plugins: production ? [new webpack.DefinePlugin({ 'process.env.NODE_ENV': '"production"' })] : [],
   module: {
