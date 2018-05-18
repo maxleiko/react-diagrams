@@ -6,7 +6,10 @@ docs
 .storybook
 .circleci
 tests
+src
+test
 *.md
+webpack.config.js
 
 # Created by https://www.gitignore.io/api/net,netbeans,sublimetext,phpstorm,windows,osx,node
 
