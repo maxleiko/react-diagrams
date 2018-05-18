@@ -68,7 +68,6 @@
     "cross-env": "^5.1.4",
     "css-loader": "^0.28.10",
     "dagre": "^0.8.2",
-    "enzyme": "^3.3.0",
     "file-loader": "^1.1.11",
     "glob": "^7.1.2",
     "jest": "^22.4.2",

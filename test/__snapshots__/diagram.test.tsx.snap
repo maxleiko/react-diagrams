@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DiagramWidget renders correctly 1`] = `
+exports[`DiagramWidget empty model 1`] = `
 <div
   className="srd-diagram"
   onMouseDown={[Function]}
@@ -15,6 +15,240 @@ exports[`DiagramWidget renders correctly 1`] = `
       }
     }
   />
+  <svg
+    className="srd-link-layer"
+    style={
+      Object {
+        "transform": "translate(0px, 0px) scale(1)",
+      }
+    }
+  />
+</div>
+`;
+
+exports[`DiagramWidget places nodes correctly 1`] = `
+<div
+  className="srd-diagram"
+  onMouseDown={[Function]}
+  onWheel={[Function]}
+  style={undefined}
+>
+  <div
+    className="srd-node-layer"
+    style={
+      Object {
+        "transform": "translate(0px, 0px) scale(1)",
+      }
+    }
+  >
+    <div
+      className="srd-node"
+      srd-id="1"
+      style={
+        Object {
+          "transform": "translate(150px, 200px)",
+        }
+      }
+    >
+      <div
+        className="srd-default-node"
+        style={
+          Object {
+            "background": "rgb(0,192,255)",
+          }
+        }
+      >
+        <div
+          className="title"
+        >
+          <div
+            className="name"
+          >
+            node0
+          </div>
+        </div>
+        <div
+          className="ports"
+        >
+          <div
+            className="in"
+          />
+          <div
+            className="out"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      className="srd-node"
+      srd-id="2"
+      style={
+        Object {
+          "transform": "translate(300px, 400px)",
+        }
+      }
+    >
+      <div
+        className="srd-default-node"
+        style={
+          Object {
+            "background": "rgb(0,192,255)",
+          }
+        }
+      >
+        <div
+          className="title"
+        >
+          <div
+            className="name"
+          >
+            node1
+          </div>
+        </div>
+        <div
+          className="ports"
+        >
+          <div
+            className="in"
+          />
+          <div
+            className="out"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <svg
+    className="srd-link-layer"
+    style={
+      Object {
+        "transform": "translate(0px, 0px) scale(1)",
+      }
+    }
+  />
+</div>
+`;
+
+exports[`DiagramWidget places ports correctly 1`] = `
+<div
+  className="srd-diagram"
+  onMouseDown={[Function]}
+  onWheel={[Function]}
+  style={undefined}
+>
+  <div
+    className="srd-node-layer"
+    style={
+      Object {
+        "transform": "translate(0px, 0px) scale(1)",
+      }
+    }
+  >
+    <div
+      className="srd-node"
+      srd-id="1"
+      style={
+        Object {
+          "transform": "translate(0px, 0px)",
+        }
+      }
+    >
+      <div
+        className="srd-default-node"
+        style={
+          Object {
+            "background": "rgb(0,192,255)",
+          }
+        }
+      >
+        <div
+          className="title"
+        >
+          <div
+            className="name"
+          >
+            node0
+          </div>
+        </div>
+        <div
+          className="ports"
+        >
+          <div
+            className="in"
+          />
+          <div
+            className="out"
+          >
+            <div
+              className="srd-default-port"
+            >
+              <div
+                className="name"
+              >
+                out
+              </div>
+              <div
+                className="srd-port"
+                srd-id="2"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="srd-node"
+      srd-id="3"
+      style={
+        Object {
+          "transform": "translate(0px, 0px)",
+        }
+      }
+    >
+      <div
+        className="srd-default-node"
+        style={
+          Object {
+            "background": "rgb(0,192,255)",
+          }
+        }
+      >
+        <div
+          className="title"
+        >
+          <div
+            className="name"
+          >
+            node1
+          </div>
+        </div>
+        <div
+          className="ports"
+        >
+          <div
+            className="in"
+          >
+            <div
+              className="srd-default-port"
+            >
+              <div
+                className="srd-port"
+                srd-id="4"
+              />
+              <div
+                className="name"
+              >
+                in
+              </div>
+            </div>
+          </div>
+          <div
+            className="out"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
   <svg
     className="srd-link-layer"
     style={
