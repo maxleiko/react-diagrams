@@ -7,6 +7,7 @@ import { DiagramEngine } from '../../DiagramEngine';
 import { DiagramModel } from '../DiagramModel';
 import { NodeModel } from '../NodeModel';
 import { ABaseModel } from './ABaseModel';
+import { Toolkit } from '../../Toolkit';
 
 export abstract class ANodeModel<P extends PortModel = PortModel> extends ABaseModel<DiagramModel>
   implements NodeModel {
@@ -123,6 +124,7 @@ export abstract class ANodeModel<P extends PortModel = PortModel> extends ABaseM
   addPort(port: P): P {
     port.parent = this;
     this._ports.set(port.id, port);
+    Toolkit.keyUpdater(port, 'id', this._ports);
     return port;
   }
 

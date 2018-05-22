@@ -7,6 +7,7 @@ import { NodeModel } from '../NodeModel';
 import { LinkModel } from '../LinkModel';
 import { DiagramEngine } from '../../DiagramEngine';
 import { ABaseModel } from './ABaseModel';
+import { Toolkit } from '../../Toolkit';
 
 export abstract class APortModel extends ABaseModel<NodeModel> implements PortModel {
   @observable private _name: string;
@@ -94,6 +95,7 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
       throw new Error(`Port "${this._name}" cannot have more links (max: ${this._maximumLinks})`);
     }
     this._links.set(link.id, link);
+    Toolkit.keyUpdater(link, 'id', this._links);
   }
 
   @action

@@ -9,6 +9,7 @@ import { NodeModel } from '../NodeModel';
 import { BaseModel } from '../BaseModel';
 import { ALinkModel } from './ALinkModel';
 import { ANodeModel } from './ANodeModel';
+import { Toolkit } from '../../Toolkit';
 
 export class ADiagramModel extends ABaseModel implements DiagramModel {
   // models
@@ -119,6 +120,7 @@ export class ADiagramModel extends ABaseModel implements DiagramModel {
   addLink(link: LinkModel): LinkModel {
     link.parent = this;
     this._links.set(link.id, link);
+    Toolkit.keyUpdater(link, 'id', this._links);
     return link;
   }
 
@@ -126,6 +128,7 @@ export class ADiagramModel extends ABaseModel implements DiagramModel {
   addNode(node: NodeModel): NodeModel {
     node.parent = this;
     this._nodes.set(node.id, node);
+    Toolkit.keyUpdater(node, 'id', this._nodes);
     return node;
   }
 
