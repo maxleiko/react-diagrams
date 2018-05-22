@@ -1,5 +1,6 @@
 !dist
 demos
+dist/demos.js
 images
 docs
 .out
