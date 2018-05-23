@@ -152,10 +152,11 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           // define link source to be the current clicked port
           link.sourcePort = model;
           // create a point on the link to track mouse position
+          const { x, y } = this.props.engine.getRelativeMousePoint(event);
           const lastPoint = this.props.engine
             .getLinkFactory(link.type)
             .getPointFactory()
-            .getNewInstance({ x: event.clientX, y: event.clientY });
+            .getNewInstance({ x, y });
           link.addPoint(lastPoint);
           // unselect all
           this.props.engine.model.clearSelection();
