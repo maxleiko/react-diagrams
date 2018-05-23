@@ -1,8 +1,6 @@
 // tslint:disable no-bitwise
-// @ts-ignore
 import closest from 'closest';
 import { ROUTING_SCALING_FACTOR, Path } from './routing/PathFinding';
-// @ts-ignore
 import * as SVGPath from 'paths-js/path';
 import { BaseModel } from './models/BaseModel';
 import { IReactionDisposer, reaction } from 'mobx';
