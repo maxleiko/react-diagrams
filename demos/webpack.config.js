@@ -1,9 +1,11 @@
-const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
 module.exports = {
+  mode,
   entry: path.join(__dirname, 'demos.tsx'),
   output: {
     filename: 'demos.js',
@@ -21,8 +23,7 @@ module.exports = {
     compress: true,
     port: 9000
   },
-  devtool: 'cheap-module-eval-source-map',
-  mode: 'development',
+  devtool: mode === 'production' ? false : 'cheap-module-eval-source-map',
   module: {
     rules: [
       {
@@ -53,4 +54,20 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
     plugins: [new TsconfigPathsPlugin({ configFile: path.join(__dirname, 'tsconfig.json') })]
   },
+  externals: {
+    'ReactDiagrams': '@leiko/react-diagrams',
+  },
+  optimization: {
+    minimizer: [
+      // we specify a custom UglifyJsPlugin here to get source maps in production
+      new UglifyJsPlugin({
+        uglifyOptions: {
+          compress: false,
+          ecma: 5,
+          mangle: false
+        },
+        sourceMap: true
+      })
+    ]
+  }
 };

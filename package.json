@@ -22,6 +22,7 @@
   "scripts": {
     "clean": "rm -rf dist build",
     "build": "yarn run build:ts:prod && yarn run build:sass:prod",
+    "build:demos": "NODE_ENV=production webpack --config demos/webpack.config.js",
     "build:ts": "webpack",
     "build:ts:prod": "NODE_ENV=production webpack -p",
     "build:sass:prod": "node-sass --output-style compressed ./src/sass/main.scss > ./dist/style.min.css",

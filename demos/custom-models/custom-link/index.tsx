@@ -3,7 +3,6 @@ import {
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget,
-  DefaultLinkFactory,
 } from '@leiko/react-diagrams';
 import * as React from 'react';
 import { AdvancedLinkModel } from './AdvancedLinkModel';

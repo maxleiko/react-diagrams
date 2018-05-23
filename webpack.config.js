@@ -10,7 +10,7 @@ module.exports = {
     filename: path.join('dist', 'index.js'),
     path: path.join(__dirname),
     libraryTarget: 'umd',
-    library: '@leiko/react-diagrams'
+    library: 'ReactDiagrams'
   },
   devtool: mode === 'production' ? 'source-map' : 'cheap-module-eval-source-map',
   plugins: [
@@ -62,6 +62,12 @@ module.exports = {
       commonjs2: 'mobx-utils',
       amd: 'MobXUtils',
       root: 'MobXUtils'
+    },
+    'mobx-react': {
+      commonjs: 'mobx-react',
+      commonjs2: 'mobx-react',
+      amd: 'MobXReact',
+      root: 'MobXReact'
     }
   },
   optimization: {
