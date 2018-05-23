@@ -12,12 +12,9 @@ function createNode(name: any) {
   return new DefaultNodeModel(name, 'rgb(0,192,255)');
 }
 
-let count = 0;
 function connectNodes(nodeFrom: any, nodeTo: any) {
-  // just to get id-like structure
-  count++;
-  const portOut = nodeFrom.addPort(new DefaultPortModel(true, `${nodeFrom.name}-out-${count}`, 'Out'));
-  const portTo = nodeTo.addPort(new DefaultPortModel(false, `${nodeFrom.name}-to-${count}`, 'IN'));
+  const portOut = nodeFrom.addPort(new DefaultPortModel(true, 'Out'));
+  const portTo = nodeTo.addPort(new DefaultPortModel(false, 'In'));
   return portOut.link(portTo);
 }
 

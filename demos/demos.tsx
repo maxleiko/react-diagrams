@@ -1,8 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import '@leiko/react-diagrams/sass/main.scss';
-
 import Simple from './simple-usage/simple';
 import Ports from './simple-usage/ports';
 import Grid from './simple-usage/grid';

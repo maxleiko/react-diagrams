@@ -1,20 +1,21 @@
 const webpack = require('webpack');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
-const plugins = [];
-const production = process.env.NODE_ENV === 'production';
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const mode = process.env.NODE_ENV === 'production' ? 'production' : 'development';
 
 module.exports = {
+  mode,
   entry: './src/index.ts',
   output: {
-    filename: 'index.js',
-    path: path.join(__dirname, 'dist'),
+    filename: path.join('dist', 'index.js'),
+    path: path.join(__dirname),
     libraryTarget: 'umd',
-    library: 'react-diagrams'
+    library: '@leiko/react-diagrams'
   },
-  devtool: production ? 'source-map' : 'cheap-module-eval-source-map',
-  mode: production ? 'production' : 'development',
-  plugins: production ? [new webpack.DefinePlugin({ 'process.env.NODE_ENV': '"production"' })] : [],
+  devtool: mode === 'production' ? 'source-map' : 'cheap-module-eval-source-map',
+  plugins: [
+    new webpack.DefinePlugin({ 'process.env.NODE_ENV': `"${mode}"` }),
+  ],
   module: {
     rules: [
       {
@@ -63,7 +64,6 @@ module.exports = {
       root: 'MobXUtils'
     }
   },
-  plugins: plugins,
   optimization: {
     minimizer: [
       // we specify a custom UglifyJsPlugin here to get source maps in production

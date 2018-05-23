@@ -3,22 +3,12 @@ import {
   DefaultNodeModel,
   DefaultPortModel,
   DiagramWidget,
-  DefaultLinkModel,
   DefaultLinkFactory,
 } from '@leiko/react-diagrams';
 import * as React from 'react';
-
-export class AdvancedLinkModel extends DefaultLinkModel {
-  constructor() {
-    super(undefined, 10);
-  }
-}
-
-export class AdvancedPortModel extends DefaultPortModel {
-  createLinkModel(): AdvancedLinkModel | null {
-    return new AdvancedLinkModel();
-  }
-}
+import { AdvancedLinkModel } from './AdvancedLinkModel';
+import { AdvancedLinkFactory } from './AdvancedLinkFactory';
+import { AdvancedPortModel } from './AdvancedPortModel';
 
 export interface AdvancedLinkSegmentProps {
   model: AdvancedLinkModel;
@@ -84,23 +74,6 @@ export class AdvancedLinkSegment extends React.Component<AdvancedLinkSegmentProp
   }
 }
 
-export class AdvancedLinkFactory extends DefaultLinkFactory {
-  constructor() {
-    super('advanced');
-  }
-
-  getNewInstance(_initialConfig?: any): AdvancedLinkModel {
-    return new AdvancedLinkModel();
-  }
-
-  generateLinkSegment(model: AdvancedLinkModel, _selected: boolean, path: string) {
-    return (
-      <g>
-        <AdvancedLinkSegment model={model} path={path} />
-      </g>
-    );
-  }
-}
 /**
  *
  * Simple link styling demo
@@ -115,23 +88,23 @@ export default () => {
 
   // create some nodes
   const node1 = new DefaultNodeModel('Source', 'rgb(0,192,255)');
-  const port1 = node1.addPort(new AdvancedPortModel(false, 'out-1', 'Out thick'));
-  const port2 = node1.addPort(new DefaultPortModel(false, 'out-2', 'Out default'));
+  const port1 = node1.addPort(new AdvancedPortModel(false, 'Out thick'));
+  const port2 = node1.addPort(new DefaultPortModel(false, 'Out default'));
   node1.setPosition(100, 100);
 
   const node2 = new DefaultNodeModel('Target', 'rgb(192,255,0)');
-  const port3 = node2.addPort(new AdvancedPortModel(true, 'in-1', 'In thick'));
-  const port4 = node2.addPort(new DefaultPortModel(true, 'in-2', 'In default'));
+  const port3 = node2.addPort(new AdvancedPortModel(true, 'In thick'));
+  const port4 = node2.addPort(new DefaultPortModel(true, 'In default'));
   node2.setPosition(300, 100);
 
   const node3 = new DefaultNodeModel('Source', 'rgb(0,192,255)');
-  node3.addPort(new AdvancedPortModel(false, 'out-1', 'Out thick'));
-  node3.addPort(new DefaultPortModel(false, 'out-2', 'Out default'));
+  node3.addPort(new AdvancedPortModel(false, 'Out thick'));
+  node3.addPort(new DefaultPortModel(false, 'Out default'));
   node3.setPosition(100, 200);
 
   const node4 = new DefaultNodeModel('Target', 'rgb(192,255,0)');
-  node4.addPort(new AdvancedPortModel(true, 'in-1', 'In thick'));
-  node4.addPort(new DefaultPortModel(true, 'in-2', 'In default'));
+  node4.addPort(new AdvancedPortModel(true, 'In thick'));
+  node4.addPort(new DefaultPortModel(true, 'In default'));
   node4.setPosition(300, 200);
 
   engine.model.addAll(port1.link(port3)!, port2.link(port4)!);

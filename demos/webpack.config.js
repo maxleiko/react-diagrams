@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
   entry: path.join(__dirname, 'demos.tsx'),
@@ -27,12 +28,10 @@ module.exports = {
       {
         test: /\.scss$/,
         loaders: ['style-loader', 'css-loader', 'sass-loader'],
-        include: path.resolve(__dirname, '../')
       },
       {
         test: /\.css/,
         loaders: ['style-loader', 'css-loader'],
-        include: path.resolve(__dirname, '../')
       },
       {
         enforce: 'pre',
@@ -51,9 +50,7 @@ module.exports = {
     ]
   },
   resolve: {
-    alias: {
-      '@leiko/react-diagrams': path.join(__dirname, '..', 'src')
-    },
-    extensions: ['.tsx', '.ts', '.js']
+    extensions: ['.tsx', '.ts', '.js'],
+    plugins: [new TsconfigPathsPlugin({ configFile: path.join(__dirname, 'tsconfig.json') })]
   },
 };
