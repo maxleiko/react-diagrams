@@ -57,10 +57,9 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   }
 
   generateLabel(label: LabelModel) {
-    const canvas = this.props.engine.canvas as HTMLElement;
     const factory = this.props.engine.getFactoryForLabel(label);
     return (
-      <foreignObject key={label.id} className="label" width={canvas.offsetWidth} height={canvas.offsetHeight}>
+      <foreignObject key={label.id} className="srd-label-container">
         <div ref={(ref) => (this._labelElems[label.id] = ref)}>
           {factory.generateReactWidget(this.props.engine, label)}
         </div>
@@ -81,9 +80,8 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
   findPathAndRelativePositionToRenderLabel(index: number) {
     // an array to hold all path lengths, making sure we hit the DOM only once to fetch this information
     if (this._elem) {
-      const lengths = Array.from(this._elem.querySelectorAll<SVGPathElement>('.srd-segment .path')).map((path) =>
-        path.getTotalLength()
-      );
+      const lengths = Array.from(this._elem.querySelectorAll<SVGPathElement>('.srd-segment .path'))
+        .map((path) => path.getTotalLength());
 
       // calculate the point where we want to display the label
       let labelPosition =
@@ -92,7 +90,7 @@ export class DefaultLinkWidget extends React.Component<DefaultLinkProps> {
 
       // find the path where the label will be rendered and calculate the relative position
       let pathIndex = 0;
-      while (pathIndex < this.props.link.points.length - 1) {
+      while (pathIndex < this.props.link.points.length + 1) {
         if (labelPosition - lengths[pathIndex] < 0) {
           return {
             path: this._elem.querySelector<SVGPathElement>(`.srd-segment[srd-index="${pathIndex}"] path.path`)!,

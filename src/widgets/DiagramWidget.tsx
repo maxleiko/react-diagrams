@@ -191,8 +191,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
                   segmentIndex = parseInt(indexAttr, 10);
                 }
               }
-              // point should be placed at index = segmentIndex + 1
-              model.addPoint(point, segmentIndex + 1);
+              // point should be placed at 'segmentIndex' position
+              model.addPoint(point, segmentIndex);
               const a = new MoveItemsAction(event.clientX, event.clientY, this.props.engine);
               this.startFiringAction(a);
             } else {

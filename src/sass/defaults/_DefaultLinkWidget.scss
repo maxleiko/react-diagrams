@@ -5,14 +5,5 @@
         animation-direction: reverse;
       }
     }
-
-    .label {
-      pointer-events: none;
-
-      > div {
-        display: inline-block;
-        position: absolute;
-      }
-    }
   }
 }
