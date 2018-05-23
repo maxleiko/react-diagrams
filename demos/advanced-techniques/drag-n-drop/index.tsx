@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { DiagramEngine, DefaultNodeModel, DiagramWidget } from '@leiko/react-diagrams';
-import { DemoWorkspace } from '../../DemoWorkspace';
 
 import './styles.scss';
 
@@ -23,43 +22,41 @@ export default () => {
   engine.model.addAll(node1, node2, link);
 
   return (
-    <DemoWorkspace>
-      <div className="container">
-        <div className="sidebar">
-          <SidebarItem name="In Node" type="in" color="rgb(192,255,0)" />
-          <SidebarItem name="Out Node" type="out" color="rgb(0,192,255)" />
-        </div>
-        <div
-          className="diagram-layer"
-          onDrop={(event) => {
-            const data = event.dataTransfer.getData(DATA_TRANSFER);
-            const nodesCount = engine.model.nodes.length;
-
-            let node = null;
-            if (data === 'in') {
-              node = new DefaultNodeModel('Node ' + (nodesCount + 1), 'rgb(192,255,0)');
-              node.addInPort('In');
-            } else if (data === 'out') {
-              node = new DefaultNodeModel('Node ' + (nodesCount + 1), 'rgb(0,192,255)');
-              node.addOutPort('Out');
-            } else {
-              // unknown drop data
-            }
-
-            if (node) {
-              const { x, y } = engine.getRelativeMousePoint(event);
-              node.setPosition(x, y);
-              engine.model.addNode(node);
-            }
-          }}
-          onDragOver={(event) => {
-            event.preventDefault();
-          }}
-        >
-          <DiagramWidget engine={engine} />
-        </div>
+    <div className="container">
+      <div className="sidebar">
+        <SidebarItem name="In Node" type="in" color="rgb(192,255,0)" />
+        <SidebarItem name="Out Node" type="out" color="rgb(0,192,255)" />
       </div>
-    </DemoWorkspace>
+      <div
+        className="diagram-layer"
+        onDrop={(event) => {
+          const data = event.dataTransfer.getData(DATA_TRANSFER);
+          const nodesCount = engine.model.nodes.length;
+
+          let node = null;
+          if (data === 'in') {
+            node = new DefaultNodeModel('Node ' + (nodesCount + 1), 'rgb(192,255,0)');
+            node.addInPort('In');
+          } else if (data === 'out') {
+            node = new DefaultNodeModel('Node ' + (nodesCount + 1), 'rgb(0,192,255)');
+            node.addOutPort('Out');
+          } else {
+            // unknown drop data
+          }
+
+          if (node) {
+            const { x, y } = engine.getRelativeMousePoint(event);
+            node.setPosition(x, y);
+            engine.model.addNode(node);
+          }
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+        }}
+      >
+        <DiagramWidget engine={engine} />
+      </div>
+    </div>
   );
 };
 

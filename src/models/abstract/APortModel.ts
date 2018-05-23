@@ -47,6 +47,7 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
   @action
   fromJSON(ob: any, engine: DiagramEngine) {
     super.fromJSON(ob, engine);
+    this._name = ob.name;
     this._x = ob.x;
     this._y = ob.y;
     if (ob.maximumLinks === null) {
@@ -61,6 +62,7 @@ export abstract class APortModel extends ABaseModel<NodeModel> implements PortMo
   toJSON() {
     return {
       ...super.toJSON(),
+      name: this._name,
       x: this._x,
       y: this._y,
       maximumLinks: this._maximumLinks,

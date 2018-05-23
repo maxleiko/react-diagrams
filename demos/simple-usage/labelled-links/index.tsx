@@ -5,9 +5,6 @@ import {
   DiagramWidget,
   DefaultLinkModel,
 } from '@leiko/react-diagrams';
-// @ts-ignore
-import { action } from '@storybook/addon-actions';
-import { DemoWorkspace } from '../../DemoWorkspace';
 
 export default () => {
   // setup the diagram engine
@@ -48,15 +45,5 @@ export default () => {
   // add all to the main model
   engine.model.addAll(node1, node2, node3, node4, link1, link2, link3);
 
-  const Header = () => (
-    <button onClick={() => action('Serialized Graph')(JSON.stringify(engine.model, null, 2))}>
-      Serialize Graph
-    </button>
-  );
-
-  return (
-    <DemoWorkspace header={<Header />}>
-      <DiagramWidget engine={engine} />
-    </DemoWorkspace>
-  );
+  return <DiagramWidget engine={engine} />;
 };

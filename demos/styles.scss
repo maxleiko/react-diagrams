@@ -38,16 +38,17 @@ html {
           .demo {
             position: relative;
             flex-grow: 1;
+            display: flex;
 
-            .srd-demo-workspace {
+            .workspace {
               background: black;
               display: flex;
-              flex-direction: column;
-              height: 100%;
+              flex-grow: 1;
+              flex-flow: column;
               border-radius: 5px;
               overflow: hidden;
 
-              &__toolbar {
+              .toolbar {
                 color: white;
                 font-size: 12px;
                 padding: 5px;
@@ -71,9 +72,9 @@ html {
                 }
               }
 
-              &__content {
+              .content {
                 flex-grow: 1;
-                height: 100%;
+                position: relative;
               }
             }
 

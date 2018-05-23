@@ -1,9 +1,10 @@
 .container {
   display: flex;
+  flex-grow: 1;
   flex-direction: row;
-  min-height: 100%;
 
   .sidebar {
+    padding-top: 15px;
     min-width: 200px;
     background: rgb(20, 20, 20);
     flex-grow: 0;

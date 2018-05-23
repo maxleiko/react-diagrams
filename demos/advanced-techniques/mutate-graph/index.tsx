@@ -37,8 +37,6 @@ export default () => {
   });
 
   const updatePositionViaSerialize = () => {
-    console.log('==== SERIAL before ====');
-    console.log(JSON.parse(JSON.stringify(engine.model)));
     const currentModel = JSON.parse(JSON.stringify(engine.model));
     const node0 = currentModel.nodes[0];
     const c = currentModel.nodes[1];
@@ -49,8 +47,6 @@ export default () => {
     const newModel = new DefaultDiagramModel();
     engine.model = newModel;
     newModel.fromJSON(currentModel, engine);
-    console.log('==== SERIAL after ====');
-    console.log(JSON.parse(JSON.stringify(engine.model)));
   };
 
   updatePosition();

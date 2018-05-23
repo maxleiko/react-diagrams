@@ -1,9 +1,9 @@
+import * as React from 'react';
 import {
   DiagramEngine,
   DefaultNodeModel,
   DiagramWidget
 } from '@leiko/react-diagrams';
-import * as React from 'react';
 
 // import the custom models
 import { DiamondNodeModel } from './DiamondNodeModel';
