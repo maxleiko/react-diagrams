@@ -1,10 +1,9 @@
 {
-  "extends": "../tsconfig.json",
   "name": "react-diagrams-demos",
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "../build/demos",
+    "outDir": "../dist/demos",
     "target": "es5",
     "declaration": false,
     "sourceMap": true,
@@ -18,7 +17,7 @@
     "jsx": "react",
     "lib": ["dom", "es2015"],
     "paths": {
-      "@leiko/react-diagrams": ["../src/index"]
+      "@leiko/react-diagrams": ["../src/index.ts"]
     }
   }
 }

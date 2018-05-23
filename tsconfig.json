@@ -16,10 +16,7 @@
     "experimentalDecorators": true,
     "strict": true,
     "jsx": "react",
-    "lib": ["dom", "es2015"],
-    "paths": {
-      "@leiko/react-diagrams": ["src/index"]
-    }
+    "lib": ["dom", "es2015"]
   },
   "include": [
     "src/**/*"

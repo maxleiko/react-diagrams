@@ -25,7 +25,7 @@
     "build:ts": "webpack",
     "build:ts:prod": "webpack -p",
     "build:sass:prod": "node-sass --output-style compressed ./src/sass/main.scss > ./dist/style.min.css",
-    "storybook": "start-storybook -p 9001 -c .storybook",
+    "start": "webpack-dev-server --config demos/webpack.config.js",
     "storybook:build": "build-storybook -c .storybook -o .out",
     "storybook:github": "storybook-to-ghpages",
     "pretty": "prettier --write \"{src,demos,tests}/**/*.{ts,tsx}\"",
