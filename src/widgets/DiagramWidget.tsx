@@ -140,6 +140,11 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
 
   @action.bound
   onMouseDown(event: React.MouseEvent<HTMLDivElement>) {
+    if (event.button !== 0) {
+      // only register for left-click
+      return;
+    }
+
     const { el, model } = this.getModelAtPosition(event.nativeEvent);
     if (model) {
       if (model instanceof APortModel) {
@@ -231,6 +236,10 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
 
   @action.bound
   onMouseMove(event: MouseEvent) {
+    if (event.button !== 0) {
+      // left-click only
+      return;
+    }
     event.preventDefault();
     const model = this.props.engine.model;
     if (this.props.engine.action instanceof SelectingAction) {
@@ -290,6 +299,10 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
 
   @action.bound
   onMouseUp(event: MouseEvent) {
+    if (event.button !== 0) {
+      // left-click only
+      return;
+    }
     event.preventDefault();
     if (this.props.engine.action instanceof CreateLinkAction) {
       const link = this.props.engine.action.link;
