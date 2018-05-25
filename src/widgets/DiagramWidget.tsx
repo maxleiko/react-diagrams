@@ -85,6 +85,22 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       }
     }
 
+    // look for a label
+    element = Toolkit.closest(target, '.srd-label[srd-id]');
+    if (element) {
+      const labelId = element.getAttribute('srd-id');
+      const linkId = element.getAttribute('srd-link-id');
+      if (linkId && labelId) {
+        const link = model.linksMap.get(linkId);
+        if (link) {
+          const label = link.getLabel(labelId);
+          if (label) {
+            return { el: target, model: label };
+          }
+        }
+      }
+    }
+
     // look for a link
     element = Toolkit.closest(target, '.srd-link[srd-id]');
     if (element) {
@@ -375,6 +391,8 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
           }
         });
       }
+    } else if (event.keyCode === 27) {
+      this.props.engine.model.selectedEntities.forEach((e) => e.selected = false);
     }
   }
 

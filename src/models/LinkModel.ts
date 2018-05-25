@@ -23,6 +23,5 @@ export interface LinkModel extends BaseModel<DiagramModel> {
   removeAllPoints(): void;
   removePointsBefore(point: PointModel): void;
   removePointsAfter(point: PointModel): void;
-  removeMiddlePoints(): void;
   addPoint(point: PointModel, index?: number): PointModel;
 }

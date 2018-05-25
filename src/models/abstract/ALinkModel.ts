@@ -115,7 +115,9 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
     if (this.selected) {
       entities.push(this);
     }
-    return entities.concat(_.flatten(this._points.map((pt) => pt.selectedEntities)));
+    return entities
+      .concat(_.flatten(this._points.map((pt) => pt.selectedEntities)))
+      .concat(_.flatten(this._labels.map((label) => label.selectedEntities)));
   }
 
   @computed
@@ -181,13 +183,6 @@ export abstract class ALinkModel extends ABaseModel<DiagramModel> implements Lin
   @action
   removePointsAfter(point: PointModel) {
     this._points.splice(this.getPointIndex(point) + 1);
-  }
-
-  @action
-  removeMiddlePoints() {
-    if (this._points.length > 2) {
-      this._points.splice(0, this._points.length - 2);
-    }
   }
 
   @action

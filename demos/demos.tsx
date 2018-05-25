@@ -8,6 +8,7 @@ import LabelledLinks from './simple-usage/labelled-links';
 import LimitPoints from './simple-usage/limit-points';
 import LockFeatures from './simple-usage/lock-features';
 import Performance from './simple-usage/performance';
+import FitContent from './simple-usage/fit-content';
 
 import ChangeModel from './advanced-techniques/change-model';
 import DragNDrop from './advanced-techniques/drag-n-drop';
@@ -39,6 +40,7 @@ const DEMOS: Array<SelectOption & { component?: () => JSX.Element }> = [
   { name: 'simple-usage/limit-points', component: LimitPoints },
   { name: 'simple-usage/lock-features', component: LockFeatures },
   { name: 'simple-usage/performance', component: Performance },
+  { name: 'simple-usage/fit-content', component: FitContent },
   { name: '------------------------', disabled: true },
   { name: 'advanced-techniques/change-model', component: ChangeModel },
   { name: 'advanced-techniques/drag-n-drop', component: DragNDrop },
