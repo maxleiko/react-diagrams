@@ -14,7 +14,6 @@ import { MoveItemsAction } from '../actions/MoveItemsAction';
 import { SelectingAction } from '../actions/SelectingAction';
 import { APortModel } from '../models/abstract/APortModel';
 import { ALinkModel } from '../models/abstract/ALinkModel';
-import { BaseModel } from '../models/BaseModel';
 import { CreateLinkAction } from '../actions/CreateLinkAction';
 
 export interface DiagramProps {
@@ -43,89 +42,6 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     window.removeEventListener('mouseup', this.onMouseUp);
     window.removeEventListener('mousemove', this.onMouseMove);
     window.removeEventListener('keyup', this.onKeyUp);
-  }
-
-  /**
-   * Gets a model and element under the mouse cursor
-   */
-  getModelAtPosition(event: MouseEvent): { el: Element; model: BaseModel<any> | undefined } {
-    const target = event.target as Element;
-    const model = this.props.engine.model;
-
-    // look for a port
-    let element = Toolkit.closest(target, '.srd-port[srd-id]');
-    if (element) {
-      const nodeElement = Toolkit.closest(target, '.srd-node[srd-id]');
-      const nodeId = nodeElement.getAttribute('srd-id');
-      const portId = element.getAttribute('srd-id');
-      if (nodeId && portId) {
-        const node = model.nodesMap.get(nodeId);
-        if (node) {
-          const port = node.portsMap.get(portId);
-          if (port) {
-            return { el: target, model: port };
-          }
-        }
-      }
-    }
-
-    // look for a point
-    element = Toolkit.closest(target, '.srd-point[srd-id]');
-    if (element) {
-      const pointId = element.getAttribute('srd-id');
-      const linkId = element.getAttribute('srd-link-id');
-      if (pointId && linkId) {
-        const link = model.linksMap.get(linkId);
-        if (link) {
-          const point = link.getPointModel(pointId);
-          if (point) {
-            return { el: target, model: point };
-          }
-        }
-      }
-    }
-
-    // look for a label
-    element = Toolkit.closest(target, '.srd-label[srd-id]');
-    if (element) {
-      const labelId = element.getAttribute('srd-id');
-      const linkId = element.getAttribute('srd-link-id');
-      if (linkId && labelId) {
-        const link = model.linksMap.get(linkId);
-        if (link) {
-          const label = link.getLabel(labelId);
-          if (label) {
-            return { el: target, model: label };
-          }
-        }
-      }
-    }
-
-    // look for a link
-    element = Toolkit.closest(target, '.srd-link[srd-id]');
-    if (element) {
-      const linkId = element.getAttribute('srd-id');
-      if (linkId) {
-        const link = model.linksMap.get(linkId);
-        if (link) {
-          return { el: target, model: link };
-        }
-      }
-    }
-
-    // look for a node
-    element = Toolkit.closest(target, '.srd-node[srd-id]');
-    if (element) {
-      const nodeId = element.getAttribute('srd-id');
-      if (nodeId) {
-        const node = model.nodesMap.get(nodeId);
-        if (node) {
-          return { el: target, model: node };
-        }
-      }
-    }
-
-    return { el: target, model: undefined };
   }
 
   fireAction() {
@@ -161,7 +77,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
       return;
     }
 
-    const { el, model } = this.getModelAtPosition(event.nativeEvent);
+    const { el, model } = this.props.engine.getModelAtPosition(event.nativeEvent);
     if (model) {
       if (model instanceof APortModel) {
         // its a port element, we want to create a link
@@ -322,7 +238,7 @@ export class DiagramWidget extends React.Component<DiagramProps & React.HTMLProp
     event.preventDefault();
     if (this.props.engine.action instanceof CreateLinkAction) {
       const link = this.props.engine.action.link;
-      const { model } = this.getModelAtPosition(event);
+      const { model } = this.props.engine.getModelAtPosition(event);
       if (model) {
         if (!model.locked && !this.props.engine.model.locked) {
           if (model instanceof APortModel) {
