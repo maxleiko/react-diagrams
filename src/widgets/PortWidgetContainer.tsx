@@ -21,8 +21,20 @@ export class PortWidgetContainer extends React.Component<PortProps> {
     }
   }
 
+  componentWillUpdate() {
+    if (this._elem) {
+      this.props.port.setPosition(this._elem.offsetLeft, this._elem.offsetTop);
+      this.props.port.setSize(this._elem.offsetWidth, this._elem.offsetHeight);
+    }
+  }
+
   render() {
     const { id, selected, connected } = this.props.port;
+
+    if (this._elem) {
+      this.props.port.setPosition(this._elem.offsetLeft, this._elem.offsetTop);
+      this.props.port.setSize(this._elem.offsetWidth, this._elem.offsetHeight);
+    }
 
     return (
       <div ref={(elem) => (this._elem = elem)} srd-id={id} className={cx('srd-port', { selected, connected })}>
