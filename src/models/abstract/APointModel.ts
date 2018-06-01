@@ -3,6 +3,7 @@ import { observable, computed, action } from 'mobx';
 import { LinkModel } from '../LinkModel';
 import { ABaseModel } from './ABaseModel';
 import { PointModel } from '../PointModel';
+import { DiagramEngine } from '../..';
 
 export abstract class APointModel<P extends LinkModel = LinkModel> extends ABaseModel<P> implements PointModel {
   // calculated post-rendering so routing can be done correctly
@@ -52,5 +53,19 @@ export abstract class APointModel<P extends LinkModel = LinkModel> extends ABase
 
   set y(y: number) {
     this._y = y;
+  }
+
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      x: this._x,
+      y: this._y
+    };
+  }
+
+  fromJSON(data: any, engine: DiagramEngine) {
+    super.fromJSON(data, engine);
+    this._x = data.x;
+    this._y = data.y;
   }
 }

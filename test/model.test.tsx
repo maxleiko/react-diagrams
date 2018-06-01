@@ -1,15 +1,16 @@
-import { DiagramEngine } from '../src';
+import { DefaultDiagramModel, DiagramEngine } from '../src';
 
 const model = require('./fixtures/model.json');
 
-describe('DiagramEngine', () => {
-  describe('deserialize()/serialize()', () => {
+describe('DefaultDiagramModel', () => {
+  describe('JSON.parse/stringify', () => {
     it('complete model', () => {
       const modelStr = JSON.stringify(model);
-      const engine = new DiagramEngine();
+      const dModel = new DefaultDiagramModel();
+      const engine = new DiagramEngine(dModel);
       engine.installDefaultFactories();
-      engine.deserialize(modelStr);
-      expect(JSON.parse(engine.serialize())).toEqual({
+      dModel.fromJSON(model, engine);
+      expect(JSON.parse(JSON.stringify(dModel))).toEqual({
         id: '6d309342-c6e3-425c-bfa7-4785bf13b7fc',
         locked: false,
         type: 'srd-base',
